@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-AinApplication<ain>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.team.ain.AinApplication",
+            "projectName": "ain",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
