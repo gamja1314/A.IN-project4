@@ -40,7 +40,7 @@ dependencies {
 	// devtools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	// mybatis
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.0'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
 	// junit
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
