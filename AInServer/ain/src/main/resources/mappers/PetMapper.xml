@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team.ain.mapper.PetMapper">
+    <insert id="insertPet" parameterType="com.team.ain.dto.PetRegist">
+        INSERT INTO pets (
+            member_id,
+            name,
+            species,
+            breed,
+            gender,
+            age,
+            photo_url,
+            created_at
+        ) VALUES (
+            #{memberId},
+            #{name},
+            #{species},
+            #{breed},
+            #{gender},
+            #{photoUrl},
+            now()
+        )
+    </insert>
+</mapper>
