@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team.ain.mapper.PetMapper">
+ 
+    <!-- 생성 -->
+    <insert id="insertPet" parameterType="com.team.ain.dto.Pet">
+        INSERT INTO pets (member_id, name, species, breed, gender, age, photo_url, created_at)
+        VALUES (#{memberId}, #{name}, #{species}, #{breed}, #{gender}, #{age}, #{photoUrl}, #{createdAt})
+    </insert>
+
+    <!-- ID로 조회 -->
+    <select id="getPetById" parameterType="int" resultType="com.team.ain.dto.Pet">
+        SELECT * FROM pets WHERE id = #{id}
+    </select>
+
+    <!-- 전체조회 -->
+    <select id="getAllPets" resultType="com.team.ain.dto.Pet">
+        SELECT * FROM pets
+    </select>
+
+    <!-- 수정 -->
+    <update id="updatePet" parameterType="com.team.ain.dto.Pet">
+        UPDATE pets
+        SET name = #{name},
+            species = #{species},
+            breed = #{breed},
+            gender = #{gender},
+            age = #{age},
+            photo_url = #{photoUrl}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 삭제 -->
+    <delete id="deletePet" parameterType="int">
+        DELETE FROM pets WHERE id = #{id}
+    </delete>
+    
+</mapper>
