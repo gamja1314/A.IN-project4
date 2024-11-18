@@ -18,4 +18,14 @@
             now()
         )
     </insert>
+
+    <update id="updateProfile" parameterType="com.team.ain.dto.MemberProfile">
+        UPDATE member 
+        SET profile_picture_url = #{profile_picture_url} 
+        WHERE id = #{id}
+    </update>
+
+    <select id="findByEmail" parameterType="String" resultType="com.team.ain.dto.Member">
+        SELECT * FROM member WHERE email = #{email}
+    </select>
 </mapper>
