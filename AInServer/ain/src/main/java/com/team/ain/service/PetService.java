@@ -22,12 +22,12 @@ public class PetService {
 
     // ID로 조회
     public Pet getPetById(int id) {
-        return petMapper.getPetById(id);
+        return petMapper.selectPetById(id);
     }
 
     // 전체 조회
     public List<Pet> getAllPets() {
-        return petMapper.getAllPets();
+        return petMapper.selectAllPets();
     }
 
     // 수정

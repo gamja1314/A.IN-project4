@@ -11,12 +11,12 @@
     </insert>
 
     <!-- ID로 조회 -->
-    <select id="getPetById" parameterType="int" resultType="com.team.ain.dto.Pet">
+    <select id="selectPetById" parameterType="int" resultType="com.team.ain.dto.Pet">
         SELECT * FROM pets WHERE id = #{id}
     </select>
 
     <!-- 전체조회 -->
-    <select id="getAllPets" resultType="com.team.ain.dto.Pet">
+    <select id="selectAllPets" resultType="com.team.ain.dto.Pet">
         SELECT * FROM pets
     </select>
 
