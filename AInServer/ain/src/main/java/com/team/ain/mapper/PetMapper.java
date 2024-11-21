@@ -14,7 +14,6 @@ public interface PetMapper {
     // 생성
     void insertPet(PetRegist pet);
 
-
     // ID 조회
     Pet selectPetById(int id);
 
