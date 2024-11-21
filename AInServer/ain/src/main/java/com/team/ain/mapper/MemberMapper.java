@@ -13,6 +13,6 @@ public interface MemberMapper {
     int insertMember(MemberJoin memberJoin);
 
     Optional<Member> findByEmail(String email);
-    
+    Optional<Member> findByPhoneNumber(String phoneNumber);
     int updateProfile(MemberProfile memberProfile);
 }
