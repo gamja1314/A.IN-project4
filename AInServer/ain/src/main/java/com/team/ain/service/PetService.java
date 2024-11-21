@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.team.ain.dto.Pet;
+import com.team.ain.dto.PetRegist;
 import com.team.ain.mapper.PetMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ public class PetService {
     private final PetMapper petMapper;
 
     // 생성
-    public void addPet(Pet pet) {
+    public void addPet(PetRegist pet) {
         petMapper.insertPet(pet);
     }
 

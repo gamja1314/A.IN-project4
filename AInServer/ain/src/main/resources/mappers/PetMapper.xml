@@ -5,9 +5,9 @@
 <mapper namespace="com.team.ain.mapper.PetMapper">
  
     <!-- 생성 -->
-    <insert id="insertPet" parameterType="com.team.ain.dto.Pet">
+    <insert id="insertPet" parameterType="com.team.ain.dto.PetRegist">
         INSERT INTO pets (member_id, name, species, breed, gender, age, photo_url, created_at)
-        VALUES (#{memberId}, #{name}, #{species}, #{breed}, #{gender}, #{age}, #{photoUrl}, #{createdAt})
+        VALUES (#{memberId}, #{name}, #{species}, #{breed}, #{gender}, #{age}, #{photoUrl}, now())
     </insert>
 
     <!-- ID로 조회 -->
