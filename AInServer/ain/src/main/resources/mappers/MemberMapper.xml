@@ -28,4 +28,7 @@
     <select id="findByEmail" parameterType="String" resultType="com.team.ain.dto.Member">
         SELECT * FROM member WHERE email = #{email}
     </select>
+    <select id="findByPhoneNumber" parameterType="String" resultType="com.team.ain.dto.Member">
+        SELECT * FROM member WHERE phone_number = #{phoneNumber}
+    </select>
 </mapper>

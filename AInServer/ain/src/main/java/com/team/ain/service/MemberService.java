@@ -1,8 +1,11 @@
 package com.team.ain.service;
 
+import java.util.Optional;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.team.ain.dto.Member;
 import com.team.ain.dto.MemberJoin;
 import com.team.ain.dto.MemberProfile;
 import com.team.ain.mapper.MemberMapper;
@@ -17,6 +20,16 @@ public class MemberService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     public void signup(MemberJoin memberJoin) {
+
+        Optional<Member> member = memberMapper.findByEmail(memberJoin.getEmail());
+        if (member.isPresent()) {
+            throw new RuntimeException("존재하는 이메일 입니다.");
+        }
+        member = memberMapper.findByPhoneNumber(memberJoin.getPhoneNumber());
+        if (member.isPresent()) {
+            throw new RuntimeException("이미 가입하신 전화번호 입니다.");
+        }
+        
         // 비밀번호 암호화 필수
         String encoded = passwordEncoder.encode(memberJoin.getPassword());
         memberJoin.setPassword(encoded);
