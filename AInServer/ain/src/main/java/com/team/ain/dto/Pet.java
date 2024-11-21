@@ -2,11 +2,9 @@ package com.team.ain.dto;
 
 import java.time.LocalDateTime;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class Pet {
     private int id;
 

@@ -11,14 +11,19 @@ import com.team.ain.dto.PetRegist;
 public interface PetMapper {
 
 
+    // 생성
     void insertPet(PetRegist pet);
 
-    Pet getPetById(int id);
+    // ID 조회
+    Pet selectPetById(int id);
 
-    List<Pet> getAllPets();
-    
+    // 전체 조회
+    List<Pet> selectAllPets();
+
+    // 수정
     void updatePet(Pet pet);
 
+    // 삭제
     void deletePet(int id);
     
 }
