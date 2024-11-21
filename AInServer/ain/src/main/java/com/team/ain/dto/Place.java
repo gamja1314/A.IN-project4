@@ -5,8 +5,8 @@ import lombok.Data;
 @Data
 public class Place {
 
-    private Long id;
-    private Long categoryId;        // 카테고리 ID
+    private int id;
+    private int categoryId;        // 카테고리 ID
     private String categoryName;    //카테고리 이름
     private String name;            // 장소 이름
     private String address;         // 장소 주소
