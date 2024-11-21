@@ -1,18 +1,29 @@
 import { HomePage, StorePage, CommunityPage, SearchPage, MyPage, LoginPage } from '../pages';
-// 페이지 렌더링 함수
+import { ProtectedRoute } from './ProtectedRoute';
+
+// 페이지별 인증 필요 여부 설정
+const PROTECTED_PAGES = {
+  'store': true,
+  'community': true,
+  'home': false,
+  'search': true,
+  'mypage': true,
+  'login': false
+};
 
 export const getPageTitle = (currentPage) => {
-    switch (currentPage) {
-      case 'store': return '스토어';
-      case 'community': return '커뮤니티';
-      case 'home': return '애니멀 인사이드';
-      case 'search': return '검색';
-      case 'mypage': return '마이페이지';
-      default: return '애니멀 인사이드';
-    }
-  };
-  
-  export const renderPage = (currentPage) => {
+  switch (currentPage) {
+    case 'store': return '스토어';
+    case 'community': return '커뮤니티';
+    case 'home': return '애니멀 인사이드';
+    case 'search': return '검색';
+    case 'mypage': return '마이페이지';
+    default: return '애니멀 인사이드';
+  }
+};
+
+export const renderPage = (currentPage) => {
+  const getPageComponent = () => {
     switch (currentPage) {
       case 'login': return <LoginPage />;
       case 'store': return <StorePage />;
@@ -23,3 +34,11 @@ export const getPageTitle = (currentPage) => {
       default: return <HomePage />;
     }
   };
+
+  // 보호된 페이지인 경우 ProtectedRoute로 감싸서 반환
+  return PROTECTED_PAGES[currentPage] ? (
+    <ProtectedRoute>
+      {getPageComponent()}
+    </ProtectedRoute>
+  ) : getPageComponent();
+};
