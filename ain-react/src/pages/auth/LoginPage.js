@@ -7,7 +7,6 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* 로고 */}
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900">
             애니멀 인사이드
@@ -17,22 +16,17 @@ const LoginPage = () => {
           </p>
         </div>
 
-        {/* 일반 로그인 폼 */}
         <LoginForm />
 
-        {/* 구분선 */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-gray-50 text-gray-500">
-              또는
-            </span>
+            <span className="px-2 bg-gray-50 text-gray-500">또는</span>
           </div>
         </div>
 
-        {/* OAuth 로그인 버튼들 */}
         <OAuthButtons />
       </div>
     </div>
