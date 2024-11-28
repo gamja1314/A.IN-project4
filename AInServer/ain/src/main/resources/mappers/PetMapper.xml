@@ -37,4 +37,8 @@
         DELETE FROM pets WHERE id = #{id}
     </delete>
     
+    <select id="findByMemberId" parameterType="int" resultType="com.team.ain.dto.Pet">
+        SELECT * FROM pets WHERE member_id = #{id}
+    </select>
+    
 </mapper>

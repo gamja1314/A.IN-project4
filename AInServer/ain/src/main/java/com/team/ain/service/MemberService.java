@@ -2,6 +2,7 @@ package com.team.ain.service;
 
 import java.util.Optional;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,4 +50,8 @@ public class MemberService {
         memberMapper.updateProfile(updateDto);
     }
 
+    public Member findByEmail(String email) {
+        return memberMapper.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("찾을 수 없는 이메일입니다."));
+    }
+    
 }

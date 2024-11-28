@@ -1,6 +1,6 @@
 import { API_BASE_URL } from '../config/apiConfig';
 
-const AUTH_TOKEN_KEY = 'auth_token';
+const AUTH_TOKEN_KEY = 'access_token';
 
 export const authService = {
   // 로그인 처리

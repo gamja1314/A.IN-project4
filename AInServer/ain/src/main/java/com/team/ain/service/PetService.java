@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.team.ain.dto.Pet;
 import com.team.ain.dto.PetRegist;
+import com.team.ain.mapper.MemberMapper;
 import com.team.ain.mapper.PetMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class PetService {
 
     private final PetMapper petMapper;
+    private final MemberMapper memberMapper;
 
     // 생성
     public void addPet(PetRegist pet) {
@@ -39,6 +41,12 @@ public class PetService {
     // 삭제
     public void deletePet(int id) {
         petMapper.deletePet(id);
+    }
+
+    // 멤버 이메일로 반려동물 찾기
+    public Pet findByEmail(String email) {
+        int id = memberMapper.findByEmail(email).get().getId();
+        return petMapper.findByMemberId(id);
     }
     
 }
