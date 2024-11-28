@@ -26,4 +26,5 @@ public interface PetMapper {
     // 삭제
     void deletePet(int id);
     
+    Pet findByMemberId(int id);
 }
