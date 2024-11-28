@@ -1,11 +1,11 @@
 export const BottomNav = ({ currentPage, onPageChange }) => {
     return (
-      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t flex items-center justify-around z-50 max-w-md mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t flex items-center justify-around z-[1000] max-w-md mx-auto">
         <button 
-          className={`flex flex-col items-center justify-center w-1/5 ${currentPage === 'store' ? 'text-blue-500' : ''}`}
-          onClick={() => onPageChange('store')}
+          className={`flex flex-col items-center justify-center w-1/5 ${currentPage === 'place' ? 'text-blue-500' : ''}`}
+          onClick={() => onPageChange('place')}
         >
-          <span className="text-sm">스토어</span>
+          <span className="text-sm">장소</span>
         </button>
         <button 
           className={`flex flex-col items-center justify-center w-1/5 ${currentPage === 'community' ? 'text-blue-500' : ''}`}

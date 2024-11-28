@@ -1,5 +1,5 @@
 // pages/index.js
-export { default as StorePage } from './main/StorePage';
+export { default as PlacePage } from './main/PlacePage';
 export { default as CommunityPage } from './main/CommunityPage';
 export { default as HomePage } from './main/HomePage';
 export { default as SearchPage } from './main/SearchPage';
