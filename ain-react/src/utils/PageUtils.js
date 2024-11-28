@@ -1,9 +1,9 @@
-import { HomePage, StorePage, CommunityPage, SearchPage, MyPage, LoginPage } from '../pages';
+import { HomePage, PlacePage, CommunityPage, SearchPage, MyPage, LoginPage } from '../pages';
 import { ProtectedRoute } from './ProtectedRoute';
 
 // 페이지별 인증 필요 여부 설정
 const PROTECTED_PAGES = {
-  'store': true,
+  'place': true,
   'community': true,
   'home': false,
   'search': true,
@@ -13,7 +13,7 @@ const PROTECTED_PAGES = {
 
 export const getPageTitle = (currentPage) => {
   switch (currentPage) {
-    case 'store': return '스토어';
+    case 'place': return '장소';
     case 'community': return '커뮤니티';
     case 'home': return '애니멀 인사이드';
     case 'search': return '검색';
@@ -26,7 +26,7 @@ export const renderPage = (currentPage) => {
   const getPageComponent = () => {
     switch (currentPage) {
       case 'login': return <LoginPage />;
-      case 'store': return <StorePage />;
+      case 'place': return <PlacePage />;
       case 'community': return <CommunityPage />;
       case 'home': return <HomePage />;
       case 'search': return <SearchPage />;
