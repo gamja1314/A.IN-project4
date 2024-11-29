@@ -2,9 +2,11 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
+<mapper namespace="com.team.ain.mapper.PostMapper">
+
     <!-- 생성 -->
     <insert id="insertPost" parameterType="com.team.ain.dto.Post">
-        INSET INTO post (
+        INSERT INTO post (
             caption, 
             location, 
             member_id, 
@@ -18,18 +20,20 @@
             'ACTIVE',
             NOW(),
             NOW()
+            #{mediaUrl},
+            #{mediaType}
         )
     </insert>
 
     <!-- 수정 -->
     <update id="updatePost" parameterType="com.team.ain.dto.Post">
-        UDATE 
+        UPDATE 
             post
         SET 
             caption = #{caption},
             location = #{location}
         WHERE 
-            d = #{id};
+            id = #{id};
     </update>
 
     <!-- 완전삭제 -->
@@ -51,7 +55,7 @@
     </update>
 
     <!-- id로 게시글 조회 -->
-    <select id="getPostById" parameterType="com.team.ain.dto.Post" parameterType="long">
+    <select id="getPostById" resultType="com.team.ain.dto.Post" parameterType="long">
         SELECT
             id,
             member_id,
@@ -91,18 +95,18 @@
             caption, 
             location, 
             created_at, 
-            updated_at
+            updated_at,
+            media_url as mediaUrl,
+            media_type as mediaType
         FROM 
             post
         WHERE 
             status = 'ACTIVE'
         ORDER BY 
             created_at DESC
-        <!-- 한번에 가져올 게시글 개수 -->
         LIMIT 
-            #{limit} 
-        <!-- 스크롤 위치에 따라 스킵할 개수 -->
+            #{limit}  <!-- 한번에 가져올 게시글 개수 -->
         OFFSET 
-            #{offset};
+            #{offset}; <!-- 스크롤 위치에 따라 스킵할 개수 -->
 </select>
 </mapper>

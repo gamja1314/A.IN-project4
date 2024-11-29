@@ -2,10 +2,12 @@ package com.team.ain.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.team.ain.dto.Post;
 
+@Mapper
 public interface PostMapper {
     void insertPost(Post post); //생성
     void updatePost(Post post); //수정

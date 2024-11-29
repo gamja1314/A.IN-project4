@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class PostSerivce {
+public class PostService {
     
     private final PostMapper postMapper;
 

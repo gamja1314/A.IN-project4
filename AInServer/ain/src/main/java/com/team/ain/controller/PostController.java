@@ -3,7 +3,6 @@ package com.team.ain.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,18 +11,19 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.dto.Post;
-import com.team.ain.service.PostSerivce;
+import com.team.ain.service.PostService;
 
 import lombok.RequiredArgsConstructor;
 
-@Controller
+@RestController
 @RequestMapping("/api/post")
 @RequiredArgsConstructor
 public class PostController {
     
-    private final PostSerivce postSerivce;
+    private final PostService postSerivce;
 
     //생성
     @PostMapping
@@ -41,14 +41,14 @@ public class PostController {
     }
 
     //완전 삭제
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/hard")
     public ResponseEntity<String> deletePost(@PathVariable Long id){
         postSerivce.deletePost(id);
         return ResponseEntity.ok("삭제 완료!");
     }
 
     // "삭제상태"로 변경
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/soft")
     public ResponseEntity<String> softDeletePost(@PathVariable Long id){
         postSerivce.softDeletePost(id);
         return ResponseEntity.ok("삭제 되었습니다.");

@@ -15,5 +15,6 @@ public class Post {
     private String status; //게시글 상태(ACTIVE or DELETED)
     private LocalDateTime createdAt;    //게시글 생성일
     private LocalDateTime updatedAt;    //게시글 수정일
-
+    private String mediaUrl; //미디어 파일
+    private String mediaType; //미디어 파일 유형 (img, video)
 }

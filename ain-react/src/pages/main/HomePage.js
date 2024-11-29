@@ -1,6 +1,10 @@
 import React from "react";
+import InfiniteScroll from "react-infinite-scroll-component"
+import axios from "axios"
 
 // Home Page
+
+
 const HomePage = () => {
     return (
       <div className="p-4">
