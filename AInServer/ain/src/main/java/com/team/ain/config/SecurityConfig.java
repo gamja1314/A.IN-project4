@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.CorsFilter;
 
 import com.team.ain.config.jwt.JwtAccessDeniedHandler;
 import com.team.ain.config.jwt.JwtAuthenticationEntryPoint;
@@ -24,16 +25,23 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
     
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CorsFilter corsFilter;
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            // CORS 필터 추가
+            .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+            
             // CSRF 비활성화
             .csrf(csrf -> csrf.disable())
             
             // JWT 필터 추가
             .addFilterBefore(jwtAuthenticationFilter, 
                             UsernamePasswordAuthenticationFilter.class)
+            
+            // CORS 활성화
+            .cors(cors -> cors.configure(http))
             
             // 세션 관리 설정
             .sessionManagement(session -> 

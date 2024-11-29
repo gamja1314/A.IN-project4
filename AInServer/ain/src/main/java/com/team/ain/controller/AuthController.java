@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.config.jwt.JwtTokenProvider;
 import com.team.ain.dto.LoginRequest;
+import com.team.ain.dto.Member;
+import com.team.ain.service.MemberService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class AuthController {
     
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    private final MemberService memberService;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -35,7 +38,8 @@ public class AuthController {
         );
         
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.generateToken(loginRequest.getEmail());
+        Member member = memberService.findByEmail(loginRequest.getEmail());
+        String jwt = tokenProvider.generateToken(loginRequest.getEmail(), member.getId());
         System.out.println(jwt);
         return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
     }
