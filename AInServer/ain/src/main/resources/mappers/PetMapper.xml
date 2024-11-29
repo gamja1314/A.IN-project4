@@ -11,7 +11,7 @@
     </insert>
 
     <!-- ID로 조회 -->
-    <select id="selectPetById" parameterType="int" resultType="com.team.ain.dto.Pet">
+    <select id="selectPetById" parameterType="long" resultType="com.team.ain.dto.Pet">
         SELECT * FROM pets WHERE id = #{id}
     </select>
 
@@ -33,11 +33,11 @@
     </update>
 
     <!-- 삭제 -->
-    <delete id="deletePet" parameterType="int">
+    <delete id="deletePet" parameterType="long">
         DELETE FROM pets WHERE id = #{id}
     </delete>
     
-    <select id="findByMemberId" parameterType="int" resultType="com.team.ain.dto.Pet">
+    <select id="findByMemberId" parameterType="long" resultType="com.team.ain.dto.Pet">
         SELECT * FROM pets WHERE member_id = #{id}
     </select>
     

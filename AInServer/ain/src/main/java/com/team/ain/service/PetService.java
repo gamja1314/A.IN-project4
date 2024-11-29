@@ -24,7 +24,7 @@ public class PetService {
     }
 
     // ID로 조회
-    public Pet getPetById(int id) {
+    public Pet getPetById(Long id) {
         return petMapper.selectPetById(id);
     }
 
@@ -39,13 +39,13 @@ public class PetService {
     }
 
     // 삭제
-    public void deletePet(int id) {
+    public void deletePet(Long id) {
         petMapper.deletePet(id);
     }
 
     // 멤버 이메일로 반려동물 찾기
     public Pet findByEmail(String email) {
-        int id = memberMapper.findByEmail(email).get().getId();
+        Long id = memberMapper.findByEmail(email).get().getId();
         return petMapper.findByMemberId(id);
     }
     

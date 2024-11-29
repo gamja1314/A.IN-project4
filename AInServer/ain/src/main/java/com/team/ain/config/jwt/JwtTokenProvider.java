@@ -27,7 +27,7 @@ public class JwtTokenProvider {
     }
     
     // 토큰 생성 메소드 수정
-    public String generateToken(String email, int memberId) {
+    public String generateToken(String email, Long memberId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
         

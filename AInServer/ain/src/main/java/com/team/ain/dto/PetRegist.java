@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class PetRegist {
     
-    int memberId;
+    Long memberId;
 
     String name;
 

@@ -21,7 +21,7 @@
     </insert>
 
     <!-- ID로 조회 -->
-    <select id="selectPlaceById" parameterType="int" resultType="com.team.ain.dto.Place">
+    <select id="selectPlaceById" parameterType="long" resultType="com.team.ain.dto.Place">
         SELECT 
             id,
             name,
@@ -58,7 +58,7 @@
     </update>
 
     <!-- 삭제 -->
-    <delete id="deletePlace" parameterType="int">
+    <delete id="deletePlace" parameterType="long">
         DELETE FROM place 
         WHERE id = #{id}
     </delete>

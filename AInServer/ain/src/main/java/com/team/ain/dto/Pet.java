@@ -6,9 +6,9 @@ import lombok.Data;
 
 @Data
 public class Pet {
-    private int id;
+    private Long id;
 
-    private int memberId;
+    private Long memberId;
 
     private String name;
 

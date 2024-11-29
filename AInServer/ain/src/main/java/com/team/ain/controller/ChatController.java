@@ -43,14 +43,18 @@ public class ChatController {
     
     // 채팅방 목록 조회
     @GetMapping("/rooms")
-    public ResponseEntity<List<ChatRoomDTO>> getRooms(@RequestParam Long userId) {
-        return ResponseEntity.ok(chatService.getUserRooms(userId));
+    public ResponseEntity<List<ChatRoomDTO>> getRooms(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        return ResponseEntity.ok(chatService.getUserRooms(memberId));
     }
     
     // 채팅방 참여
     @PostMapping("/rooms/{roomId}/join")
-    public ResponseEntity<?> joinRoom(@PathVariable Long roomId, @RequestParam Long userId) {
-        chatService.joinRoom(roomId, userId);
+    public ResponseEntity<?> joinRoom(@PathVariable Long roomId, HttpServletRequest request) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        chatService.joinRoom(roomId, memberId);
         return ResponseEntity.ok().build();
     }
     
