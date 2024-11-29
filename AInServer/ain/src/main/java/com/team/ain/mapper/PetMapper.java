@@ -15,7 +15,7 @@ public interface PetMapper {
     void insertPet(PetRegist pet);
 
     // ID 조회
-    Pet selectPetById(int id);
+    Pet selectPetById(Long id);
 
     // 전체 조회
     List<Pet> selectAllPets();
@@ -24,7 +24,7 @@ public interface PetMapper {
     void updatePet(Pet pet);
 
     // 삭제
-    void deletePet(int id);
+    void deletePet(Long id);
     
-    Pet findByMemberId(int id);
+    Pet findByMemberId(Long id);
 }

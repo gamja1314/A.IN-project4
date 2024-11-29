@@ -13,7 +13,7 @@ public interface PlaceMapper {
     void insertPlace(Place place);
 
     // ID로 조회
-    Place selectPlaceById(int id);
+    Place selectPlaceById(Long id);
 
     // 전체 조회
     List<Place> selectAllPlaces();
@@ -22,6 +22,6 @@ public interface PlaceMapper {
     void updatePlace(Place place);
 
     // 삭제
-    void deletePlace(int id);
+    void deletePlace(Long id);
     
 }

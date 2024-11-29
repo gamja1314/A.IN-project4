@@ -21,7 +21,7 @@ public class PlaceService {
     }
 
     // ID로 조회 
-    public Place getPlaceById(int id) {
+    public Place getPlaceById(Long id) {
         return placeMapper.selectPlaceById(id);
     }
 
@@ -36,7 +36,7 @@ public class PlaceService {
     }
 
     // 삭제 
-    public void deletePlace(int id) {
+    public void deletePlace(Long id) {
         placeMapper.deletePlace(id);
     }
 }

@@ -42,7 +42,7 @@ public class MemberService {
         }
     }
 
-    public void updateProfile(int memberId, String profileUrl) {
+    public void updateProfile(Long memberId, String profileUrl) {
         MemberProfile updateDto = new MemberProfile();
         updateDto.setId(memberId);
         updateDto.setProfilePictureUrl(profileUrl);

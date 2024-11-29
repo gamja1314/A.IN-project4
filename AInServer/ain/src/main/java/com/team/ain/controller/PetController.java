@@ -37,7 +37,7 @@ public class PetController {
     
     // ID로 조회
     @GetMapping("/{id}")
-    public ResponseEntity<Pet> getPetById(@PathVariable int id)  {
+    public ResponseEntity<Pet> getPetById(@PathVariable Long id)  {
         Pet pet = petService.getPetById(id);
         return ResponseEntity.ok(pet);
     }
@@ -58,7 +58,7 @@ public class PetController {
     
     // 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePet(@PathVariable int id) {
+    public ResponseEntity<String> deletePet(@PathVariable Long id) {
         petService.deletePet(id);
         return ResponseEntity.ok("정보 삭제가 완료되었습니다.");
     }

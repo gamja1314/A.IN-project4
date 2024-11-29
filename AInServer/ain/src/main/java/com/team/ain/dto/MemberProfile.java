@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class MemberProfile {
 
-    private int id;
+    private Long id;
 
     private String profilePictureUrl;
 

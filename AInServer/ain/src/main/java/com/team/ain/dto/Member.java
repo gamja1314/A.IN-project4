@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Member {
-    private int id;
+    private Long id;
     private String name;
     private String email;
     private String password;

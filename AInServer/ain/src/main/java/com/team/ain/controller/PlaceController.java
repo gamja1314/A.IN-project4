@@ -33,7 +33,7 @@ public class PlaceController {
     
     // ID로 조회
     @GetMapping("/{id}")
-    public ResponseEntity<Place> getPlaceById(@PathVariable int id) {
+    public ResponseEntity<Place> getPlaceById(@PathVariable Long id) {
         Place place = placeService.getPlaceById(id);
         return ResponseEntity.ok(place);
     }
@@ -47,7 +47,7 @@ public class PlaceController {
 
     // 수정
     @PutMapping("/{id}")
-    public ResponseEntity<String> updatePlace(@PathVariable int id, @RequestBody Place place) {
+    public ResponseEntity<String> updatePlace(@PathVariable Long id, @RequestBody Place place) {
         place.setId(id);
         placeService.updatePlace(place);       
         return ResponseEntity.ok("장소 정보 수정이 완료되었습니다.");
@@ -55,7 +55,7 @@ public class PlaceController {
     
     // 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePlace(@PathVariable int id) {
+    public ResponseEntity<String> deletePlace(@PathVariable Long id) {
         placeService.deletePlace(id);
         return ResponseEntity.ok("장소 정보 삭제가 완료되었습니다.");
     }
