@@ -66,7 +66,7 @@ const MyPage = () => {
           <div>
             <h2 className="font-semibold">{memberInfo?.member?.name || '사용자'}님</h2>
             <p className="text-sm text-gray-600">
-              반려동물: {memberInfo?.pet?.map(pet => pet.name).join(', ') || '등록된 반려동물이 없습니다'}
+              반려동물: {memberInfo?.pet ? memberInfo.pet.name : '등록된 반려동물이 없습니다'}
             </p>
           </div>
         </div>
