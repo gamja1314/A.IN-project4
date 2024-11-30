@@ -7,14 +7,14 @@
     <!-- 생성 -->
     <insert id="insertPost" parameterType="com.team.ain.dto.Post">
         INSERT INTO post (
-            caption, 
+            content, 
             location, 
             member_id, 
             status, 
             created_at, 
             updated_at
         ) VALUES (
-            #{caption},
+            #{content},
             #{location},
             #{memberId},
             'ACTIVE',
@@ -30,7 +30,7 @@
         UPDATE 
             post
         SET 
-            caption = #{caption},
+            content = #{content},
             location = #{location}
         WHERE 
             id = #{id};
@@ -59,7 +59,7 @@
         SELECT
             id,
             member_id,
-            caption,
+            content,
             location,
             created_at,
             updated_at
@@ -70,12 +70,31 @@
         
     </select>
 
+    <!-- 특정 회원의 전체 게시글 불러오기 -->
+    <select id="getPostsByMemberId" resultType="com.team.ain.dto.Post">
+        SELECT
+            id,
+            member_id,
+            content,
+            location,
+            created_at,
+            updated_at
+        FROM
+            post
+        WHERE
+            member_id = #{memberId}
+        AND
+            status = 'ACTIVE'
+        ORDER BY
+            created_at DESC;
+    </select>
+
     <!-- 전체 게시글 조회 -->
     <select id="getAllPosts" resultType="com.team.ain.dto.Post">
         SELECT
             id,
             member_id,
-            caption,
+            content,
             location,
             created_at,
             updated_at
@@ -92,7 +111,7 @@
         SELECT 
             id, 
             member_id, 
-            caption, 
+            content, 
             location, 
             created_at, 
             updated_at,
