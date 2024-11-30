@@ -9,15 +9,24 @@ import { AuthProvider } from './hooks/useAuth';  // AuthProvider import 추가
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
+  const [pageData, setPageData] = useState({});
+
+  const handlePageChange = (newPage, data = {}) => {
+    setCurrentPage(newPage);
+    setPageData(data);
+  };
 
   return (
-    <AuthProvider>      {/* AuthProvider로 전체 앱을 감싸기 */}
+    <AuthProvider>
       <MobileLayout>
-        <Header title={getPageTitle(currentPage)} />
+        <Header title={getPageTitle(currentPage, pageData)} />
         <MainContent>
-          {renderPage(currentPage)}
+          {renderPage(currentPage, pageData, handlePageChange)}
         </MainContent>
-        <BottomNav currentPage={currentPage} onPageChange={setCurrentPage} />
+        <BottomNav 
+          currentPage={currentPage} 
+          onPageChange={handlePageChange} 
+        />
       </MobileLayout>
     </AuthProvider>
   );

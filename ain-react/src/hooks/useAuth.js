@@ -1,19 +1,35 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { authService } from '../services/authService';
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsAuthenticated(authService.isAuthenticated());
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setCurrentUser(decoded);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Token decode error:', error);
+        authService.logout();
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+      }
+    }
     setLoading(false);
   }, []);
 
   const login = async (credentials) => {
     const token = await authService.login(credentials);
+    const decoded = jwtDecode(token);
+    setCurrentUser(decoded);
     setIsAuthenticated(true);
     return token;
   };
@@ -21,10 +37,17 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     authService.logout();
     setIsAuthenticated(false);
+    setCurrentUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, login, logout }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      currentUser,
+      loading, 
+      login, 
+      logout 
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -12,4 +12,5 @@ public interface ChatRoomMapper {
     void addRoomMember(Long roomId, Long userId);
     List<ChatRoomDTO> findRoomsByUserId(Long userId);
     boolean isRoomMember(Long roomId, Long userId);
+    ChatRoomDTO findRoomById(Long romeId);
 }

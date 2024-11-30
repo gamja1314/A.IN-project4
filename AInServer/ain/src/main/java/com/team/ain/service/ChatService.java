@@ -46,4 +46,13 @@ public class ChatService {
         chatMessageMapper.insertMessage(message);
         return message;
     }
+
+    // 채팅방 메시지 가져오기
+    public List<ChatMessageDTO> getRoomMessages(Long roomId) {
+        return chatMessageMapper.findMessagesByRoomId(roomId);
+    }
+
+    public ChatRoomDTO getRoomById(Long roomId) {
+        return chatRoomMapper.findRoomById(roomId);
+    }
 }

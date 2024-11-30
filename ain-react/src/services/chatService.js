@@ -45,5 +45,27 @@ export const ChatService = {
       console.error('Error fetching chat rooms:', error);
       throw error;
     }
-  }
+  },
+
+  // 채팅방 참여하기
+  joinRoom: async (roomId) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/chat/rooms/${roomId}/join`, {
+            method: 'POST',
+            headers: {
+                ...authService.getAuthHeader(),
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to join chat room');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Join room error:', error);
+        throw error;
+    }
+}
 };
