@@ -27,7 +27,7 @@ public class PostController {
 
     //생성
     @PostMapping
-    public ResponseEntity<String> createPost(@RequestBody Post post){
+    public ResponseEntity<String> createPost(@RequestBody Post post ){
         postSerivce.createPost(post);
         return ResponseEntity.ok("게시글이 등록 되었습니다.");
     }
