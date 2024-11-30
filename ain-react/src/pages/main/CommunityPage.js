@@ -1,14 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { ChatService } from "../../services/chatService";
+import { useAuth } from "../../hooks/useAuth";
 
-const CommunityPage = () => {
+const CommunityPage = ( { onPageChange } ) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [roomName, setRoomName] = useState("");
     const [roomDescription, setRoomDescription] = useState("");
     const [chatRooms, setChatRooms] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const { currentUser } = useAuth();
 
+    const handleJoinRoom = async (roomId) => {
+        try {
+            console.log('Attempting to join room with ID:', roomId);
+            console.log('Current user:', currentUser);  // 유저 정보 확인
+            await ChatService.joinRoom(roomId);
+            console.log('Successfully joined room, attempting page change');
+            onPageChange('chatRoom', { 
+                roomId: roomId,
+                currentUser: currentUser 
+            });
+        } catch (error) {
+            console.error('Join room error:', error);  // 구체적인 에러 확인
+            setError('채팅방 입장에 실패했습니다.');
+        }
+    };
+    
     // 채팅방 목록 로드
     useEffect(() => {
         loadChatRooms();
@@ -78,7 +96,11 @@ const CommunityPage = () => {
 
                 <div className="space-y-4">
                     {chatRooms.map((room) => (
-                        <div key={room.id} className="border rounded-lg p-3">
+                        <div 
+                            key={room.id} 
+                            className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50"
+                            onClick={() => handleJoinRoom(room.id)}
+                        >
                             <h3 className="font-medium">{room.roomName}</h3>
                             <p className="text-sm text-gray-600 mt-1">{room.description}</p>
                             <p className="text-sm text-gray-600">참여자: {room.memberCount || 0}명</p>

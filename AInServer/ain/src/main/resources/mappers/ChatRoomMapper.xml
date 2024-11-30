@@ -72,4 +72,8 @@
             AND member_id = #{userId}
         )
     </select>
+
+    <select id="findRoomById" resultType="com.team.ain.dto.ChatRoomDTO">
+        SELECT * FROM chat_room WHERE id = #{roomId} AND is_active = true
+    </select>
 </mapper>
