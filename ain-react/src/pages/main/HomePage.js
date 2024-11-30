@@ -55,7 +55,7 @@ const HomePage = () => {
               <p className="text-xs text-center">냥이</p>
             </div>
           </div>
-        </div>
+        </div> 
         
         {/* 최신 게시글 */}
         <div className="bg-white rounded-lg shadow p-4">
