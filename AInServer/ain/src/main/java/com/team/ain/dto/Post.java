@@ -11,7 +11,7 @@ public class Post {
     private Long id;    //게시글 ID
     private String title;   //게시글 제목
     private String content; //게시글 내용
-    private int memberId;  //작성자
+    private Long memberId;  //작성자
     private String status; //게시글 상태(ACTIVE or DELETED)
     private LocalDateTime createdAt;    //게시글 생성일
     private LocalDateTime updatedAt;    //게시글 수정일

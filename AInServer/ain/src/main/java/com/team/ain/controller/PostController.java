@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.team.ain.config.jwt.JwtTokenProvider;
 import com.team.ain.dto.Post;
 import com.team.ain.service.PostService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,10 +26,13 @@ import lombok.RequiredArgsConstructor;
 public class PostController {
     
     private final PostService postSerivce;
+    private final JwtTokenProvider jwtTokenProvider;
 
     //생성
     @PostMapping
-    public ResponseEntity<String> createPost(@RequestBody Post post ){
+    public ResponseEntity<String> createPost(@RequestBody Post post, HttpServletRequest request ){
+        Long memberId = jwtTokenProvider.getMemberIdFromRequest(request);
+        post.setMemberId(memberId);
         postSerivce.createPost(post);
         return ResponseEntity.ok("게시글이 등록 되었습니다.");
     }

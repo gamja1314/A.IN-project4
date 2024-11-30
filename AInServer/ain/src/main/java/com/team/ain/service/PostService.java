@@ -40,6 +40,11 @@ public class PostService {
         return postMapper.getPostById(postId);
     }
 
+    //특정회원 게시글 조회
+    public List<Post> getMemberId(Long MemberId){
+        return postMapper.getPostsByMemberId();
+    }
+
     //전체 게시글 조회
     public List<Post> getAllPosts(){
         return postMapper.getAllPosts();

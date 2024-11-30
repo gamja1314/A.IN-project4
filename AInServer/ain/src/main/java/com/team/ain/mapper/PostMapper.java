@@ -15,7 +15,7 @@ public interface PostMapper {
     void softDeletePost(Long id); //'삭제 상태'로 변경 -- DB에 데이터는 남김
     Post getPostById(Long id);  //ID기반 게시글 조회
     List<Post> getAllPosts();   //모든 게시글 조회
-
+    List<Post> getPostsByMemberId(); //특정 회원의 전체 게시글 불러오기
      // 페이지 단위로 게시글 가져오기
     List<Post> getPostsByPage(@Param("limit") int limit, @Param("offset") int offset);
 } 
