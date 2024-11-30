@@ -14,6 +14,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Component
 public class JwtTokenProvider {
@@ -49,6 +50,11 @@ public class JwtTokenProvider {
                 .getBody();
         
         return claims.getSubject();
+    }
+    
+    public Long getMemberIdFromRequest(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        return getMemberIdFromToken(token);
     }
     
     // memberId 추출 메소드 추가

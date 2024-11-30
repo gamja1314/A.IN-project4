@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.config.jwt.JwtTokenProvider;
@@ -35,8 +34,7 @@ public class ChatController {
     public ResponseEntity<ChatRoomDTO> createRoom(
             @RequestBody ChatRoomDTO roomDTO,
             HttpServletRequest request) {
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
-        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        Long memberId = jwtTokenProvider.getMemberIdFromRequest(request);
         roomDTO.setHostId(memberId);
         return ResponseEntity.ok(chatService.createRoom(roomDTO));
     }
@@ -44,8 +42,7 @@ public class ChatController {
     // 채팅방 목록 조회
     @GetMapping("/rooms")
     public ResponseEntity<List<ChatRoomDTO>> getRooms(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
-        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        Long memberId = jwtTokenProvider.getMemberIdFromRequest(request);
         return ResponseEntity.ok(chatService.getUserRooms(memberId));
     }
     
