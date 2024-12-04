@@ -12,4 +12,5 @@ public class ChatRoomDTO {
     private Long hostId;
     private LocalDateTime createdAt;
     private boolean isActive;
+    private int memberCount;  // 채팅방 참여자 수
 }
