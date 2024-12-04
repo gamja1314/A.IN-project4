@@ -5,8 +5,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.team.ain.dto.CustomUserDetails;
-import com.team.ain.dto.Member;
+import com.team.ain.dto.auth.CustomUserDetails;
+import com.team.ain.dto.auth.Member;
 import com.team.ain.mapper.MemberMapper;
 
 import lombok.RequiredArgsConstructor;

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.team.ain.dto.MemberJoin;
+import com.team.ain.dto.auth.MemberJoin;
 import com.team.ain.service.FollowerService;
 import com.team.ain.service.MemberService;
 import com.team.ain.service.PetService;
@@ -53,8 +53,10 @@ public class MemberController {
     @GetMapping("/{memberId}")
     public Map<String, Object> getSomeoneInfo(@PathVariable Long memberId) {
         Map<String, Object> response = new HashMap<>();
+        response.put("name", memberService.findNameAndProfileUrlById(memberId));
         response.put("pet", petService.getPetById(memberId));
         response.put("follows", followerService.checkFollwers(memberId));
+        // post 추가
         return response;
     }
     

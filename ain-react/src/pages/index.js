@@ -6,3 +6,4 @@ export { default as SearchPage } from './main/SearchPage';
 export { default as MyPage } from './auth/MyPage';
 export { default as LoginPage } from './auth/LoginPage';
 export { default as ChatRoom } from './chat/ChatRoom';
+export { default as SomeoneInfo } from './auth/SomeoneInfo';

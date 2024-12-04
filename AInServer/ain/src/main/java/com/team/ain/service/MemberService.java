@@ -1,14 +1,15 @@
 package com.team.ain.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.team.ain.dto.Member;
-import com.team.ain.dto.MemberJoin;
-import com.team.ain.dto.MemberProfile;
+import com.team.ain.dto.auth.Member;
+import com.team.ain.dto.auth.MemberJoin;
+import com.team.ain.dto.auth.MemberProfile;
 import com.team.ain.mapper.MemberMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,10 @@ public class MemberService {
 
     public Member findByEmail(String email) {
         return memberMapper.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("찾을 수 없는 이메일입니다."));
+    }
+
+    public List<String> findNameAndProfileUrlById(Long id) {
+        return memberMapper.findNameAndProfileUrlById(id);
     }
     
 }

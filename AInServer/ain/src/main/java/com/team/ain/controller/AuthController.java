@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.config.jwt.JwtTokenProvider;
-import com.team.ain.dto.LoginRequest;
-import com.team.ain.dto.Member;
+import com.team.ain.dto.auth.LoginRequest;
+import com.team.ain.dto.auth.Member;
 import com.team.ain.service.MemberService;
 
 import jakarta.validation.Valid;

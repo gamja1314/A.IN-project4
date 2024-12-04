@@ -1,4 +1,4 @@
-import { HomePage, PlacePage, CommunityPage, SearchPage, MyPage, LoginPage } from '../pages';
+import { HomePage, PlacePage, CommunityPage, SearchPage, MyPage, LoginPage, SomeoneInfo } from '../pages';
 import { ProtectedRoute } from './ProtectedRoute';
 import ChatRoom from '../pages/chat/ChatRoom';  // ChatRoom import 추가
 
@@ -10,7 +10,8 @@ const PROTECTED_PAGES = {
   'search': true,
   'mypage': true,
   'login': false,
-  'chatRoom': true
+  'chatRoom': true,
+  'someoneInfo': false
 };
 
 export const getPageTitle = (currentPage, pageData = {}) => {  // pageData 매개변수 추가
@@ -21,6 +22,7 @@ export const getPageTitle = (currentPage, pageData = {}) => {  // pageData 매�
     case 'home': return '애니멀 인사이드';
     case 'search': return '검색';
     case 'mypage': return '마이페이지';
+    case 'someoneInfo': return `${pageData?.name}`;
     default: return '애니멀 인사이드';
   }
 };
@@ -38,6 +40,7 @@ export const renderPage = (currentPage, pageData = {}, onPageChange) => {  // pa
       case 'home': return <HomePage />;
       case 'search': return <SearchPage />;
       case 'mypage': return <MyPage />;
+      case 'someoneInfo': return <SomeoneInfo />;
       default: return <HomePage />;
     }
   };
