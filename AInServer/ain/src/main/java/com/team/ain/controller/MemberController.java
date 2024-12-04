@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.team.ain.config.jwt.JwtTokenProvider;
 import com.team.ain.dto.auth.MemberJoin;
 import com.team.ain.service.FollowerService;
 import com.team.ain.service.MemberService;
 import com.team.ain.service.PetService;
 import com.team.ain.service.PostService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 
@@ -32,6 +34,7 @@ public class MemberController {
     private final PetService petService;
     private final FollowerService followerService;
     private final PostService postService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody MemberJoin memberJoin) {
@@ -51,10 +54,13 @@ public class MemberController {
     }
 
     @GetMapping("/{memberId}")
-    public Map<String, Object> getSomeoneInfo(@PathVariable Long memberId) {
+    public Map<String, Object> getSomeoneInfo(@PathVariable Long memberId, HttpServletRequest request) {
+        Long userId = jwtTokenProvider.getMemberIdFromRequest(request);
+
         Map<String, Object> response = new HashMap<>();
-        response.put("name", memberService.findNameAndProfileUrlById(memberId));
-        response.put("pet", petService.getPetById(memberId));
+        response.put("isFollowing", followerService.isFollowing(userId, memberId));
+        response.put("member", memberService.findNameAndProfileUrlById(memberId));
+        response.put("pet", petService.getPetByMeberId(memberId));
         response.put("follows", followerService.checkFollwers(memberId));
         // post 추가
         return response;

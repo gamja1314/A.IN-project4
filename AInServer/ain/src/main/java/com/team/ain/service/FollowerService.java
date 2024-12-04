@@ -35,4 +35,9 @@ public class FollowerService {
         followers.put("following", followersMapper.getFollowingCount(memberId));
         return followers;
     }
+
+    // 팔로우 체크
+    public boolean isFollowing(Long followerId, Long followingId) {
+        return followersMapper.isFollowing(followerId, followingId);
+    }
 }

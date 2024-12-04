@@ -3,7 +3,7 @@ import { Send, Image, Paperclip } from 'lucide-react';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { ChatService } from '../../services/ChatService';
 
-const ChatRoom = ({ roomId, currentUser }) => {
+const ChatRoom = ({ roomId, currentUser, onPageChange }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isConnected, setIsConnected] = useState(false);
@@ -91,6 +91,14 @@ const ChatRoom = ({ roomId, currentUser }) => {
     }
   };
 
+  const handleProfileClick = (senderId, senderName) => {
+    console.log('Clicked profile:', { senderId, senderName }); // 데이터 확인용 로그
+    onPageChange('someoneInfo', {
+        memberId: senderId,
+        name: senderName
+    });
+};
+  
   useEffect(() => {
     ChatService.connect(
       roomId,
@@ -122,19 +130,18 @@ const ChatRoom = ({ roomId, currentUser }) => {
   
       {/* 메시지 목록 - 스크롤 영역 */}
       <div className="flex-1 overflow-y-auto p-4 mt-16 mb-20">  {/* 상단/하단 여백 조정 */}
-        {messages.map((msg, index) => (
-            <div
-                key={index}
-                className={`flex ${msg.senderId === currentUser.id ? 'justify-end' : 'justify-start'} mb-4`}
-            >
-                {/* 상대방 메시지일 때만 프로필 표시 */}
+      {messages.map((msg, index) => (
+            <div key={index} className={`flex ${msg.senderId === currentUser.id ? 'justify-end' : 'justify-start'} mb-4`}>
                 {msg.senderId !== currentUser.id && (
-                    <div className="flex-shrink-0 mr-2">
-                      <img 
-                          src={msg.senderProfileUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(msg.senderName)}`}
-                          alt={`${msg.senderName}의 프로필`}
-                          className="w-8 h-8 rounded-full object-cover"
-                      />
+                    <div 
+                        className="flex-shrink-0 mr-2 cursor-pointer" 
+                        onClick={() => handleProfileClick(msg.senderId, msg.senderName)}
+                    >
+                        <img 
+                            src={msg.senderProfileUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(msg.senderName)}`}
+                            alt={`${msg.senderName}의 프로필`}
+                            className="w-8 h-8 rounded-full object-cover hover:opacity-80 transition-opacity"
+                        />
                     </div>
                 )}
                 

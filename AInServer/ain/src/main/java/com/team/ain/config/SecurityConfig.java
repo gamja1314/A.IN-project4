@@ -52,7 +52,7 @@ public class SecurityConfig {
                 // Swagger UI 접근 허용
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // 로그인, 회원가입, 게시글 불러오기 엔드포인트 허용
-                .requestMatchers("/api/auth/**", "/api/member/signup", "/api/post/all").permitAll()
+                .requestMatchers("/api/auth/**", "/api/member/signup", "/api/post/all", "/api/member/{memberId}").permitAll()
                 // WebSocket 엔드포인트 허용
                 .requestMatchers("/ws-chat/**").permitAll()
                 // 나머지 API는 인증 필요

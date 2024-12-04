@@ -1,6 +1,5 @@
 package com.team.ain.mapper;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -16,5 +15,5 @@ public interface MemberMapper {
     Optional<Member> findByEmail(String email);
     Optional<Member> findByPhoneNumber(String phoneNumber);
     int updateProfile(MemberProfile memberProfile);
-    List<String> findNameAndProfileUrlById(Long id);
+    MemberProfile findNameAndProfileUrlById(Long id);
 }
