@@ -11,6 +11,8 @@ public class ChatMessageDTO {
     private Long senderId;
     private String messageType;  // TEXT, IMAGE, FILE
     private String content;
+    private String senderName;      // sender_name이 이 필드로 매핑되어야 함
+    private String senderProfileUrl; // sender_profile_url이 이 필드로 매핑되어야 함
     private LocalDateTime createdAt;
     private boolean isDeleted;
     private String fileUrl;

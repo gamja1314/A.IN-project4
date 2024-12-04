@@ -2,6 +2,9 @@ package com.team.ain.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +30,7 @@ public class ChatService {
         chatRoomMapper.addRoomMember(roomDTO.getId(), roomDTO.getHostId());
         return roomDTO;
     }
-    
+
     // 사용자의 채팅방 목록 조회
     public List<ChatRoomDTO> getUserRooms(Long userId) {
         return chatRoomMapper.findRoomsByUserId(userId);
@@ -54,5 +57,28 @@ public class ChatService {
 
     public ChatRoomDTO getRoomById(Long roomId) {
         return chatRoomMapper.findRoomById(roomId);
+    }
+
+    public Page<ChatRoomDTO> searchRooms(String keyword, Pageable pageable) {
+        List<ChatRoomDTO> rooms;
+        long total;
+        
+        if (keyword == null || keyword.trim().isEmpty()) {
+            rooms = chatRoomMapper.findAllByIsActiveTrue(
+                pageable.getPageNumber() * pageable.getPageSize(),  // offset
+                pageable.getPageSize()                              // size
+            );
+            total = chatRoomMapper.countAllByIsActiveTrue();
+        } else {
+            rooms = chatRoomMapper.findByRoomNameContainingIgnoreCaseAndIsActiveTrue(
+                keyword.trim(),
+                pageable.getPageNumber() * pageable.getPageSize(),  // offset
+                pageable.getPageSize()                              // size
+            );
+            total = chatRoomMapper.countByRoomNameContainingIgnoreCaseAndIsActiveTrue(
+                keyword.trim());
+        }
+        
+        return new PageImpl<>(rooms, pageable, total);
     }
 }

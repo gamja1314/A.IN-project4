@@ -7,16 +7,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.dto.MemberJoin;
+import com.team.ain.service.FollowerService;
 import com.team.ain.service.MemberService;
 import com.team.ain.service.PetService;
+import com.team.ain.service.PostService;
 
 import lombok.RequiredArgsConstructor;
+
 
 
 @RestController
@@ -26,6 +30,8 @@ public class MemberController {
 
     private final MemberService memberService;
     private final PetService petService;
+    private final FollowerService followerService;
+    private final PostService postService;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody MemberJoin memberJoin) {
@@ -44,4 +50,12 @@ public class MemberController {
         return response;
     }
 
+    @GetMapping("/{memberId}")
+    public Map<String, Object> getSomeoneInfo(@PathVariable Long memberId) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("pet", petService.getPetById(memberId));
+        response.put("follows", followerService.checkFollwers(memberId));
+        return response;
+    }
+    
 }

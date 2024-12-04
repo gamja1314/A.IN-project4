@@ -1,6 +1,6 @@
 import { HomePage, PlacePage, CommunityPage, SearchPage, MyPage, LoginPage } from '../pages';
 import { ProtectedRoute } from './ProtectedRoute';
-import ChatRoom from '../pages/main/ChatRoom';  // ChatRoom import 추가
+import ChatRoom from '../pages/chat/ChatRoom';  // ChatRoom import 추가
 
 // 페이지별 인증 필요 여부 설정
 const PROTECTED_PAGES = {
@@ -15,7 +15,7 @@ const PROTECTED_PAGES = {
 
 export const getPageTitle = (currentPage, pageData = {}) => {  // pageData 매개변수 추가
   switch (currentPage) {
-    case 'chatRoom': return `채팅방 #${pageData?.roomId}`;
+    case 'chatRoom': return `${pageData?.roomName}`;
     case 'place': return '장소';
     case 'community': return '커뮤니티';
     case 'home': return '애니멀 인사이드';
