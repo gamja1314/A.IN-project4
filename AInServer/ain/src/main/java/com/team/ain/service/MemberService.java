@@ -55,7 +55,7 @@ public class MemberService {
         return memberMapper.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("찾을 수 없는 이메일입니다."));
     }
 
-    public List<String> findNameAndProfileUrlById(Long id) {
+    public MemberProfile findNameAndProfileUrlById(Long id) {
         return memberMapper.findNameAndProfileUrlById(id);
     }
     

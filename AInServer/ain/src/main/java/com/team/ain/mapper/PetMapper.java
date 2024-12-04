@@ -17,6 +17,9 @@ public interface PetMapper {
     // ID 조회
     Pet selectPetById(Long id);
 
+    // 멤버 ID로 조회
+    Pet selectPetByMemberId(Long memberId);
+
     // 전체 조회
     List<Pet> selectAllPets();
 

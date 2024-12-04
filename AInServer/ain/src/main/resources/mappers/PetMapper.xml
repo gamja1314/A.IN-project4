@@ -15,6 +15,11 @@
         SELECT * FROM pets WHERE id = #{id}
     </select>
 
+    <!-- 멤버 ID로 조회 -->
+    <select id="selectPetByMemberId" parameterType="long" resultType="com.team.ain.dto.Pet">
+        SELECT * FROM pets WHERE member_id = #{memberId}
+    </select>
+
     <!-- 전체조회 -->
     <select id="selectAllPets" resultType="com.team.ain.dto.Pet">
         SELECT * FROM pets

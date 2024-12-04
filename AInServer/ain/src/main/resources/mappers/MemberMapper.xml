@@ -31,7 +31,7 @@
     <select id="findByPhoneNumber" parameterType="String" resultType="com.team.ain.dto.auth.Member">
         SELECT * FROM member WHERE phone_number = #{phoneNumber}
     </select>
-    <select id="findNameAndProfileUrlById" parameterType="long">
-        SELECT name, profile_picture_url FROM member WHERE id = #{id}
+    <select id="findNameAndProfileUrlById" parameterType="long" resultType="com.team.ain.dto.auth.MemberProfile">
+        SELECT id, name, profile_picture_url FROM member WHERE id = #{id}
     </select>
 </mapper>

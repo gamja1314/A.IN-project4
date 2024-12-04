@@ -33,6 +33,7 @@ export const renderPage = (currentPage, pageData = {}, onPageChange) => {  // pa
       case 'chatRoom': return <ChatRoom 
         roomId={pageData?.roomId} 
         currentUser={pageData?.currentUser}
+        onPageChange={onPageChange}
       />;
       case 'login': return <LoginPage />;
       case 'place': return <PlacePage />;
@@ -40,7 +41,7 @@ export const renderPage = (currentPage, pageData = {}, onPageChange) => {  // pa
       case 'home': return <HomePage />;
       case 'search': return <SearchPage />;
       case 'mypage': return <MyPage />;
-      case 'someoneInfo': return <SomeoneInfo />;
+      case 'someoneInfo': return <SomeoneInfo pageData={pageData} />;
       default: return <HomePage />;
     }
   };

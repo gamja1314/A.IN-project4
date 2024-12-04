@@ -28,6 +28,10 @@ public class PetService {
         return petMapper.selectPetById(id);
     }
 
+    public Pet getPetByMeberId(Long memberId) {
+        return petMapper.selectPetByMemberId(memberId);
+    }
+
     // 전체 조회
     public List<Pet> getAllPets() {
         return petMapper.selectAllPets();
