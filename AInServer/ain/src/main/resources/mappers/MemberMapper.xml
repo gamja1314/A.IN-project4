@@ -3,7 +3,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.team.ain.mapper.MemberMapper">
-    <insert id="insertMember" parameterType="com.team.ain.dto.MemberJoin">
+    <insert id="insertMember" parameterType="com.team.ain.dto.auth.MemberJoin">
         INSERT INTO member (
             email,
             password,
@@ -19,16 +19,19 @@
         )
     </insert>
 
-    <update id="updateProfile" parameterType="com.team.ain.dto.MemberProfile">
+    <update id="updateProfile" parameterType="com.team.ain.dto.auth.MemberProfile">
         UPDATE member 
         SET profile_picture_url = #{profile_picture_url} 
         WHERE id = #{id}
     </update>
 
-    <select id="findByEmail" parameterType="String" resultType="com.team.ain.dto.Member">
+    <select id="findByEmail" parameterType="String" resultType="com.team.ain.dto.auth.Member">
         SELECT * FROM member WHERE email = #{email}
     </select>
-    <select id="findByPhoneNumber" parameterType="String" resultType="com.team.ain.dto.Member">
+    <select id="findByPhoneNumber" parameterType="String" resultType="com.team.ain.dto.auth.Member">
         SELECT * FROM member WHERE phone_number = #{phoneNumber}
+    </select>
+    <select id="findNameAndProfileUrlById" parameterType="long">
+        SELECT name, profile_picture_url FROM member WHERE id = #{id}
     </select>
 </mapper>
