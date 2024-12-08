@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, Image, Paperclip } from 'lucide-react';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { ChatService } from '../../services/ChatService';
+import { ChatService } from '../../services/chatService';
 
 const ChatRoom = ({ roomId, currentUser, onPageChange }) => {
   const [messages, setMessages] = useState([]);
