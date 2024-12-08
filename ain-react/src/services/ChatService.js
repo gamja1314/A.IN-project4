@@ -166,7 +166,7 @@ class ChatServiceClass {
   }
 
   // 채팅방 검색
-  async searchRooms(keyword, page = 0, size = 10) {
+  async searchRooms(keyword, page = 0, size = 5) {
     try {
         const params = new URLSearchParams({
             page: page.toString(),

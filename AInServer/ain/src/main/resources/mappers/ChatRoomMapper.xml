@@ -54,7 +54,15 @@
                 )
                 AND cm.sender_id != #{userId}
                 AND cm.is_deleted = false
-            ) as unread_count
+            ) as unread_count,
+            (
+                SELECT created_at
+                FROM chat_message
+                WHERE room_id = r.id
+                AND is_deleted = false
+                ORDER BY created_at DESC
+                LIMIT 1
+            ) as last_message_time
         FROM chat_room r
         JOIN chat_room_member crm ON r.id = crm.room_id
         WHERE r.is_active = true
@@ -65,7 +73,7 @@
             AND member_id = #{userId}
         )
         GROUP BY r.id
-        ORDER BY r.created_at DESC
+        ORDER BY last_message_time DESC NULLS LAST
     </select>
     
     <!-- 채팅방 멤버인지 확인 -->

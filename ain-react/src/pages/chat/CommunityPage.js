@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ChatService } from "../../services/ChatService";
 import { useAuth } from "../../hooks/useAuth";
+import { ChatService } from "../../services/chatService";
 import SearchResultsPage from "./SearchResultsPage";
 
 const CommunityPage = ({ onPageChange }) => {
@@ -14,6 +14,9 @@ const CommunityPage = ({ onPageChange }) => {
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchResults, setSearchResults] = useState(null);
     const [isSearching, setIsSearching] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
 
     // 검색 결과 페이지에서 뒤로가기
     const handleBackFromSearch = () => {
@@ -66,12 +69,14 @@ const CommunityPage = ({ onPageChange }) => {
     const handleSearch = async (e) => {
         e.preventDefault();
         if (!searchKeyword.trim()) return;
-
+    
         try {
             setLoading(true);
             setError(null);
-            const response = await ChatService.searchRooms(searchKeyword);
+            const response = await ChatService.searchRooms(searchKeyword, currentPage);
             setSearchResults(response.content);
+            setTotalPages(response.totalPages);
+            setTotalElements(response.totalElements);
             if (!isSearching) {
                 setIsSearching(true);
             }
@@ -81,6 +86,23 @@ const CommunityPage = ({ onPageChange }) => {
             setLoading(false);
         }
     };
+
+    // 페이지 변경 핸들러 추가
+    const handlePageChange = async (newPage) => {
+        try {
+            setLoading(true);
+            setCurrentPage(newPage);
+            const response = await ChatService.searchRooms(searchKeyword, newPage);
+            setSearchResults(response.content);
+            setTotalPages(response.totalPages);
+            setTotalElements(response.totalElements);
+        } catch (error) {
+            setError('검색 결과를 불러오는데 실패했습니다: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     
     useEffect(() => {
         loadChatRooms();
@@ -98,6 +120,10 @@ const CommunityPage = ({ onPageChange }) => {
                 searchKeyword={searchKeyword}
                 onSearchChange={handleSearchChange}
                 onSearch={handleSearch}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalElements={totalElements}
+                onPageChange={handlePageChange}
             />
         );
     }
