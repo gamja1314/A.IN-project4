@@ -24,6 +24,7 @@ import com.team.ain.config.jwt.JwtTokenProvider;
 import com.team.ain.dto.ChatMessageDTO;
 import com.team.ain.dto.ChatRoomDTO;
 import com.team.ain.service.ChatService;
+import com.team.ain.service.NotificationService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class ChatController {
     
     private final ChatService chatService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final NotificationService notificationService;
     private final SimpMessageSendingOperations messagingTemplate;
     
     // 채팅방 생성
@@ -76,7 +78,7 @@ public class ChatController {
     public void handleChatMessage(@Payload ChatMessageDTO message) {
         // 메시지 저장
         ChatMessageDTO savedMessage = chatService.saveAndSendMessage(message);
-        
+        notificationService.createMessageNotification(message.getRoomId(), message.getSenderId(), message.getContent());
         // WebSocket을 통해 구독자들에게 메시지 전송
         messagingTemplate.convertAndSend("/topic/chat/" + message.getRoomId(), savedMessage);
     }
@@ -108,8 +110,10 @@ public class ChatController {
 
     @GetMapping("/rooms/{roomId}/messages")
     public ResponseEntity<List<ChatMessageDTO>> getRoomMessages(
-            @PathVariable Long roomId) {
-        List<ChatMessageDTO> messages = chatService.getRoomMessages(roomId);
+            @PathVariable Long roomId, HttpServletRequest request) {
+        Long userId = jwtTokenProvider.getMemberIdFromRequest(request);
+        List<ChatMessageDTO> messages = chatService.getRoomMessages(roomId, userId);
+        notificationService.readRoomMessage(roomId, userId);
         return ResponseEntity.ok(messages);
     }
     

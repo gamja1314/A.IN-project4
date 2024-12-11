@@ -205,22 +205,58 @@ const CommunityPage = ({ onPageChange }) => {
                 )}
 
                 <div className="space-y-4">
-                    {chatRooms.map((room) => (
-                        <div 
-                            key={room.id} 
-                            className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50"
-                            onClick={() => handleJoinRoom(room.id)}
-                        >
-                            <h3 className="font-medium">{room.roomName}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{room.description}</p>
-                            <div className="flex justify-between items-center mt-2">
-                                <p className="text-sm text-gray-600">참여자: {room.memberCount || 0}명</p>
-                                <span className="text-xs text-gray-500">
-                                    {new Date(room.createdAt).toLocaleDateString()}
-                                </span>
+                    {chatRooms.map((room) => {
+                        // 시간 포맷팅 함수
+                        const formatTime = (dateString) => {
+                            const messageDate = new Date(dateString);
+                            const today = new Date();
+                            const isToday = messageDate.toDateString() === today.toDateString();
+                            
+                            if (isToday) {
+                                return messageDate.toLocaleTimeString('ko-KR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                });
+                            } else {
+                                return messageDate.toLocaleDateString('ko-KR', {
+                                    month: 'long',
+                                    day: 'numeric'
+                                });
+                            }
+                        };
+
+                        return (
+                            <div 
+                                key={room.id} 
+                                className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                                onClick={() => handleJoinRoom(room.id)}
+                            >
+                                <div className="flex justify-between items-center">
+                                    <h3 className="font-medium text-lg flex items-center">{room.roomName}
+                                        <span className="text-sm text-stone-400 mx-3">
+                                            {room.memberCount || 0}
+                                        </span>
+                                    </h3>
+                                    
+                                    <span className="text-xs text-gray-500">
+                                        {formatTime(room.lastMessageTime || room.createdAt)}
+                                    </span>
+                                </div>
+                                
+                                <div className="flex justify-between items-center mt-2">
+                                    <p className="text-sm text-gray-600 line-clamp-1 flex-1">
+                                        {room.lastMessage || "최근 메시지가 없습니다."}
+                                    </p>
+                                    {room.unreadCount > 0 && (
+                                        <span className="bg-red-400 text-white text-xs font-medium px-2.5 py-1 rounded-full ml-4">
+                                            {room.unreadCount}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 

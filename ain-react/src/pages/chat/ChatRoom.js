@@ -14,7 +14,6 @@ const ChatRoom = ({ roomId, currentUser, onPageChange }) => {
 
   const handleMessage = useCallback((message) => {
     const receivedMessage = JSON.parse(message.body);
-    console.log('Received message timestamp:', receivedMessage.timestamp); // timestamp 확인
     setMessages(prev => [...prev, receivedMessage]);
 }, []);
 

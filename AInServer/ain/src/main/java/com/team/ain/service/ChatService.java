@@ -33,7 +33,7 @@ public class ChatService {
 
     // 사용자의 채팅방 목록 조회
     public List<ChatRoomDTO> getUserRooms(Long userId) {
-        return chatRoomMapper.findRoomsByUserId(userId);
+        return chatRoomMapper.getUserRooms(userId);
     }
     
     // 채팅방 참여
@@ -46,12 +46,14 @@ public class ChatService {
     
     // 메시지 저장 및 전송
     public ChatMessageDTO saveAndSendMessage(ChatMessageDTO message) {
+        chatRoomMapper.readChatRoom(message.getRoomId(), message.getSenderId());
         chatMessageMapper.insertMessage(message);
         return message;
     }
 
     // 채팅방 메시지 가져오기
-    public List<ChatMessageDTO> getRoomMessages(Long roomId) {
+    public List<ChatMessageDTO> getRoomMessages(Long roomId, Long userId) {
+        chatRoomMapper.readChatRoom(roomId, userId);
         return chatMessageMapper.findMessagesByRoomId(roomId);
     }
 
