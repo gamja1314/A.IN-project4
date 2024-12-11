@@ -13,4 +13,8 @@ public class ChatRoomDTO {
     private LocalDateTime createdAt;
     private boolean isActive;
     private int memberCount;  // 채팅방 참여자 수
+    private Integer unreadCount;
+    private LocalDateTime lastMessageTime;  // 마지막 메시지 시간 추가
+    private String lastMessage;             // 마지막 메시지 내용 추가
+    private Boolean isPrivate;              // 방 타입 (private/public)
 }

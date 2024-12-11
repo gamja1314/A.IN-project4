@@ -15,8 +15,10 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-router-dom": "^6.27.0",
     "react-scripts": "5.0.1",
+    "react-toastify": "^10.0.6",
     "sockjs-client": "^1.6.1",
     "styled-components": "^6.1.13",
+    "toast": "^0.5.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

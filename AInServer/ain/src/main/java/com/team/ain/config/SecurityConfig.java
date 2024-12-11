@@ -54,7 +54,7 @@ public class SecurityConfig {
                 // 로그인, 회원가입, 게시글 불러오기 엔드포인트 허용
                 .requestMatchers("/api/auth/**", "/api/member/signup", "/api/post/all", "/api/member/{memberId}").permitAll()
                 // WebSocket 엔드포인트 허용
-                .requestMatchers("/ws-chat/**").permitAll()
+                .requestMatchers("/ws/**").permitAll()
                 // 나머지 API는 인증 필요
                 .anyRequest().authenticated()
             )

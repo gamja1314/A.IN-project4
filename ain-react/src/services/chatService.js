@@ -200,12 +200,7 @@ class ChatServiceClass {
     const token = authService.getToken();
     
     this.client = new Client({
-      webSocketFactory: () => new SockJS(`${API_BASE_URL}/ws-chat`, null, {
-        transports: ["websocket", "xhr-streaming", "xhr-polling"],
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }),
+      webSocketFactory: () => new SockJS(`${API_BASE_URL}/ws`),
       connectHeaders: {
         'Authorization': `Bearer ${token}`
       },
@@ -213,26 +208,22 @@ class ChatServiceClass {
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       onConnect: () => {
-        const subscribeHeaders = {
-          'Authorization': `Bearer ${token}`
-        };
-
+        // 웹소켓 연결이 성공적으로 이루어졌을 때 실행되는 콜백
+        // 1. 채팅방 구독 설정
         this.client.subscribe(
-          `/topic/chat/${roomId}`,
-          onMessageCallback,
-          subscribeHeaders
-        );
-
+            `/topic/chat/${roomId}`,
+            onMessageCallback
+          );
+        // 2. 타이핑 알림 구독 설정
         this.client.subscribe(
-          `/topic/typing/${roomId}`,
-          onTypingCallback,
-          subscribeHeaders
-        );
-
+            `/topic/typing/${roomId}`,
+            onTypingCallback
+          );
+        // 3. 연결 성공을 상위 컴포넌트에 알림
         onConnectedCallback();
       },
       onDisconnect: () => {
-        console.log('Disconnected!');
+        // console.log('Disconnected!');
       },
       onStompError: (frame) => {
         onErrorCallback('Connection error: ' + frame.body);
