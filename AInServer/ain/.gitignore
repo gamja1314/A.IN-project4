@@ -43,3 +43,6 @@ application-*.properties
 **/application-*.properties
 src/main/resources/application.properties
 src/main/resources/application-*.properties
+
+### .env(환경변수파일) ###
+.env
