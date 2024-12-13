@@ -18,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.team.ain.dto.Place;
 import com.team.ain.mapper.PlaceMapper;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,11 +27,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j 
 public class PlaceService {
 
-    @Value("${naver.client.id}")
-    private String clientId;
+    private final Dotenv dotenv = Dotenv.load(); // .env 파일 로드
+    private final String clientId = dotenv.get("NAVER_CLIENT_ID"); // NAVER_CLIENT_ID 값 로드
+    private final String clientSecret = dotenv.get("NAVER_CLIENT_SECRET"); // NAVER_CLIENT_SECRET 값 로드
+
+    // @Value("${naver.client.id}")
+    // private String clientId;
     
-    @Value("${naver.client.secret}")
-    private String clientSecret;
+    // @Value("${naver.client.secret}")
+    // private String clientSecret;
     
     private final RestTemplate restTemplate;
     private final PlaceMapper placeMapper;

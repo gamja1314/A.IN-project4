@@ -5,7 +5,7 @@
 <mapper namespace="com.team.ain.mapper.PostMapper">
 
     <!-- 생성 -->
-    <insert id="insertPost" parameterType="com.team.ain.dto.Post">
+    <insert id="insertPost" parameterType="com.team.ain.dto.post.Post">
         INSERT INTO post (
             content, 
             location, 
@@ -26,7 +26,7 @@
     </insert>
 
     <!-- 수정 -->
-    <update id="updatePost" parameterType="com.team.ain.dto.Post">
+    <update id="updatePost" parameterType="com.team.ain.dto.post.Post">
         UPDATE 
             post
         SET 
@@ -55,7 +55,7 @@
     </update>
 
     <!-- id로 게시글 조회 -->
-    <select id="getPostById" resultType="com.team.ain.dto.Post" parameterType="long">
+    <select id="getPostById" resultType="com.team.ain.dto.post.Post" parameterType="long">
         SELECT
             id,
             member_id,
@@ -71,7 +71,7 @@
     </select>
 
     <!-- 특정 회원의 전체 게시글 불러오기 -->
-    <select id="getPostsByMemberId" resultType="com.team.ain.dto.Post">
+    <select id="getPostsByMemberId" resultType="com.team.ain.dto.post.Post">
         SELECT
             id,
             member_id,
@@ -90,7 +90,7 @@
     </select>
 
     <!-- 전체 게시글 조회 -->
-    <select id="getAllPosts" resultType="com.team.ain.dto.Post">
+    <select id="selectActivePosts" resultType="com.team.ain.dto.post.Post">
         SELECT
             id,
             member_id,
@@ -107,7 +107,7 @@
     </select>
 
     <!-- 페이지 단위로 최신 게시글 가져오기 -->
-    <select id="getPostsByPage" resultType="com.team.ain.dto.Post">
+    <select id="getPostsByPage" resultType="com.team.ain.dto.post.Post">
         SELECT 
             id, 
             member_id, 
