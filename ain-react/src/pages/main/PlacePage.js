@@ -1,162 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import { authService } from '../../services/authService';
+import React, { useState } from 'react';
+import KakaoMap from '../../components/map/KakaoMap';
+import { Search } from 'lucide-react';
 
 const PlacePage = () => {
-  const [map, setMap] = useState(null);
-  const [currentMarker, setCurrentMarker] = useState(null);
-  const [placeMarkers, setPlaceMarkers] = useState([]);
-  const [error, setError] = useState('');
-  
-  useEffect(() => {
-    const initializeMap = async () => {
-      try {
-        // 지도 초기화
-        const mapOptions = {
-          center: new window.naver.maps.LatLng(37.5666805, 126.9784147),
-          zoom: 15,
-          zoomControl: true
-        };
-        
-        const newMap = new window.naver.maps.Map('map', mapOptions);
-        setMap(newMap);
-        
-        // 현재 위치 가져오기
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition((position) => {
-            const location = new window.naver.maps.LatLng(
-              position.coords.latitude,
-              position.coords.longitude
-            );
-            
-            newMap.setCenter(location);
-            
-            const marker = new window.naver.maps.Marker({
-              position: location,
-              map: newMap,
-              icon: {
-                content: '<div style="background-color: #1E88E5; width: 15px; height: 15px; border-radius: 50%;"></div>',
-                anchor: new window.naver.maps.Point(7.5, 7.5),
-              }
-            });
-            
-            setCurrentMarker(marker);
-          }, (error) => {
-            setError('위치 정보를 가져올 수 없습니다. 위치 권한을 확인해주세요.');
-            console.error('Geolocation error:', error);
-          });
-        }
-      } catch (err) {
-        setError(err.message);
-        console.error('Error:', err);
-      }
-    };
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [currentKeyword, setCurrentKeyword] = useState('');
 
-    initializeMap();
-  }, []);
-
-  const searchNearbyPlaces = async () => {
-    if (!map || !currentMarker) {
-      setError('현재 위치를 가져올 수 없습니다.');
-      return;
-    }
-    
-    // 인증 확인
-    if (!authService.isAuthenticated()) {
-      setError('인증이 필요합니다. 로그인해주세요.');
-      return;
-    }
-    
-    try {
-      // 기존 마커들 제거
-      placeMarkers.forEach(marker => marker.setMap(null));
-      
-      const position = currentMarker.getPosition();
-      
-      const response = await fetch(
-        `/api/place/nearby?query=공원&latitude=${position.lat()}&longitude=${position.lng()}`,
-        {
-          headers: {
-            ...authService.getAuthHeader(),
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          setError('인증이 만료되었습니다. 다시 로그인해주세요.');
-          authService.logout();  // 토큰 제거
-          return;
-        }
-        throw new Error('검색 중 오류가 발생했습니다.');
-      }
-
-      const data = await response.json();
-      
-      if ('message' in data) {
-        setError(data.message);
-        return;
-      }
-      
-      const markers = data.map(place => {
-        const marker = new window.naver.maps.Marker({
-          position: new window.naver.maps.LatLng(place.latitude, place.longitude),
-          map: map,
-          title: place.name,
-          icon: {
-            content: '<div style="background-color: #4CAF50; width: 12px; height: 12px; border-radius: 50%;"></div>',
-            anchor: new window.naver.maps.Point(6, 6),
-          }
-        });
-
-        const infoWindow = new window.naver.maps.InfoWindow({
-          content: `
-            <div class="p-4">
-              <h3 class="font-bold text-lg mb-2">${place.name}</h3>
-              <p class="text-sm mb-1">${place.address}</p>
-              ${place.description ? `<p class="text-sm text-gray-600">${place.description}</p>` : ''}
-            </div>
-          `
-        });
-
-        window.naver.maps.Event.addListener(marker, 'click', () => {
-          if (marker.getMap()) {
-            infoWindow.open(map, marker);
-          }
-        });
-
-        return marker;
-      });
-      
-      setPlaceMarkers(markers);
-      
-      if (markers.length === 0) {
-        setError('주변에 공원이 없습니다.');
-      } else {
-        setError('');
-      }
-      
-    } catch (error) {
-      setError(error.message);
-      console.error('Failed to search nearby places:', error);
-    }
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setCurrentKeyword(searchKeyword);
   };
 
-
   return (
-    <div className="p-4">
-      {error && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-          {error}
+    <div className="w-full h-full p-4">
+      <div className="max-w-4xl mx-auto">
+        
+        {/* 검색 폼 */}
+        <form onSubmit={handleSearch} className="mb-4">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                placeholder="반려동물 동반 가능한 장소를 검색해보세요"
+                className="w-full p-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button 
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2"
+              >
+                <Search className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {/* 빠른 검색 버튼들 */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {['애견동반 카페', '공원', '동물 병원', '애견미용'].map((keyword) => (
+            <button
+              key={keyword}
+              onClick={() => {
+                setSearchKeyword(keyword);
+                setCurrentKeyword(keyword);
+              }}
+              className="px-4 py-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+            >
+              {keyword}
+            </button>
+          ))}
         </div>
-      )}
-      <div id="map" className="w-full h-96 rounded shadow-lg"></div>
-      <button 
-        className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200"
-        onClick={searchNearbyPlaces}
-      >
-        주변 공원 검색
-      </button>
+
+        {/* 지도 컴포넌트 */}
+        <div className="border rounded-lg overflow-hidden">
+          <KakaoMap searchKeyword={currentKeyword} />
+        </div>
+
+        {/* 하단 설명 */}
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-semibold mb-2">이용 안내</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>• 반려동물 동반 가능 여부는 사전에 해당 장소에 확인하시는 것을 권장합니다.</li>
+            <li>• 영업시간 및 이용조건은 변동될 수 있습니다.</li>
+            <li>• 장소에 대한 후기와 정보는 커뮤니티에서 공유해주세요.</li>
+          </ul>
+        </div>
+      </div>
     </div>
   );
 };
