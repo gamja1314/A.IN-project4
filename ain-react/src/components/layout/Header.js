@@ -5,9 +5,20 @@ import { Bell, MessageSquare, UserPlus, Heart, MessageCircle } from 'lucide-reac
 
 export const Header = ({ title }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const { notifications } = useNotification();
+  const { notifications, markAllAsRead, getUnreadCount } = useNotification();
   
-  const unreadCount = notifications?.filter(n => !n.is_read).length;
+  const unreadCount = getUnreadCount();
+
+  const handleNotificationOpen = () => {
+    if (!isNotificationOpen) {  // 열릴 때만 markAllAsRead 호출
+      markAllAsRead();
+    }
+    setIsNotificationOpen(!isNotificationOpen);  // 토글 기능으로 변경
+  };
+
+  const handleClose = () => {
+    setIsNotificationOpen(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b flex items-center justify-between px-4 z-[1000] max-w-md mx-auto">
@@ -15,7 +26,7 @@ export const Header = ({ title }) => {
       
       <div className="relative">
         <button 
-          onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+          onClick={handleNotificationOpen}
           className="p-2 hover:bg-gray-100 rounded-full"
         >
           <Bell size={20} />
@@ -29,7 +40,7 @@ export const Header = ({ title }) => {
         {isNotificationOpen && (
           <NotificationDropdown 
             notifications={notifications} 
-            onClose={() => setIsNotificationOpen(false)}
+            onClose={handleClose}
           />
         )}
       </div>

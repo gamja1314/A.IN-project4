@@ -10,4 +10,5 @@ import com.team.ain.dto.ChatMessageDTO;
 public interface ChatMessageMapper {
     void insertMessage(ChatMessageDTO message);
     List<ChatMessageDTO> findMessagesByRoomId(Long roomId);
+    Integer getMessageCounts(Long userId);
 }
