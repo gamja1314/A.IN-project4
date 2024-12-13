@@ -3,8 +3,9 @@ package com.team.ain.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.team.ain.dto.Post;
+import com.team.ain.dto.post.Post;
 import com.team.ain.mapper.PostMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -12,47 +13,33 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PostService {
-    
+
     private final PostMapper postMapper;
 
-    //생성
-    public void createPost(Post post){
+    // 게시물 생성
+    public void createPost(Post post) {
         postMapper.insertPost(post);
     }
 
-    //수정
-    public void updatePost(Post post){
-        postMapper.updatePost(post);
+    // 특정 게시물 조회
+    public Post getPostById(Long id) {
+        return postMapper.selectPostById(id);
     }
 
-    //삭제
-    public void deletePost(Long postId){
-        postMapper.deletePost(postId);
+    // 활성화된 게시물 조회
+    public List<Post> getActivePosts() {
+        return postMapper.selectActivePosts();
     }
 
-    //'삭제상태'로 변경 -- DB에 데이터 남김
-    public void softDeletePost(Long postId) {
-        postMapper.softDeletePost(postId);
+    // 게시물 수정
+    @Transactional
+    public void updatePost(Post updatedPost) {
+        postMapper.updatePost(updatedPost);
     }
 
-    //ID로 게시글 조회
-    public Post getPostById(Long postId){
-        return postMapper.getPostById(postId);
+    // 게시물 상태 변경 (삭제 또는 비활성화)
+    @Transactional
+    public void updatePostStatus(Long id, String status) {
+        postMapper.updatePostStatus(id, status);
     }
-
-    //특정회원 게시글 조회
-    public List<Post> getMemberId(Long MemberId){
-        return postMapper.getPostsByMemberId();
-    }
-
-    //전체 게시글 조회
-    public List<Post> getAllPosts(){
-        return postMapper.getAllPosts();
-    }
-
-    //게시글 페이징 처리
-    public List<Post> getPostsByPage(int limit, int offset){
-        return postMapper.getPostsByPage(limit,offset);
-    }
-    
 }

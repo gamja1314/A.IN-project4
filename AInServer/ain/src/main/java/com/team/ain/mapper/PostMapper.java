@@ -5,17 +5,23 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.team.ain.dto.Post;
+import com.team.ain.dto.post.Post;
 
 @Mapper
 public interface PostMapper {
-    void insertPost(Post post); //생성
-    void updatePost(Post post); //수정
-    void deletePost(Long id);   //삭제
-    void softDeletePost(Long id); //'삭제 상태'로 변경 -- DB에 데이터는 남김
-    Post getPostById(Long id);  //ID기반 게시글 조회
-    List<Post> getAllPosts();   //모든 게시글 조회
-    List<Post> getPostsByMemberId(); //특정 회원의 전체 게시글 불러오기
-     // 페이지 단위로 게시글 가져오기
-    List<Post> getPostsByPage(@Param("limit") int limit, @Param("offset") int offset);
-} 
+
+    // 게시물 생성
+    void insertPost(Post post);
+
+    // 특정 게시물 조회
+    Post selectPostById(Long id);
+
+    // 활성화된 게시물 조회
+    List<Post> selectActivePosts();
+
+    // 게시물 수정
+    void updatePost(Post post);
+
+    // 게시물 상태 변경 (삭제 또는 비활성화)
+    void updatePostStatus(@Param("id") Long id, @Param("status") String status);
+}

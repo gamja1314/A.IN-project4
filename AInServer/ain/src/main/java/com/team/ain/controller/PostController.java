@@ -3,8 +3,8 @@ package com.team.ain.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,80 +13,50 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.team.ain.config.jwt.JwtTokenProvider;
-import com.team.ain.dto.Post;
+import com.team.ain.dto.post.Post;
 import com.team.ain.service.PostService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/post")
+@RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class PostController {
-    
-    private final PostService postSerivce;
-    private final JwtTokenProvider jwtTokenProvider;
 
-    //생성
+    private final PostService postService;
+
+    // 게시물 생성
     @PostMapping
-    public ResponseEntity<String> createPost(@RequestBody Post post, HttpServletRequest request ){
-        Long memberId = jwtTokenProvider.getMemberIdFromRequest(request);
-        post.setMemberId(memberId);
-        postSerivce.createPost(post);
-        return ResponseEntity.ok("게시글이 등록 되었습니다.");
+    public ResponseEntity<String> createPost(@RequestBody Post post) {
+        postService.createPost(post);
+        return ResponseEntity.ok("게시물이 생성되었습니다.");
     }
 
-    //수정
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updatePost(@PathVariable Long id, @RequestBody Post post){
-        post.setId(id);
-        postSerivce.updatePost(post);
-        return ResponseEntity.ok("수정 완료!");
-    }
-
-    //완전 삭제
-    @DeleteMapping("/{id}/hard")
-    public ResponseEntity<String> deletePost(@PathVariable Long id){
-        postSerivce.deletePost(id);
-        return ResponseEntity.ok("삭제 완료!");
-    }
-
-    // "삭제상태"로 변경
-    @DeleteMapping("/{id}/soft")
-    public ResponseEntity<String> softDeletePost(@PathVariable Long id){
-        postSerivce.softDeletePost(id);
-        return ResponseEntity.ok("삭제 되었습니다.");
-    }
-    
-    //ID기반 게시글 조회
+    // 특정 게시물 조회
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id){
-        Post post = postSerivce.getPostById(id);
+    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+        Post post = postService.getPostById(id);
         return ResponseEntity.ok(post);
     }
 
-    //전체 게시글 조회
-    @GetMapping("/all")
-    public ResponseEntity<List<Post>> getAllPosts(){
-        List<Post> posts = postSerivce.getAllPosts();
-
-        //데이터가 없으면 빈 리스트 반환
-        if(posts.isEmpty()){ 
-            return ResponseEntity.ok(List.of());
-        }
-        //데이터 있으면 조회된 게시글 반환
+    // 활성화된 게시물 조회
+    @GetMapping
+    public ResponseEntity<List<Post>> getActivePosts() {
+        List<Post> posts = postService.getActivePosts();
         return ResponseEntity.ok(posts);
     }
 
-    //게시글 페이징 처리
-    @GetMapping("/page")
-    public ResponseEntity<List<Post>> getPostsByPage(
-            @RequestParam int page, //페이지 번호
-            @RequestParam int size  //페이지 게시글 수
-    ){
-       int offset = page * size; //offset 계산
-       List<Post> posts = postSerivce.getPostsByPage(size, offset);
-       return ResponseEntity.ok(posts);
+    // 게시물 수정
+    @PutMapping
+    public ResponseEntity<String> updatePost(@RequestBody Post updatedPost) {
+        postService.updatePost(updatedPost);
+        return ResponseEntity.ok("게시물이 수정되었습니다.");
+    }
+
+    // 게시물 상태 변경 (삭제 또는 비활성화)
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<String> updatePostStatus(@PathVariable Long id, @RequestParam String status) {
+        postService.updatePostStatus(id, status);
+        return ResponseEntity.ok("게시물 상태가 변경되었습니다.");
     }
 }
