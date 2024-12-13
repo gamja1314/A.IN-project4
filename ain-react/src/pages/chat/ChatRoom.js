@@ -49,13 +49,15 @@ const ChatRoom = ({ roomId, currentUser, onPageChange }) => {
     e.preventDefault();
     if (!inputMessage.trim() || !isConnected) return;
 
+    const now = new Date();
+    const koreanTime = new Date(now.getTime() + (9*60*60*1000));
     const chatMessage = {
       roomId: roomId,
       senderId: currentUser.id,
       content: inputMessage,
       messageType: 'TEXT',
       senderName: currentUser.name,
-      createdAt: new Date().toISOString()
+      createdAt: koreanTime.toISOString()
     };
 
     try {

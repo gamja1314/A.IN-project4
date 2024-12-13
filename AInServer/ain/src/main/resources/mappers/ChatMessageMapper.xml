@@ -37,4 +37,14 @@
         AND m.is_deleted = false
         ORDER BY m.created_at ASC
     </select>
+
+    <select id="getMessageCounts" resultType="integer">
+        SELECT COUNT(*) as unread_count
+        FROM chat_message cm
+        JOIN chat_room_member crm ON cm.room_id = crm.room_id
+        WHERE crm.member_id = #{userId}
+        AND cm.created_at > crm.last_read_at
+        AND cm.sender_id != #{userId}
+        AND cm.is_deleted = false;
+    </select>
 </mapper>

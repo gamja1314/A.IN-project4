@@ -58,6 +58,15 @@ public class ChatController {
         return ResponseEntity.ok(rooms);
     }
 
+    // 읽지 않은 모든 채팅 수 조회
+    @GetMapping("/message-count")
+    public ResponseEntity<Integer> getAllMessageCount(HttpServletRequest request) {
+        Long memberId = jwtTokenProvider.getMemberIdFromRequest(request);
+        Integer counts = chatService.getMessageCounts(memberId);
+        return ResponseEntity.ok(counts);
+    }
+    
+
     @GetMapping("/rooms/search")
     public ResponseEntity<?> searchRooms(
             @RequestParam(required = false) String keyword,

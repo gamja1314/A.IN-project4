@@ -57,6 +57,27 @@ class ChatServiceClass {
     }
   }
 
+  // 읽지 않은 모든 채팅 수
+  async getMessageCounts() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat/message-count`, {
+        method: 'GET',
+        headers: {
+          ...authService.getAuthHeader()
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('읽지 않은 채팅 수를 가져오는데 실패하였습니다.');
+      }
+
+      return await response.text();
+    } catch(err) {
+      console.error('API 통신에 실패하였습니다:', err)
+      throw err;
+    }
+  }
+
   // 채팅방 참여
   async joinRoom(roomId) {
     try {
@@ -193,7 +214,7 @@ class ChatServiceClass {
         console.error('Search rooms error:', error);
         throw error;
     }
-}
+  }
 
   // WebSocket 관련 메서드들
   connect(roomId, onMessageCallback, onTypingCallback, onConnectedCallback, onErrorCallback) {

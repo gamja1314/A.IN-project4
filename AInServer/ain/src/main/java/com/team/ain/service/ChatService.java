@@ -51,6 +51,11 @@ public class ChatService {
         return message;
     }
 
+    // 읽지않은 모든 메시지 수 가져오기
+    public Integer getMessageCounts(Long userId) {
+        return chatMessageMapper.getMessageCounts(userId);
+    }
+
     // 채팅방 메시지 가져오기
     public List<ChatMessageDTO> getRoomMessages(Long roomId, Long userId) {
         chatRoomMapper.readChatRoom(roomId, userId);
