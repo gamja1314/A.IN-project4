@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team.ain.mapper.StoryMapper">
+    
+    <!-- 스토리 생성 -->
+    <insert id="insertStory" parameterType="com.team.ain.dto.story.StoryDTO">
+        INSERT INTO story (
+            member_id,
+            content,
+            created_at,
+            status
+        ) VALUES (
+            #{memberId},
+            #{content},
+            CURRENT_TIMESTAMP,
+            'ACTIVE'
+        )
+    </insert>
+    
+    <!-- 모든 활성 스토리 조회 -->
+    <select id="findAllActiveStories" resultType="com.team.ain.dto.story.StoryDTO">
+        SELECT s.*, m.name, m.profile_picture_url
+        FROM story s
+        JOIN member m ON s.member_id = m.id
+        WHERE s.status = 'ACTIVE'
+        AND s.expires_at > CURRENT_TIMESTAMP
+        ORDER BY s.created_at DESC
+    </select>
+    
+    <!-- 특정 회원의 스토리 조회 -->
+    <select id="findStoriesByMemberId" resultType="com.team.ain.dto.story.StoryDTO">
+        SELECT s.*, m.name, m.profile_picture_url
+        FROM story s
+        JOIN member m ON s.member_id = m.id
+        WHERE s.member_id = #{memberId}
+        ORDER BY s.created_at DESC
+    </select>
+    
+    <!-- 특정 회원의 24시간 이내 스토리 조회 -->
+    <select id="findRecentStoriesByMemberId" resultType="com.team.ain.dto.story.StoryDTO">
+        SELECT s.*, m.name, m.profile_picture_url
+        FROM story s
+        JOIN member m ON s.member_id = m.id
+        WHERE s.member_id = #{memberId}
+        AND s.created_at >= CURRENT_TIMESTAMP - INTERVAL '24 hours'
+        ORDER BY s.created_at DESC
+    </select>
+
+    <update id="updateExpiredStories">
+        <![CDATA[
+            UPDATE story 
+            SET status = 'PRIVATE'
+            WHERE expires_at <= CURRENT_TIMESTAMP 
+            AND status = 'ACTIVE'
+        ]]>
+    </update>
+    
+</mapper>

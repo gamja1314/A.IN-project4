@@ -1,6 +1,6 @@
-import { HomePage, PlacePage, CommunityPage, SearchPage, MyPage, LoginPage, SomeoneInfo } from '../pages';
+import { HomePage, PlacePage, CommunityPage, SearchPage, MyPage, LoginPage, SomeoneInfo, CreateStory, MyStories } from '../pages';
 import { ProtectedRoute } from './ProtectedRoute';
-import ChatRoom from '../pages/chat/ChatRoom';  // ChatRoom import 추가
+import ChatRoom from '../pages/chat/ChatRoom';
 
 // 페이지별 인증 필요 여부 설정
 const PROTECTED_PAGES = {
@@ -11,7 +11,9 @@ const PROTECTED_PAGES = {
   'mypage': true,
   'login': false,
   'chatRoom': true,
-  'someoneInfo': false
+  'someoneInfo': false,
+  'createStory': true,
+  'MyStories': true
 };
 
 export const getPageTitle = (currentPage, pageData = {}) => {  // pageData 매개변수 추가
@@ -23,6 +25,8 @@ export const getPageTitle = (currentPage, pageData = {}) => {  // pageData 매�
     case 'search': return '검색';
     case 'mypage': return '마이페이지';
     case 'someoneInfo': return `${pageData?.name}`;
+    case 'createStory': return '스토리 만들기';
+    case 'MyStories': return '내 스토리';
     default: return '애니멀 인사이드';
   }
 };
@@ -38,10 +42,12 @@ export const renderPage = (currentPage, pageData = {}, onPageChange) => {  // pa
       case 'login': return <LoginPage />;
       case 'place': return <PlacePage />;
       case 'community': return <CommunityPage onPageChange={onPageChange} />;
-      case 'home': return <HomePage />;
+      case 'home': return <HomePage onPageChange={onPageChange} />;
       case 'search': return <SearchPage />;
       case 'mypage': return <MyPage />;
       case 'someoneInfo': return <SomeoneInfo pageData={pageData} />;
+      case 'createStory': return <CreateStory onPageChange={onPageChange} />;
+      case 'MyStories': return <MyStories onPageChange={onPageChange} />;
       default: return <HomePage />;
     }
   };
