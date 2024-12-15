@@ -9,12 +9,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.config.jwt.JwtTokenProvider;
 import com.team.ain.dto.auth.MemberJoin;
+import com.team.ain.dto.auth.MemberUpdateDTO;
 import com.team.ain.service.FollowerService;
 import com.team.ain.service.MemberService;
 import com.team.ain.service.PetService;
@@ -65,5 +67,16 @@ public class MemberController {
         // post 추가
         return response;
     }
-    
+
+    //1215 프로필 업뎃
+    @PutMapping("/update")
+    public ResponseEntity<String> updateProfile(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody MemberUpdateDTO updateDTO
+    ) {
+        String email = userDetails.getUsername();
+        memberService.updateMemberProfile(email, updateDTO);
+        return ResponseEntity.ok("프로필이 성공적으로 업데이트되었습니다.");
+    }
+        
 }

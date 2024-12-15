@@ -16,4 +16,7 @@ public interface MemberMapper {
     Optional<Member> findByPhoneNumber(String phoneNumber);
     int updateProfile(MemberProfile memberProfile);
     MemberProfile findNameAndProfileUrlById(Long id);
+
+    //1215 프로필업뎃
+    int updateMemberProfile(Member member);
 }

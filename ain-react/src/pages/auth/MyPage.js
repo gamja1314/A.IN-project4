@@ -3,6 +3,8 @@ import { API_BASE_URL } from "../../config/apiConfig";
 import { useAuth } from "../../hooks/useAuth";
 import { authService } from "../../services/authService";
 import './MyPage.css';
+import ProfileEditModal from './ProfileEditModal';
+
 
 const MyPage = () => {
   const { logout } = useAuth();
@@ -120,6 +122,36 @@ const MyPage = () => {
 
   console.log("Current memberInfo:", memberInfo);
 
+
+  //1215 프로필 업뎃
+  const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
+
+  const handleProfileUpdateSuccess = async () => {
+    // 프로필 업데이트 후 회원 정보 다시 가져오기
+    try {
+      const headers = {
+        ...authService.getAuthHeader(),
+        "Content-Type": "application/json",
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/member/my`, {
+        method: "GET",
+        headers,
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("회원 정보를 가져오는 것을 실패했습니다.");
+
+      const data = await response.json();
+      setMemberInfo({
+        member: data.member,
+        pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []),
+      });
+    } catch (err) {
+      console.error("Error:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
@@ -168,8 +200,10 @@ const MyPage = () => {
                 ))}
               </div>
               <div className="flex justify-center mb-4">
-                <button className="px-8 py-1.5 border rounded text-sm font-medium hover:bg-gray-50 w-[200px]">
-                  프로필 편집
+                <button 
+                onClick={() => setIsProfileEditModalOpen(true)}
+                className="px-8 py-1.5 border rounded text-sm font-medium hover:bg-gray-50 w-[200px]">
+                프로필 편집
                 </button>
               </div>
               <div className="text-sm text-center">
@@ -352,6 +386,16 @@ const MyPage = () => {
           </div>
         )}
         {/* 펫 관리 버튼 카드 끝 */}
+
+        {/* 모달은 컴포넌트의 최상위 레벨에 위치 */}
+        {isProfileEditModalOpen && (
+          <ProfileEditModal 
+            memberInfo={memberInfo?.member} 
+            onClose={() => setIsProfileEditModalOpen(false)}
+            onUpdate={handleProfileUpdateSuccess}
+          />
+        )}
+
       </main>
     </div>
   );
