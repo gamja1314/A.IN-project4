@@ -1,4 +1,4 @@
-package com.team.ain.dto;
+package com.team.ain.dto.chat;
 
 import java.time.LocalDateTime;
 

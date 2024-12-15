@@ -21,8 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.config.jwt.JwtTokenProvider;
-import com.team.ain.dto.ChatMessageDTO;
-import com.team.ain.dto.ChatRoomDTO;
+import com.team.ain.dto.chat.ChatMessageDTO;
+import com.team.ain.dto.chat.ChatRoomDTO;
+import com.team.ain.dto.chat.MessageReadDTO;
 import com.team.ain.service.ChatService;
 import com.team.ain.service.NotificationService;
 
@@ -85,11 +86,27 @@ public class ChatController {
     // WebSocket을 통한 채팅 메시지 처리
     @MessageMapping("/chat/message")
     public void handleChatMessage(@Payload ChatMessageDTO message) {
-        // 메시지 저장
+        // 1. 메시지 저장
         ChatMessageDTO savedMessage = chatService.saveAndSendMessage(message);
-        notificationService.createMessageNotification(message.getRoomId(), message.getSenderId(), message.getContent());
-        // WebSocket을 통해 구독자들에게 메시지 전송
+        
+        // 2. 채팅방 전체에 메시지 브로드캐스트
         messagingTemplate.convertAndSend("/topic/chat/" + message.getRoomId(), savedMessage);
+        
+        // 3. 발신자를 제외한 채팅방 참여자들에게 한 번만 알림 전송
+        notificationService.createMessageNotification(message.getRoomId(), message.getSenderId(), message.getContent());
+    }
+
+    // 메시지 읽음 상태 업데이트를 위한 새로운 엔드포인트 추가
+    @MessageMapping("/chat/read")
+    public void handleMessageRead(@Payload MessageReadDTO readEvent) {
+        chatService.updateLastReadAt(readEvent.getRoomId(), readEvent.getMemberId());
+        
+        // 읽음 상태 변경 알림
+        messagingTemplate.convertAndSendToUser(
+            readEvent.getMemberId().toString(),
+            "/queue/read-status",
+            readEvent
+        );
     }
     
     @PostMapping("/rooms/{roomId}/join")
