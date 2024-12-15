@@ -3,6 +3,8 @@ package com.team.ain.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,9 +19,6 @@ import com.team.ain.dto.PetRegist;
 import com.team.ain.service.PetService;
 
 import lombok.RequiredArgsConstructor;
-
-
-
 
 @RestController
 @RequestMapping("/api/pet")
@@ -61,5 +60,29 @@ public class PetController {
     public ResponseEntity<String> deletePet(@PathVariable Long id) {
         petService.deletePet(id);
         return ResponseEntity.ok("정보 삭제가 완료되었습니다.");
+    }
+
+
+
+    // 현재 로그인한 멤버의 펫 등록 20241212
+    @PostMapping("/my")
+    public ResponseEntity<String> registerMyPet(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody PetRegist petRegist
+    ) {
+        String email = userDetails.getUsername();
+        petService.registerMyPet(email, petRegist);
+        return ResponseEntity.ok("반려동물 등록에 성공했습니다.");
+    }
+
+    // 현재 로그인한 멤버의 펫 수정 20241212
+    @PutMapping("/my")
+    public ResponseEntity<String> updateMyPet(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody Pet petUpdateInfo
+    ) {
+        String email = userDetails.getUsername();
+        petService.updateMyPet(email, petUpdateInfo);
+        return ResponseEntity.ok("반려동물 정보 수정에 성공했습니다.");
     }
 }
