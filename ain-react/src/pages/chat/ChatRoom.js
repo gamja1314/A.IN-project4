@@ -66,6 +66,7 @@ const ChatRoom = ({ roomId, currentUser, onPageChange }) => {
       ChatService.sendTypingStatus(roomId, currentUser.id, false);
     } catch (err) {
       setError('Failed to send message');
+      console.log(err)
     }
   };
 

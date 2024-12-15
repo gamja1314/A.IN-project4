@@ -63,8 +63,14 @@ export const NotificationProvider = ({ children }) => {
   };
 
   // 읽지 않은 알림 개수 계산
-  const getUnreadCount = () => {
-    return notifications.filter(n => !n.is_read).length;
+  const getUnreadCount = (notifications) => {
+    // notifications이 배열인지 확인
+    if (!Array.isArray(notifications)) {
+      console.log('Received notifications:', notifications); // 디버깅용
+      return 0; // 또는 적절한 기본값
+    }
+    
+    return notifications.filter(notification => !notification.isRead).length;
   };
 
   const value = {

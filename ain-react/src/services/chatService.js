@@ -1,7 +1,6 @@
 import { API_BASE_URL } from "../config/apiConfig";
 import { authService } from "./authService";
-import SockJS from 'sockjs-client';
-import { Client } from '@stomp/stompjs';
+import { socketService } from "./SocketService";
 
 class ChatServiceClass {
   constructor() {
@@ -218,72 +217,35 @@ class ChatServiceClass {
 
   // WebSocket 관련 메서드들
   connect(roomId, onMessageCallback, onTypingCallback, onConnectedCallback, onErrorCallback) {
-    const token = authService.getToken();
+    // 채팅 메시지 구독
+    socketService.subscribe(
+      `/topic/chat/${roomId}`,
+      onMessageCallback
+    );
     
-    this.client = new Client({
-      webSocketFactory: () => new SockJS(`${API_BASE_URL}/ws`),
-      connectHeaders: {
-        'Authorization': `Bearer ${token}`
-      },
-      reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
-      onConnect: () => {
-        // 웹소켓 연결이 성공적으로 이루어졌을 때 실행되는 콜백
-        // 1. 채팅방 구독 설정
-        this.client.subscribe(
-            `/topic/chat/${roomId}`,
-            onMessageCallback
-          );
-        // 2. 타이핑 알림 구독 설정
-        this.client.subscribe(
-            `/topic/typing/${roomId}`,
-            onTypingCallback
-          );
-        // 3. 연결 성공을 상위 컴포넌트에 알림
-        onConnectedCallback();
-      },
-      onDisconnect: () => {
-        // console.log('Disconnected!');
-      },
-      onStompError: (frame) => {
-        onErrorCallback('Connection error: ' + frame.body);
-      }
-    });
+    // 타이핑 알림 구독
+    socketService.subscribe(
+      `/topic/typing/${roomId}`,
+      onTypingCallback
+    );
 
-    try {
-      this.client.activate();
-    } catch (err) {
-      onErrorCallback('Failed to connect to chat server');
-    }
+    // Socket 연결
+    socketService.connect(onConnectedCallback, onErrorCallback);
   }
 
   disconnect() {
-    if (this.client) {
-      this.client.deactivate();
-      this.client = null;
-    }
+    socketService.disconnect();
   }
 
   sendMessage(message) {
-    if (this.client && this.client.connected) {
-      this.client.publish({
-        destination: '/app/chat/message',
-        body: JSON.stringify(message)
-      });
-    }
+    socketService.publish('/app/chat/message', message);
   }
 
   sendTypingStatus(roomId, userId, isTyping) {
-    if (this.client && this.client.connected) {
-      this.client.publish({
-        destination: `/app/typing/${roomId}`,
-        body: JSON.stringify({
-          userId,
-          isTyping
-        })
-      });
-    }
+    socketService.publish(`/app/typing/${roomId}`, {
+      userId,
+      isTyping
+    });
   }
 
   async loadPreviousMessages(roomId) {
