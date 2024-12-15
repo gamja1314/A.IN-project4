@@ -8,8 +8,21 @@ const NotificationContext = createContext();
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
 
+  // 새로운 알림 추가 함수 수정
   const addNotification = (newNotification) => {
-    setNotifications(prev => [newNotification, ...prev]);
+    // 단일 객체인 경우 배열로 변환
+    const notificationArray = Array.isArray(newNotification) 
+      ? newNotification 
+      : [newNotification];
+    
+    setNotifications(prev => {
+      // 중복 방지를 위해 id 기준으로 필터링
+      const uniqueNotifications = [...notificationArray, ...prev]
+        .filter((notification, index, self) => 
+          index === self.findIndex(n => n.id === notification.id)
+        );
+      return uniqueNotifications;
+    });
   };
 
   // 단일 알림을 읽음 처리
@@ -64,13 +77,14 @@ export const NotificationProvider = ({ children }) => {
 
   // 읽지 않은 알림 개수 계산
   const getUnreadCount = (notifications) => {
-    // notifications이 배열인지 확인
     if (!Array.isArray(notifications)) {
-      console.log('Received notifications:', notifications); // 디버깅용
-      return 0; // 또는 적절한 기본값
+      console.log('Received notifications:', notifications);
+      return 0;
     }
-    
-    return notifications.filter(notification => !notification.isRead).length;
+    // read 또는 is_read 둘 다 체크
+    return notifications.filter(notification => 
+      !notification.read && !notification.is_read
+    ).length;
   };
 
   const value = {
