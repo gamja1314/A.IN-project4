@@ -7,7 +7,9 @@ export const Header = ({ title }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const { notifications, markAllAsRead, getUnreadCount } = useNotification();
   
-  const unreadCount = getUnreadCount();
+  // notifications가 undefined나 null일 경우를 처리
+  const safeNotifications = notifications || [];
+  const unreadCount = getUnreadCount(safeNotifications);
 
   const handleNotificationOpen = () => {
     if (!isNotificationOpen) {  // 열릴 때만 markAllAsRead 호출
@@ -50,6 +52,9 @@ export const Header = ({ title }) => {
 
 // 알림 드롭다운 컴포넌트
 const NotificationDropdown = ({ notifications, onClose }) => {
+  // notifications가 배열인지 확인하고, 아니라면 빈 배열을 사용
+  const notificationArray = Array.isArray(notifications) ? notifications : [];
+
   return (
     <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg border z-50 max-h-96 overflow-y-auto">
       <div className="p-4">
@@ -60,12 +65,15 @@ const NotificationDropdown = ({ notifications, onClose }) => {
           </button>
         </div>
 
-        {notifications.length === 0 ? (
+        {notificationArray.length === 0 ? (
           <p className="text-center text-gray-500 py-4">새로운 알림이 없습니다</p>
         ) : (
           <div className="space-y-3">
-            {notifications.map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} />
+            {notificationArray.map((notification) => (
+              <NotificationItem 
+                key={notification.id} 
+                notification={notification} 
+              />
             ))}
           </div>
         )}
