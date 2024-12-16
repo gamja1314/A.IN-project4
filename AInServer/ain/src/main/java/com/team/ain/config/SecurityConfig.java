@@ -2,6 +2,7 @@ package com.team.ain.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -53,6 +54,10 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // 로그인, 회원가입, 게시글 불러오기 엔드포인트 허용
                 .requestMatchers("/api/auth/**", "/api/member/signup", "/api/post/**", "/api/member/{memberId}").permitAll()
+                // 게시글 작성, 수정, 삭제는 로그인상태만 가능
+                .requestMatchers(HttpMethod.POST, "/api/post/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/post/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/post/**").authenticated()
                 // WebSocket 엔드포인트 허용
                 .requestMatchers("/ws/**").permitAll()
                 // 나머지 API는 인증 필요

@@ -1,14 +1,13 @@
-// src/pages/main/HomePage.js
 import React, { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { API_BASE_URL } from "../../config/apiConfig";
-import { authService } from '../../services/authService';
+import { authService } from "../../services/authService";
 import StoryProfile from '../story/StoryProfile';
-import StoryPost from '../story/StoryPost';
+import StoryPost from "../story/StoryPost";
 
 const HomePage = ({ onPageChange }) => {
   const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [stories, setStories] = useState([]);
   const [memberInfo, setMemberInfo] = useState(null);
@@ -54,35 +53,32 @@ const HomePage = ({ onPageChange }) => {
     fetchStories();
   }, []);
 
-  // 게시글 가져오기
+  // 게시물 가져오기
   const fetchPosts = async () => {
     try {
       const size = 10;
-      const response = await fetch(`${API_BASE_URL}/api/posts?page=${page}&size=${size}`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts/page?page=${page}&size=${size}`, {
+        method: "GET",
         headers: {
           ...authService.getAuthHeader(),
-          'Content-Type': 'application/json',
-        }
+          "Content-Type": "application/json",
+        },
       });
-
-      if (!response.ok) throw new Error('Failed to fetch posts');
+      
+      if (!response.ok) throw new Error("게시물 데이터를 가져오는데 실패했습니다.");
       
       const newPosts = await response.json();
-      if (newPosts.length === 0) {
+      if (newPosts.length < size) {
         setHasMore(false);
-      } else {
-        setPosts((prevPosts) => [...prevPosts, ...newPosts]);
-        setPage((prevPage) => prevPage + 1);
       }
+      setPosts((prevPosts) => [...prevPosts, ...newPosts]);
+      setPage((prevPage) => prevPage + 1);
     } catch (error) {
       console.error("Error fetching posts:", error);
-      if (error.response?.status === 401) {
-        console.log("Authentication required");
-      }
     }
   };
 
-  // 초기 게시글 로딩
+  // 초기 데이터 로딩
   useEffect(() => {
     fetchPosts();
   }, []);
@@ -130,14 +126,14 @@ const HomePage = ({ onPageChange }) => {
           next={fetchPosts}
           hasMore={hasMore}
           loader={<h4>Loading...</h4>}
-          endMessage={<p style={{textAlign: "center"}}>새 게시글이 없습니다.</p>}
+          endMessage={<p style={{ textAlign: "center" }}>새 게시글이 없습니다.</p>}
         >
           {posts.map((post) => (
             <StoryPost
               key={post.id}
-              title={post.title}
-              content={post.content}
-              createdAt={post.createdAt}
+              title={post.title || "제목 없음"}
+              content={post.content || "내용 없음"}
+              createdAt={new Date(post.createdAt).toLocaleDateString()}
             />
           ))}
         </InfiniteScroll>
