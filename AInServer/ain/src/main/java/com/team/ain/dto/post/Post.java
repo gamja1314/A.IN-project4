@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class Post {
     private Long id;                 // 게시글 ID
     private Long memberId;           // 작성자 ID
