@@ -120,5 +120,6 @@ public class PostController {
     public ResponseEntity<List<Post>> getPosts(@RequestParam int page, @RequestParam int size) {
         List<Post> posts = postService.getPosts(page, size);
         return ResponseEntity.ok(posts);
+        
     }
 }
