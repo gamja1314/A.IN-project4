@@ -48,4 +48,8 @@ public class StoryService {
     public int updateExpiredStories() {
         return storyMapper.updateExpiredStories();
     }
+
+    public List<StoryDTO> getFollowedMemberStories(Long memberId) {
+        return storyMapper.findFollowedMemberStories(memberId);
+    }
 }

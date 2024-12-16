@@ -26,7 +26,7 @@ export const getPageTitle = (currentPage, pageData = {}) => {  // pageData 매�
     case 'mypage': return '마이페이지';
     case 'someoneInfo': return `${pageData?.name}`;
     case 'createStory': return '스토리 만들기';
-    case 'MyStories': return '내 스토리';
+    case 'myStories': return '내 스토리';
     default: return '애니멀 인사이드';
   }
 };
@@ -47,7 +47,7 @@ export const renderPage = (currentPage, pageData = {}, onPageChange) => {  // pa
       case 'mypage': return <MyPage />;
       case 'someoneInfo': return <SomeoneInfo pageData={pageData} />;
       case 'createStory': return <CreateStory onPageChange={onPageChange} />;
-      case 'MyStories': return <MyStories onPageChange={onPageChange} />;
+      case 'myStories': return <MyStories onPageChange={onPageChange} />;
       default: return <HomePage />;
     }
   };

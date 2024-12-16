@@ -34,8 +34,13 @@ const HomePage = ({ onPageChange }) => {
   // 스토리 데이터 가져오기
   useEffect(() => {
     const fetchStories = async () => {
+      if (!authService.isAuthenticated()) {
+        console.log("Authentication required");
+        return;
+      }
+    
       try {
-        const response = await fetch(`${API_BASE_URL}/api/stories/followed`, {
+        const response = await fetch(`${API_BASE_URL}/api/stories/followed`, { 
           headers: authService.getAuthHeader(),
         });
         if (!response.ok) throw new Error('Failed to fetch stories');
@@ -97,13 +102,13 @@ const HomePage = ({ onPageChange }) => {
           />
           
           {stories.length > 0 ? (
-            // 팔로우한 유저들의 스토리가 있을 때
+            // 팔로우한 유저들의 스토리
             stories.map((story) => (
               <StoryProfile
                 key={story.id}
                 isMyStory={false}
-                profileImage={story.profile_picture_url}
-                username={story.username}
+                profileImage={story.profilePictureUrl}
+                username={story.memberName}
               />
             ))
           ) : (
