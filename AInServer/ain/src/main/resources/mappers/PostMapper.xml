@@ -5,8 +5,8 @@
 
     <!-- 게시물 생성 -->
     <insert id="insertPost">
-        INSERT INTO posts (title, content, image_url, video_url, username, created_at)
-        VALUES (#{title}, #{content}, #{imageUrl}, #{videoUrl}, #{username}, NOW())
+        INSERT INTO posts (content, image_url, video_url, username, created_at)
+        VALUES (#{content}, #{imageUrl}, #{videoUrl}, #{username}, NOW())
     </insert>
 
     <!-- 게시물 단일 조회 -->
@@ -19,7 +19,7 @@
     <!-- 게시물 수정 -->
     <update id="updatePost">
         UPDATE posts
-        SET title = #{title},
+        SET 
             content = #{content},
             image_url = #{imageUrl},
             video_url = #{videoUrl},
