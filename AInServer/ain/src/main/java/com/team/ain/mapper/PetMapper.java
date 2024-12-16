@@ -30,4 +30,6 @@ public interface PetMapper {
     void deletePet(Long id);
     
     Pet findByMemberId(Long id);
+
+    List<Pet> findAllByMemberId(Long memberId); // 1213새로 추가
 }

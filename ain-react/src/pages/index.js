@@ -7,3 +7,8 @@ export { default as MyPage } from './auth/MyPage';
 export { default as LoginPage } from './auth/LoginPage';
 export { default as ChatRoom } from './chat/ChatRoom';
 export { default as SomeoneInfo } from './auth/SomeoneInfo';
+// 스토리관련
+export { default as StoryPost } from './story/StoryPost';
+export { default as StoryProfile } from './story/StoryProfile';
+export { default as CreateStory } from './story/CreateStory';
+export { default as MyStories } from './story/MyStories';

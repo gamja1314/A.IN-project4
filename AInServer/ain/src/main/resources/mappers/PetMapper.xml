@@ -45,5 +45,10 @@
     <select id="findByMemberId" parameterType="long" resultType="com.team.ain.dto.Pet">
         SELECT * FROM pets WHERE member_id = #{id}
     </select>
+
+    <!-- 여러 펫을 조회할 수 있도록 새로운 메서드 추가 1214 -->
+    <select id="findAllByMemberId" parameterType="long" resultType="com.team.ain.dto.Pet">
+        SELECT * FROM pets WHERE member_id = #{memberId}
+    </select>
     
 </mapper>

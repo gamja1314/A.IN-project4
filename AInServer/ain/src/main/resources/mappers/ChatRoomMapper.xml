@@ -3,7 +3,7 @@
 <mapper namespace="com.team.ain.mapper.ChatRoomMapper">
     
     <!-- 채팅방 생성 -->
-    <insert id="insertRoom" parameterType="com.team.ain.dto.ChatRoomDTO" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertRoom" parameterType="com.team.ain.dto.chat.ChatRoomDTO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO chat_room (
             room_name,
             room_type,
@@ -33,7 +33,7 @@
     </insert>
 
     <!-- 채팅방 목록 가져오기 + 읽지 않은 알림 수 -->
-    <select id="getUserRooms" resultType="com.team.ain.dto.ChatRoomDTO">
+    <select id="getUserRooms" resultType="com.team.ain.dto.chat.ChatRoomDTO">
         SELECT 
             r.id,
             r.room_name,
@@ -102,7 +102,7 @@
         )
     </select>
 
-    <select id="findRoomById" resultType="com.team.ain.dto.ChatRoomDTO">
+    <select id="findRoomById" resultType="com.team.ain.dto.chat.ChatRoomDTO">
         SELECT * FROM chat_room WHERE id = #{roomId} AND is_active = true
     </select>
 
@@ -114,12 +114,12 @@
     </update>
 
     <!-- 채팅방 나감 -->
-    <delete id="leaveChatRoom" parameterType="com.team.ain.dto.ChatMember">
+    <delete id="leaveChatRoom" parameterType="com.team.ain.dto.chat.ChatMember">
         DELETE FROM chat_room_member WHERE room_id = #{roomId} AND member_id = #{memberId}
     </delete>
 
     <!-- 채팅방 이름으로 검색 -->
-    <select id="findByRoomNameContainingIgnoreCaseAndIsActiveTrue" resultType="com.team.ain.dto.ChatRoomDTO">
+    <select id="findByRoomNameContainingIgnoreCaseAndIsActiveTrue" resultType="com.team.ain.dto.chat.ChatRoomDTO">
         SELECT 
             cr.id, 
             cr.room_name, 
@@ -139,7 +139,7 @@
     </select>
 
     <!-- 모든 활성화된 채팅방 조회 -->
-    <select id="findAllByIsActiveTrue" resultType="com.team.ain.dto.ChatRoomDTO">
+    <select id="findAllByIsActiveTrue" resultType="com.team.ain.dto.chat.ChatRoomDTO">
         SELECT 
             cr.id, 
             cr.room_name, 
@@ -171,4 +171,35 @@
         FROM chat_room
         WHERE is_active = true
     </select>
+
+    <!-- 채팅방 멤버 조회 -->
+    <select id="findByRoomId" resultType="com.team.ain.dto.chat.ChatMember">
+        SELECT 
+            room_id,
+            member_id,
+            joined_at,
+            last_read_at
+        FROM chat_room_member
+        WHERE room_id = #{roomId}
+    </select>
+    
+    <!-- 특정 채팅방의 특정 멤버 조회 -->
+    <select id="findByRoomIdAndMemberId" resultType="com.team.ain.dto.chat.ChatMember">
+        SELECT 
+            room_id,
+            member_id,
+            joined_at,
+            last_read_at
+        FROM chat_room_member
+        WHERE room_id = #{roomId}
+        AND member_id = #{memberId}
+    </select>
+    
+    <!-- 마지막 읽은 시간 업데이트 -->
+    <update id="save">
+        UPDATE chat_room_member 
+        SET last_read_at = #{lastReadAt}
+        WHERE room_id = #{roomId} 
+        AND member_id = #{memberId}
+    </update>
 </mapper>
