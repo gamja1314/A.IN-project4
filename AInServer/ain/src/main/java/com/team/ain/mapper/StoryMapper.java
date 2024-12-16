@@ -21,6 +21,9 @@ public interface StoryMapper {
     // 특정 회원의 24시간 이내 스토리 조회
     List<StoryDTO> findRecentStoriesByMemberId(@Param("memberId") Long memberId);
 
+    // 팔로우한 멤버들의 스토리 조회
+    List<StoryDTO> findFollowedMemberStories(@Param("memberId") Long memberId);
+
     // 만료된 스토리 상태 업데이트
     int updateExpiredStories();
 }

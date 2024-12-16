@@ -5,7 +5,7 @@ import { authService } from '../../services/authService';
 import { useAuth } from '../../hooks/useAuth'; 
 
 const CreateStory = ({ onPageChange }) => {
-  const { isAuthenticated } = useAuth(); // 인증 상태 확인을 위한 hook
+  const { isAuthenticated } = useAuth(); 
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -14,7 +14,6 @@ const CreateStory = ({ onPageChange }) => {
     e.preventDefault();
     if (!content.trim()) return;
     
-    // 인증 상태 확인
     if (!isAuthenticated) {
       setError('로그인이 필요합니다.');
       onPageChange('login');
@@ -37,19 +36,8 @@ const CreateStory = ({ onPageChange }) => {
       if (!response.ok) {
         throw new Error('스토리 작성에 실패했습니다.');
       }
-  
-      // 스토리 작성 완료 후 내 스토리 목록 조회
-      const myStoriesResponse = await fetch(`${API_BASE_URL}/api/stories/my`, {
-        headers: authService.getAuthHeader(),
-      });
-  
-      if (!myStoriesResponse.ok) {
-        throw new Error('스토리 조회에 실패했습니다.');
-      }
-  
-      const myStories = await myStoriesResponse.json();
-      onPageChange('myStories', { stories: myStories });
-  
+      
+      onPageChange('myStories');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -57,11 +45,10 @@ const CreateStory = ({ onPageChange }) => {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-white">
       {/* 헤더 */}
-      <div className="fixed top-0 left-0 right-0 bg-white border-b z-10">
+      <div className="fixed top-0 left-0 right-0 bg-white border-b z-[1000] max-w-md mx-auto">
         <div className="flex items-center justify-between px-4 py-3">
           <button 
             onClick={() => onPageChange('home')} 

@@ -27,6 +27,7 @@ public class StoryController {
     private final StoryService storyService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    // 스토리 작성
     @PostMapping
     public ResponseEntity<?> createStory(
             @RequestBody StoryRequest content, HttpServletRequest request) {
@@ -41,6 +42,7 @@ public class StoryController {
             
     }
 
+    // 활성화된 스토리 조회
     @GetMapping
     public ResponseEntity<?> getAllStories(
             @RequestHeader("Authorization") String authHeader) {
@@ -61,6 +63,7 @@ public class StoryController {
         }
     }
 
+    // 사용자 24시간 내 스토리 조회
     @GetMapping("/my")
     public ResponseEntity<?> getMyStories(
             @RequestHeader("Authorization") String authHeader) {
@@ -78,6 +81,7 @@ public class StoryController {
         }
     }
 
+    // 특정 사용자 스토리 조회
     @GetMapping("/user/{memberId}")
     public ResponseEntity<?> getMemberStories(
             @PathVariable Long memberId,
@@ -96,6 +100,24 @@ public class StoryController {
             return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("사용자의 스토리 목록을 가져오는데 실패했습니다.");
+        }
+    }
+
+    // 팔로우 사용자 스토리 조회
+    @GetMapping("/followed")
+    public ResponseEntity<?> getFollowedStories(
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.substring(7);
+            Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+            
+            List<StoryDTO> stories = storyService.getFollowedMemberStories(memberId);
+            return ResponseEntity.ok(stories);
+            
+        } catch (Exception e) {
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("팔로우한 사용자의 스토리를 가져오는데 실패했습니다.");
         }
     }
 }
