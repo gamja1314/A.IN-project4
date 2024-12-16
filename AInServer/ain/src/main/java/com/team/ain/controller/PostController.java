@@ -16,49 +16,58 @@ import org.springframework.web.bind.annotation.RestController;
 import com.team.ain.dto.post.Post;
 import com.team.ain.service.PostService;
 
-import lombok.RequiredArgsConstructor;
-
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/posts")
 public class PostController {
 
     private final PostService postService;
 
+    public PostController(PostService postService) {
+        this.postService = postService;
+    }
+
     // 게시물 생성
     @PostMapping
-    public ResponseEntity<Void> createPost(@RequestBody Post post) {
+    public ResponseEntity<String> createPost(@RequestBody Post post) {
         postService.createPost(post);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("게시물이 성공적으로 생성되었습니다.");
     }
 
     // 게시물 단일 조회
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+    public ResponseEntity<Post> getPostById(@PathVariable("id") int id) {
         Post post = postService.getPostById(id);
         return ResponseEntity.ok(post);
     }
 
+    // 게시물 전체 조회
+    @GetMapping
+    public ResponseEntity<List<Post>> getAllPosts() {
+        List<Post> posts = postService.getAllPosts();
+        return ResponseEntity.ok(posts);
+    }
+
+    // 페이징된 게시물 조회
+    @GetMapping("/page")
+    public ResponseEntity<List<Post>> getPostsByPage(
+        @RequestParam(name = "page", defaultValue = "1") int page,
+        @RequestParam(name = "size", defaultValue = "10") int size) {
+        List<Post> posts = postService.getPostsByPage(page, size);
+        return ResponseEntity.ok(posts);
+    }
+
     // 게시물 수정
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updatePost(@PathVariable Long id, @RequestBody Post post) {
-        post.setId(id);
+    public ResponseEntity<String> updatePost(@PathVariable("id") Long id, @RequestBody Post post) {
+        post.setId(id); // 수정할 게시물 ID 설정
         postService.updatePost(post);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("게시물이 성공적으로 수정되었습니다.");
     }
 
     // 게시물 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // 게시물 목록 조회 (페이지네이션)
-    @GetMapping
-    public ResponseEntity<List<Post>> getPosts(@RequestParam int page, @RequestParam int size) {
-        List<Post> posts = postService.getPosts(page, size);
-        return ResponseEntity.ok(posts);
-        
+    public ResponseEntity<String> deletePost(@PathVariable("id") int id) {
+        postService.deletePostById(id);
+        return ResponseEntity.ok("게시물이 성공적으로 삭제되었습니다.");
     }
 }

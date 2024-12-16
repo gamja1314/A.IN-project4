@@ -1,19 +1,19 @@
 package com.team.ain.service;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import com.team.ain.dto.post.Post;
 import com.team.ain.mapper.PostMapper;
+import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class PostService {
 
     private final PostMapper postMapper;
+
+    public PostService(PostMapper postMapper) {
+        this.postMapper = postMapper;
+    }
 
     // 게시물 생성
     public void createPost(Post post) {
@@ -21,8 +21,13 @@ public class PostService {
     }
 
     // 게시물 단일 조회
-    public Post getPostById(Long id) {
-        return postMapper.findPostById(id);
+    public Post getPostById(int id) {
+        return postMapper.getPostById(id);
+    }
+
+    // 게시물 전체 조회
+    public List<Post> getAllPosts() {
+        return postMapper.getAllPosts();
     }
 
     // 게시물 수정
@@ -31,13 +36,13 @@ public class PostService {
     }
 
     // 게시물 삭제
-    public void deletePost(Long id) {
-        postMapper.deletePost(id);
+    public void deletePostById(int id) {
+        postMapper.deletePostById(id);
     }
 
-    // 게시물 목록 조회 (페이지네이션)
-    public List<Post> getPosts(int page, int size) {
-        int offset = (page - 1) * size; // 페이지네이션 계산
-        return postMapper.findPosts(offset, size);
+    // 페이지 계산
+    public List<Post> getPostsByPage(int page, int size) {
+        int offset = (page - 1) * size; // 페이지 계산
+        return postMapper.getPostsByPage(size, offset);
     }
 }
