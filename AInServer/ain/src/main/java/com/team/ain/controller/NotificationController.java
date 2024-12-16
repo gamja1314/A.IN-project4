@@ -55,6 +55,10 @@ public class NotificationController {
     // 읽지 않은 알림 목록 조회
     @MessageMapping("/notifications/unread")
     public void getUnreadNotifications(Principal principal) {
+        if (principal == null) {
+            log.error("User principal is null");
+            return;
+        }
         Long userId = Long.parseLong(principal.getName());
         List<NotificationDTO> unreadNotifications = 
             notificationService.getUnreadNotifications(userId);
