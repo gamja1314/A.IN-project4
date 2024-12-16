@@ -13,33 +13,24 @@ public class AwsConfig {
 
     @Bean
     public AmazonS3 amazonS3() {
-        // .env 파일 경로를 명시적으로 설정
-            
-        Dotenv dotenv = Dotenv.configure()
-            .directory("C:/Users/rlatj/gitHub/A-IN/AInServer/ain") // 절대 경로 지정
-            .load();
+        // Dotenv 사용하여 .env 파일 로드
+        Dotenv dotenv = Dotenv.configure().load();
 
-        // 환경 변수 로드
+        // .env 파일에서 환경 변수 읽기
         String accessKey = dotenv.get("AWS_ACCESS_KEY");
-        String secretKey = dotenv.get("AWS_SECRET_KEY");
+        String secretKey = dotenv.get("AWS_SECRET_ACCESS_KEY");
         String region = dotenv.get("AWS_REGION");
 
-        // 디버깅용 출력
-        System.out.println("AWS_ACCESS_KEY: " + accessKey);
-        System.out.println("AWS_SECRET_KEY: " + secretKey);
-        System.out.println("AWS_REGION: " + region);
-
-        if (accessKey == null || secretKey == null) {
-            throw new IllegalArgumentException("AWS Access Key or Secret Key cannot be null.");
+        if (accessKey == null || secretKey == null || region == null) {
+            throw new IllegalArgumentException("AWS credentials cannot be null.");
         }
 
-        // AWS 자격 증명 설정
+        // AWS S3 클라이언트 생성
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
 
         return AmazonS3ClientBuilder.standard()
-            .withRegion(region)
-            .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-            .build();
+                .withRegion(region)
+                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                .build();
     }
-    
 }

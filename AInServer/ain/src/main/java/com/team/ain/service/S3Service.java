@@ -55,8 +55,7 @@ package com.team.ain.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -65,20 +64,21 @@ import java.io.InputStream;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class S3Service {
 
     private final AmazonS3 amazonS3;
+    private final String bucketName;
 
-    @Value("${aws.s3.bucket-name}")
-    private String bucketName;
+    public S3Service(AmazonS3 amazonS3) {
+        Dotenv dotenv = Dotenv.configure().load();
+        this.amazonS3 = amazonS3;
+        this.bucketName = dotenv.get("AWS_BUCKET_NAME");
 
-    /**
-     * Uploads a file to S3 and returns the file URL.
-     *
-     * @param file MultipartFile to upload
-     * @return File URL in S3
-     */
+        if (this.bucketName == null) {
+            throw new IllegalArgumentException("AWS_BUCKET_NAME cannot be null.");
+        }
+    }
+
     public String uploadFile(MultipartFile file) {
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         try (InputStream inputStream = file.getInputStream()) {

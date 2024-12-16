@@ -1,35 +1,44 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.team.ain.mapper.PostMapper">
 
     <!-- 게시물 생성 -->
-    <insert id="insertPost" parameterType="com.team.ain.dto.post.Post">
-        INSERT INTO posts (title, content, image_url, video_url, username, created_at, updated_at)
-        VALUES (#{title}, #{content}, #{imageUrl}, #{videoUrl}, #{username}, NOW(), NOW());
+    <insert id="insertPost">
+        INSERT INTO posts (title, content, image_url, video_url, username, created_at)
+        VALUES (#{title}, #{content}, #{imageUrl}, #{videoUrl}, #{username}, NOW())
     </insert>
 
-    <!-- ID로 게시물 조회 -->
-    <select id="selectPostById" parameterType="long" resultType="com.team.ain.dto.post.Post">
-        SELECT * FROM posts WHERE id = #{id};
-    </select>
-
-    <!-- 모든 게시물 조회 -->
-    <select id="selectAllPosts" resultType="com.team.ain.dto.post.Post">
-        SELECT * FROM posts ORDER BY created_at DESC;
+    <!-- 게시물 단일 조회 -->
+    <select id="findPostById" resultType="com.team.ain.dto.post.Post">
+        SELECT *
+        FROM posts
+        WHERE id = #{id}
     </select>
 
     <!-- 게시물 수정 -->
-    <update id="updatePost" parameterType="com.team.ain.dto.post.Post">
+    <update id="updatePost">
         UPDATE posts
         SET title = #{title},
             content = #{content},
+            image_url = #{imageUrl},
+            video_url = #{videoUrl},
             updated_at = NOW()
-        WHERE id = #{id};
+        WHERE id = #{id}
     </update>
 
     <!-- 게시물 삭제 -->
-    <delete id="deletePost" parameterType="long">
-        DELETE FROM posts WHERE id = #{id};
+    <delete id="deletePost">
+        DELETE FROM posts
+        WHERE id = #{id}
     </delete>
+
+    <!-- 게시물 목록 조회 (페이지네이션) -->
+    <select id="findPosts" resultType="com.team.ain.dto.post.Post">
+        SELECT *
+        FROM posts
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
 
 </mapper>

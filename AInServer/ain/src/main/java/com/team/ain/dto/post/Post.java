@@ -3,12 +3,14 @@ package com.team.ain.dto.post;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Post {
     private Long id;          // 게시물 ID
     private String title;     // 게시물 제목

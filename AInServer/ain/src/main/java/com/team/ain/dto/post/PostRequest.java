@@ -8,6 +8,6 @@ import lombok.Data;
 public class PostRequest {
     private String title;
     private String content;
-    private MultipartFile image;
-    private MultipartFile video;
+    private MultipartFile imageUrl;
+    private MultipartFile videoUrl;
 }

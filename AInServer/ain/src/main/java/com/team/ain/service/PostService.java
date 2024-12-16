@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.team.ain.dto.post.Post;
-import com.team.ain.dto.post.PostRequest;
 import com.team.ain.mapper.PostMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -15,42 +14,30 @@ import lombok.RequiredArgsConstructor;
 public class PostService {
 
     private final PostMapper postMapper;
-    private final S3Service s3Service;
 
-    public Post createPost(PostRequest request, String username) {
-        String imageUrl = request.getImage() != null ? s3Service.uploadFile(request.getImage()) : null;
-        String videoUrl = request.getVideo() != null ? s3Service.uploadFile(request.getVideo()) : null;
-
-        Post post = new Post(null, request.getTitle(), request.getContent(), imageUrl, videoUrl, username, null, null);
+    // 게시물 생성
+    public void createPost(Post post) {
         postMapper.insertPost(post);
-
-        return post;
     }
 
-    public List<Post> getPosts(int page, int size) {
-        int offset = (page - 1) * size;
-        return postMapper.selectAllPosts(offset, size);
+    // 게시물 단일 조회
+    public Post getPostById(Long id) {
+        return postMapper.findPostById(id);
     }
 
-    public Post updatePost(Long id, PostRequest request, String username) {
-        Post existingPost = postMapper.selectPostById(id);
-        if (existingPost == null || !existingPost.getUsername().equals(username)) {
-            throw new RuntimeException("Post not found or unauthorized");
-        }
-
-        existingPost.setTitle(request.getTitle());
-        existingPost.setContent(request.getContent());
-        postMapper.updatePost(existingPost);
-
-        return existingPost;
+    // 게시물 수정
+    public void updatePost(Post post) {
+        postMapper.updatePost(post);
     }
 
-    public void deletePost(Long id, String username) {
-        Post existingPost = postMapper.selectPostById(id);
-        if (existingPost == null || !existingPost.getUsername().equals(username)) {
-            throw new RuntimeException("Post not found or unauthorized");
-        }
-
+    // 게시물 삭제
+    public void deletePost(Long id) {
         postMapper.deletePost(id);
+    }
+
+    // 게시물 목록 조회 (페이지네이션)
+    public List<Post> getPosts(int page, int size) {
+        int offset = (page - 1) * size; // 페이지네이션 계산
+        return postMapper.findPosts(offset, size);
     }
 }
