@@ -22,10 +22,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-      "start": "PORT=9999 react-scripts start",
+    "start": "react-scripts start",
     "prestart": "node scripts/generate-html.js",
     "prebuild": "node scripts/generate-html.js",
-    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

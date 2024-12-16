@@ -1,13 +1,8 @@
-import axiosInstance from "../utils/axiosInstance";
+import apiClient from './apiClient';
 
 export const fetchPosts = async (page, size) => {
-  try {
-    const response = await axiosInstance.get("/api/post/page", {
-      params: { page, size }, // 페이지네이션 파라미터
-    });
-    return response.data;
-  } catch (error) {
-    console.error("게시물 로딩 오류:", error);
-    throw error;
-  }
+  const response = await apiClient.get('/api/posts', {
+    params: { page, size },
+  });
+  return response.data;
 };

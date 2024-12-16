@@ -68,11 +68,10 @@ dependencies {
 	// 페이징 임포트
 	implementation 'org.springframework.data:spring-data-commons'
 
-	// Dotenv
-	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+	// AWS관련
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.534'
+	implementation 'io.github.cdimascio:dotenv-java:3.0.0' // Dotenv 사용
 
-	// AWS
-	implementation 'software.amazon.awssdk:s3:2.20.43'
 }
 
 tasks.named('test') {

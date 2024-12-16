@@ -3,7 +3,6 @@ package com.team.ain.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.team.ain.dto.post.Post;
 import com.team.ain.mapper.PostMapper;
@@ -21,25 +20,24 @@ public class PostService {
         postMapper.insertPost(post);
     }
 
-    // 특정 게시물 조회
+    // 게시물 단일 조회
     public Post getPostById(Long id) {
-        return postMapper.selectPostById(id);
-    }
-
-    // 활성화된 게시물 조회
-    public List<Post> getActivePosts() {
-        return postMapper.selectActivePosts();
+        return postMapper.findPostById(id);
     }
 
     // 게시물 수정
-    @Transactional
-    public void updatePost(Post updatedPost) {
-        postMapper.updatePost(updatedPost);
+    public void updatePost(Post post) {
+        postMapper.updatePost(post);
     }
 
-    // 게시물 상태 변경 (삭제 또는 비활성화)
-    @Transactional
-    public void updatePostStatus(Long id, String status) {
-        postMapper.updatePostStatus(id, status);
+    // 게시물 삭제
+    public void deletePost(Long id) {
+        postMapper.deletePost(id);
+    }
+
+    // 게시물 목록 조회 (페이지네이션)
+    public List<Post> getPosts(int page, int size) {
+        int offset = (page - 1) * size; // 페이지네이션 계산
+        return postMapper.findPosts(offset, size);
     }
 }

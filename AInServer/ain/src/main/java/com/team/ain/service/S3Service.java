@@ -1,91 +1,95 @@
+// package com.team.ain.service;
+
+// import java.io.IOException;
+// import java.io.InputStream;
+// import java.util.UUID;
+
+// import org.springframework.stereotype.Service;
+// import org.springframework.web.multipart.MultipartFile;
+
+// import com.amazonaws.auth.AWSStaticCredentialsProvider;
+// import com.amazonaws.auth.BasicAWSCredentials;
+// import com.amazonaws.regions.Regions;
+// import com.amazonaws.services.s3.AmazonS3;
+// import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+// import com.amazonaws.services.s3.model.ObjectMetadata;
+
+// import io.github.cdimascio.dotenv.Dotenv;
+// import lombok.RequiredArgsConstructor;
+
+// @Service
+// @RequiredArgsConstructor
+// public class S3Service {
+
+//     private final AmazonS3 amazonS3;
+
+//     private final String bucketName;
+
+//     public S3Service() {
+//         Dotenv dotenv = Dotenv.load();
+//         String accessKey = dotenv.get("AWS_ACCESS_KEY");
+//         String secretKey = dotenv.get("AWS_SECRET_KEY");
+//         String region = dotenv.get("AWS_REGION");
+//         this.bucketName = dotenv.get("AWS_BUCKET_NAME");
+
+//         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+//         this.amazonS3 = AmazonS3ClientBuilder.standard()
+//                 .withRegion(Regions.fromName(region))
+//                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+//                 .build();
+//     }
+
+//     public String uploadFile(MultipartFile file) {
+//         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+//         try (InputStream inputStream = file.getInputStream()) {
+//             ObjectMetadata metadata = new ObjectMetadata();
+//             metadata.setContentLength(file.getSize());
+//             amazonS3.putObject(bucketName, fileName, inputStream, metadata);
+//         } catch (IOException e) {
+//             throw new RuntimeException("File upload failed", e);
+//         }
+//         return amazonS3.getUrl(bucketName, fileName).toString();
+//     }
+// }
 package com.team.ain.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
-
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.github.cdimascio.dotenv.Dotenv;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
-import software.amazon.awssdk.regions.Region;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 
-@Slf4j
+import io.github.cdimascio.dotenv.Dotenv;
+
 @Service
-@RequiredArgsConstructor
 public class S3Service {
 
-    private final Dotenv dotenv = Dotenv.load();
+    private final AmazonS3 amazonS3;
+    private final String bucketName;
 
-    private final S3Client s3Client = S3Client.builder()
-            .region(Region.of(dotenv.get("AWS_REGION")))
-            .credentialsProvider(
-                    StaticCredentialsProvider.create(
-                            AwsBasicCredentials.create(
-                                    dotenv.get("AWS_ACCESS_KEY_ID"),
-                                    dotenv.get("AWS_SECRET_ACCESS_KEY")
-                            )
-                    )
-            )
-            .build();
+    public S3Service(AmazonS3 amazonS3) {
+        Dotenv dotenv = Dotenv.configure().load();
+        this.amazonS3 = amazonS3;
+        this.bucketName = dotenv.get("AWS_BUCKET_NAME");
 
-    private final String bucketName = dotenv.get("AWS_BUCKET_NAME");
-
-    public String uploadFile(MultipartFile file) {
-        String filename = generateUniqueFileName(file.getOriginalFilename());
-
-        try {
-            s3Client.putObject(
-                    PutObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(filename)
-                            .build(),
-                    software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes())
-            );
-            return "https://" + bucketName + ".s3.amazonaws.com/" + filename;
-        } catch (S3Exception | IOException e) {
-            log.error("파일 업로드 실패", e);
-            throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.");
+        if (this.bucketName == null) {
+            throw new IllegalArgumentException("AWS_BUCKET_NAME cannot be null.");
         }
     }
 
-    private String generateUniqueFileName(String originalFilename) {
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        return UUID.randomUUID().toString() + extension;
+    public String uploadFile(MultipartFile file) {
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        try (InputStream inputStream = file.getInputStream()) {
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(file.getSize());
+            amazonS3.putObject(bucketName, fileName, inputStream, metadata);
+        } catch (IOException e) {
+            throw new RuntimeException("File upload failed", e);
+        }
+        return amazonS3.getUrl(bucketName, fileName).toString();
     }
-    // private final S3Client s3Client; // S3Config에서 Bean으로 생성된 S3Client를 주입받음
-    // private final Dotenv dotenv = Dotenv.load();
-
-    // private final String bucketName = dotenv.get("AWS_BUCKET_NAME");
-
-    // public String uploadFile(MultipartFile file) {
-    //     String filename = generateUniqueFileName(file.getOriginalFilename());
-
-    //     try {
-    //         s3Client.putObject(
-    //                 PutObjectRequest.builder()
-    //                         .bucket(bucketName)
-    //                         .key(filename)
-    //                         .build(),
-    //                 software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes())
-    //         );
-    //         // return "https://" + bucketName + ".s3." + Region.AP_NORTHEAST_2.id() + ".amazonaws.com/" + filename;
-    //         return "https://" + bucketName + ".s3." + Region.AP_NORTHEAST_2.toString() + ".amazonaws.com/" + filename;
-    //     } catch (S3Exception | IOException e) {
-    //         log.error("파일 업로드 실패", e);
-    //         throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.");
-    //     }
-    // }
-
-    // private String generateUniqueFileName(String originalFilename) {
-    //     String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-    //     return UUID.randomUUID().toString() + extension;
-    // }
 }
