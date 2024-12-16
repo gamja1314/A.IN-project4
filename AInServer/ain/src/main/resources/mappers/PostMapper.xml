@@ -4,16 +4,24 @@
 <mapper namespace="com.team.ain.mapper.PostMapper">
 
     <!-- 게시물 생성 -->
-    <insert id="createPost" parameterType="com.team.ain.dto.post.Post">
+  
+<insert id="createPost" parameterType="com.team.ain.dto.post.Post">
         INSERT INTO posts (content, image_url, created_at, member_id)
         VALUES (#{content}, #{imageUrl}, NOW(), #{memberId});
+
     </insert>
 
     <!-- 게시물 수정 -->
     <update id="updatePost" parameterType="com.team.ain.dto.post.Post">
         UPDATE posts
-        SET content = #{content}, image_url = #{imageUrl}
-        WHERE id = #{id} AND member_id = #{memberId};
+
+        SET 
+            content = #{content},
+            image_url = #{imageUrl},
+            video_url = #{videoUrl},
+            updated_at = NOW()
+        WHERE id = #{id}
+
     </update>
 
     <!-- 게시물 삭제 -->
