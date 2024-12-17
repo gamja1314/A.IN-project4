@@ -2,7 +2,6 @@ package com.team.ain.dto.post;
 
 import java.time.LocalDateTime;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
