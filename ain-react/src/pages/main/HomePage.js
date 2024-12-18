@@ -121,11 +121,15 @@ const HomePage = ({ onPageChange }) => {
 
       if (!response.ok) throw new Error("게시글 등록 실패");
 
-      const newPost = await response.json();
-      setPosts((prevPosts) => [newPost, ...prevPosts]); // 새 게시글 추가
+       // 서버에서 새로운 게시글 목록을 다시 가져오기
+      setPage(1);
+      setPosts([]);
+      await fetchPosts();
+      
       setContent("");
       setMediaUrl("");
-      setShowPostForm(false); // 팝업 닫기
+      setShowPostForm(false);
+      
     } catch (error) {
       console.error("게시글 등록 중 오류 발생:", error);
     }
