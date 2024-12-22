@@ -1,25 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ChatService } from "../../services/chatService";
 import { useAuth } from "../../hooks/useAuth";
 
-export const BottomNav = ({ currentPage, onPageChange }) => {
-  const { isAuthenticated } = useAuth(); // 인증 상태 확인
+export const BottomNav = ({ currentPage, onPageChange, refreshTrigger = 0 }) => {
+  const { isAuthenticated } = useAuth();
   const [messageCount, setMessageCount] = useState(0);
 
-  useEffect(() => {
-    const fetchMessageCount = async () => {
-      if (isAuthenticated) {
-        try {
-          const count = await ChatService.getMessageCounts();
-          setMessageCount(count);
-        } catch (error) {
-          console.error('메시지 카운트 조회 실패:', error);
-        }
+  const fetchMessageCount = useCallback(async () => {
+    if (isAuthenticated) {
+      try {
+        const count = await ChatService.getMessageCounts();
+        setMessageCount(count);
+      } catch (error) {
+        console.error('메시지 카운트 조회 실패:', error);
       }
-    };
-
-    fetchMessageCount();
+    }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    fetchMessageCount();
+  }, [fetchMessageCount, refreshTrigger]);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t flex items-center justify-around z-[1000] max-w-md mx-auto">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Users } from 'lucide-react';
+import { User, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { memberService } from '../../services/MemberService';
 
 // 커스텀 버튼 컴포넌트
@@ -18,6 +18,94 @@ const CustomButton = ({ onClick, disabled, variant, className, children }) => {
         >
             {children}
         </button>
+    );
+};
+
+// 반려동물 정보 카드 컴포넌트
+const PetCard = ({ pet }) => (
+    <div className="space-y-4">
+        <div className="flex items-start gap-6">
+            <div className="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                {pet.photoUrl ? (
+                    <img 
+                        src={pet.photoUrl} 
+                        alt={pet.name} 
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <div className="text-gray-400 text-center">
+                        <span className="block">No Photo</span>
+                    </div>
+                )}
+            </div>
+            <div className="flex-1 space-y-2">
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <p className="text-gray-500">이름</p>
+                        <p className="font-medium">{pet.name}</p>
+                    </div>
+                    <div>
+                        <p className="text-gray-500">나이</p>
+                        <p className="font-medium">{pet.age}세</p>
+                    </div>
+                    <div>
+                        <p className="text-gray-500">종류</p>
+                        <p className="font-medium">{pet.species}</p>
+                    </div>
+                    <div>
+                        <p className="text-gray-500">품종</p>
+                        <p className="font-medium">{pet.breed}</p>
+                    </div>
+                    <div>
+                        <p className="text-gray-500">성별</p>
+                        <p className="font-medium">{pet.gender}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+// 반려동물 캐러셀 컴포넌트
+const PetCarousel = ({ pets }) => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const nextPet = () => {
+        setCurrentIndex((prev) => (prev + 1) % pets.length);
+    };
+
+    const prevPet = () => {
+        setCurrentIndex((prev) => (prev - 1 + pets.length) % pets.length);
+    };
+
+    return (
+        <div className="relative">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold">반려동물 정보</h3>
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">
+                        {currentIndex + 1} / {pets.length}
+                    </span>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={prevPet}
+                            className="p-1 rounded-full hover:bg-gray-100"
+                            disabled={pets.length <= 1}
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={nextPet}
+                            className="p-1 rounded-full hover:bg-gray-100"
+                            disabled={pets.length <= 1}
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <PetCard pet={pets[currentIndex]} />
+        </div>
     );
 };
 
@@ -61,7 +149,6 @@ const SomeoneInfo = ({ pageData }) => {
                 setIsFollowing(true);
             }
             
-            // 팔로우 수 업데이트
             const updatedData = await memberService.getSomeoneInfo(pageData.memberId);
             setData(updatedData);
         } catch (err) {
@@ -77,7 +164,7 @@ const SomeoneInfo = ({ pageData }) => {
     return (
         <div className="max-w-2xl mx-auto p-4">
             <div className="bg-white rounded-lg shadow-lg">
-                {/* 프로필 섹션 - 기존과 동일 */}
+                {/* 프로필 섹션 */}
                 <div className="p-6 flex flex-row items-center gap-4">
                     <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                         {data.member.profilePictureUrl ? (
@@ -116,51 +203,8 @@ const SomeoneInfo = ({ pageData }) => {
                 
                 {/* 반려동물 정보 섹션 */}
                 <div className="p-6 border-t border-gray-200">
-                    {data.pet ? (
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-semibold">반려동물 정보</h3>
-                            </div>
-                            <div className="flex items-start gap-6">
-                                <div className="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                                    {data.pet.photoUrl ? (
-                                        <img 
-                                            src={data.pet.photoUrl} 
-                                            alt={data.pet.name} 
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="text-gray-400 text-center">
-                                            <span className="block">No Photo</span>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="flex-1 space-y-2">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <p className="text-gray-500">이름</p>
-                                            <p className="font-medium">{data.pet.name}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-500">나이</p>
-                                            <p className="font-medium">{data.pet.age}세</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-500">종류</p>
-                                            <p className="font-medium">{data.pet.species}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-500">품종</p>
-                                            <p className="font-medium">{data.pet.breed}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-500">성별</p>
-                                            <p className="font-medium">{data.pet.gender}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    {Array.isArray(data.pet) && data.pet.length > 0 ? (
+                        <PetCarousel pets={data.pet} />
                     ) : (
                         <div className="mt-4 text-gray-500 text-center">
                             아직 등록된 반려동물이 없습니다.
