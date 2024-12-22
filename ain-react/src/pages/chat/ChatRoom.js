@@ -3,7 +3,7 @@ import { Send, Image, Paperclip } from 'lucide-react';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { ChatService } from '../../services/chatService';
 
-const ChatRoom = ({ roomId, currentUser, onPageChange }) => {
+const ChatRoom = ({ roomId, currentUser, onPageChange, onMessageSent, onExit }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isConnected, setIsConnected] = useState(false);
@@ -40,10 +40,12 @@ const ChatRoom = ({ roomId, currentUser, onPageChange }) => {
     try {
       const data = await ChatService.loadPreviousMessages(roomId);
       setMessages(data);
+      // 이전 메시지를 성공적으로 불러온 후 메시지 카운트 새로고침
+      onMessageSent?.();
     } catch (error) {
       setError('Failed to load messages');
     }
-  }, [roomId]);
+  }, [roomId, onMessageSent]);
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -109,7 +111,7 @@ const ChatRoom = ({ roomId, currentUser, onPageChange }) => {
       () => {
         setIsConnected(true);
         setError(null);
-        loadPreviousMessages();
+        loadPreviousMessages();  // 여기서 loadPreviousMessages가 호출되고, 그 안에서 메시지 카운트가 새로고침됨
       },
       setError
     );

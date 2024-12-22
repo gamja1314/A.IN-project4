@@ -28,7 +28,7 @@ public class PetService {
         return petMapper.selectPetById(id);
     }
 
-    public Pet getPetByMeberId(Long memberId) {
+    public List<Pet> getPetByMeberId(Long memberId) {
         return petMapper.selectPetByMemberId(memberId);
     }
 

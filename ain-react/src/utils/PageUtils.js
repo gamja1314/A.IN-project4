@@ -2,7 +2,6 @@ import { HomePage, PlacePage, CommunityPage, SearchPage, MyPage, LoginPage, Some
 import { ProtectedRoute } from './ProtectedRoute';
 import ChatRoom from '../pages/chat/ChatRoom';
 
-// 페이지별 인증 필요 여부 설정
 const PROTECTED_PAGES = {
   'place': true,
   'community': true,
@@ -16,7 +15,7 @@ const PROTECTED_PAGES = {
   'MyStories': true
 };
 
-export const getPageTitle = (currentPage, pageData = {}) => {  // pageData 매개변수 추가
+export const getPageTitle = (currentPage, pageData = {}) => {
   switch (currentPage) {
     case 'chatRoom': return `${pageData?.roomName}`;
     case 'place': return '장소';
@@ -31,17 +30,28 @@ export const getPageTitle = (currentPage, pageData = {}) => {  // pageData 매�
   }
 };
 
-export const renderPage = (currentPage, pageData = {}, onPageChange) => {  // pageData와 onPageChange 매개변수 추가
+export const renderPage = (currentPage, pageData = {}, onPageChange, refreshMessageCount) => {
   const getPageComponent = () => {
     switch (currentPage) {
-      case 'chatRoom': return <ChatRoom 
-        roomId={pageData?.roomId} 
-        currentUser={pageData?.currentUser}
-        onPageChange={onPageChange}
-      />;
+      case 'chatRoom': 
+        return <ChatRoom 
+          roomId={pageData?.roomId} 
+          currentUser={pageData?.currentUser}
+          onPageChange={onPageChange}
+          onExit={refreshMessageCount}
+          onMessageSent={refreshMessageCount}
+        />;
+      case 'community': 
+        return <CommunityPage 
+          onPageChange={(page, data) => {
+            if (page !== 'chatRoom') {
+              refreshMessageCount();
+            }
+            onPageChange(page, data);
+          }} 
+        />;
       case 'login': return <LoginPage />;
       case 'place': return <PlacePage />;
-      case 'community': return <CommunityPage onPageChange={onPageChange} />;
       case 'home': return <HomePage onPageChange={onPageChange} />;
       case 'search': return <SearchPage />;
       case 'mypage': return <MyPage />;
