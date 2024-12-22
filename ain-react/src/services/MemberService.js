@@ -3,6 +3,27 @@ import { API_BASE_URL } from "../config/apiConfig";
 import { authService } from "./authService";
 
 class MemberServiceClass {
+
+    // 내 정보 조회 추가
+    async getMemberInfo() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/member/my`, {
+                method: 'GET',
+                headers: {
+                    ...authService.getAuthHeader(),
+                    'Content-Type': 'application/json',
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch member info');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching member info:', error);
+            throw error;
+        }
+    }
+
     // 특정 사용자의 정보 조회
     async getSomeoneInfo(memberId) {
         try {

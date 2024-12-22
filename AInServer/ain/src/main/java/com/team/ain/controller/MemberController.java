@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.config.jwt.JwtTokenProvider;
+import com.team.ain.dto.auth.Member;
 import com.team.ain.dto.auth.MemberJoin;
 import com.team.ain.dto.auth.MemberUpdateDTO;
 import com.team.ain.service.FollowerService;
@@ -49,9 +50,12 @@ public class MemberController {
     @GetMapping("/my")
     public Map<String, Object> getMemberInfo(@AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
+        Member member = memberService.findByEmail(email);
+        
         Map<String, Object> response = new HashMap<>();
-        response.put("member", memberService.findByEmail(email));
+        response.put("member", member);
         response.put("pet", petService.findByEmail(email));
+        response.put("follows", followerService.checkFollwers(member.getId()));
         return response;
     }
 

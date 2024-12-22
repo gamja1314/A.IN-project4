@@ -10,7 +10,12 @@ const MyPage = () => {
   const { logout } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [memberInfo, setMemberInfo] = useState(null);
+  const [memberInfo, setMemberInfo] = useState({
+    member: null,
+    pets: [],
+    follows: { follower: 0, following: 0 }  // follows 추가
+  });
+  
   const [activeTab, setActiveTab] = useState("pets");
 
   // 1212: 모드 상태 추가 (등록/수정 모드 구분)
@@ -38,7 +43,8 @@ const MyPage = () => {
         if (data.member) {
           setMemberInfo({
             member: data.member,
-            pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []), // 배열 형태로 처리
+            pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []),
+            follows: data.follows || { follower: 0, following: 0 }  // follows 데이터 저장
           });
         } else {
           setError("회원 정보가 없습니다.");
@@ -68,8 +74,8 @@ const MyPage = () => {
 
   const stats = [
     { label: "반려동물", value: memberInfo?.pets?.[0]?.length || 0 },
-    { label: "팔로워", value: 0 },
-    { label: "팔로잉", value: 0 },
+    { label: "팔로워", value: memberInfo?.follows?.follower || 0 },
+    { label: "팔로잉", value: memberInfo?.follows?.following || 0 }
   ];
   
   
