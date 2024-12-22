@@ -1,24 +1,59 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { API_BASE_URL } from "../../config/apiConfig";
 import { authService } from "../../services/authService";
 import StoryProfile from '../story/StoryProfile';
 import StoryPost from "../story/StoryPost";
+import PostForm from "../../components/posts/PostForm"
 
 const HomePage = ({ onPageChange }) => {
-  const [posts, setPosts] = useState([]); // 게시글 목록
-  const [page, setPage] = useState(1); // 현재 페이지
-  const [hasMore, setHasMore] = useState(true); // 추가 데이터 여부
-  const [stories, setStories] = useState([]); // 스토리 목록
-  const [memberInfo, setMemberInfo] = useState(null); // 사용자 정보
-  const [loading, setLoading] = useState(false); // 게시글 로딩 상태
-  const [showPostForm, setShowPostForm] = useState(false); // 팝업 상태
-  const [content, setContent] = useState(""); // 게시글 내용
-  const [mediaUrl, setMediaUrl] = useState(""); // 미디어 URL
+  const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [stories, setStories] = useState([]);
+  const [memberInfo, setMemberInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showPostForm, setShowPostForm] = useState(false);
 
-  const limit = 10;
+  const fetchPosts = useCallback(async () => {
+    if (loading) return;
 
-  // 회원 정보 가져오기
+    try {
+      setLoading(true);
+      const size = 10;
+      const response = await fetch(`${API_BASE_URL}/api/posts/page?page=${page}&size=${size}`, {
+        method: "GET",
+        headers: {
+          ...authService.getAuthHeader(),
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("게시물 데이터를 가져오는데 실패했습니다.");
+
+      const newPosts = await response.json();
+      const uniquePosts = [...new Set([...posts, ...newPosts].map(JSON.stringify))].map(JSON.parse);
+
+      if (newPosts.length < size) {
+        setHasMore(false);
+      }
+
+      setPosts(uniquePosts);
+      setPage((prevPage) => prevPage + 1);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, page]);
+
+  // 게시글 등록 후 처리
+  const handlePostSubmitted = async () => {
+    setPage(1);
+    setPosts([]);
+    await fetchPosts();
+  };
+
   useEffect(() => {
     const fetchMemberInfo = async () => {
       try {
@@ -36,7 +71,6 @@ const HomePage = ({ onPageChange }) => {
     fetchMemberInfo();
   }, []);
 
-  // 스토리 데이터 가져오기
   useEffect(() => {
     const fetchStories = async () => {
       if (!authService.isAuthenticated()) {
@@ -59,91 +93,12 @@ const HomePage = ({ onPageChange }) => {
     fetchStories();
   }, []);
 
-  // 게시글 가져오기
-  const fetchPosts = async () => {
-    if (loading) return;
-
-    try {
-      setLoading(true);
-      const size = 10;
-      const response = await fetch(`${API_BASE_URL}/api/posts/page?page=${page}&size=${size}`, {
-        method: "GET",
-        headers: {
-          ...authService.getAuthHeader(),
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) throw new Error("게시물 데이터를 가져오는데 실패했습니다.");
-
-      const newPosts = await response.json();
-
-      // 중복 제거를 위해 Set 사용
-      const uniquePosts = [...new Set([...posts, ...newPosts].map(JSON.stringify))].map(JSON.parse);
-
-      // 새 게시글이 없거나 마지막 페이지인 경우
-      if (newPosts.length < size) {
-        setHasMore(false);
-      }
-
-      setPosts(uniquePosts);
-      setPage((prevPage) => prevPage + 1);
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 게시글 등록
-  const handlePostSubmit = async (e) => {
-    e.preventDefault();
-
-    if (content.length > 255 || mediaUrl.length > 255) {
-      alert("내용과 URL은 255자를 초과할 수 없습니다.");
-      return;
-    }
-    
-    const postData = {
-      content,
-      mediaUrl,
-      mediaType: mediaUrl.endsWith(".mp4") ? "VIDEO" : "IMAGE",
-    };
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/posts`, {
-        method: "POST",
-        headers: {
-          ...authService.getAuthHeader(),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(postData),
-      });
-
-      if (!response.ok) throw new Error("게시글 등록 실패");
-
-       // 서버에서 새로운 게시글 목록을 다시 가져오기
-      setPage(1);
-      setPosts([]);
-      await fetchPosts();
-      
-      setContent("");
-      setMediaUrl("");
-      setShowPostForm(false);
-      
-    } catch (error) {
-      console.error("게시글 등록 중 오류 발생:", error);
-    }
-  };
-
-  // 초기 데이터 로딩
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [fetchPosts]);
 
   return (
     <div className="p-4">
-      
-
       {/* Stories 섹션 */}
       <div className="bg-white rounded-lg shadow p-4 mb-4">
         <h2 className="text-lg font-semibold mb-2">Stories</h2>
@@ -174,10 +129,6 @@ const HomePage = ({ onPageChange }) => {
         </div>
       </div>
 
-
-     
-   
-
       {/* 최신 게시글 섹션 */}
       <div className="bg-white rounded-lg shadow p-4">
         <h2 className="text-lg font-semibold mb-2">최신 게시글</h2>
@@ -185,53 +136,20 @@ const HomePage = ({ onPageChange }) => {
         {/* 게시글 등록 버튼 */}
         <div className="flex justify-end mb-4">
           <button
-          onClick={() => setShowPostForm(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded mb-0"
+            onClick={() => setShowPostForm(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded mb-0"
           >
-          +
+            +
           </button>
         </div>
 
-       {/* 게시글 등록 폼 (팝업) */}
-       {showPostForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow p-6 w-96">
-            <h2 className="text-lg font-semibold mb-4">게시글 등록</h2>
-            <form onSubmit={handlePostSubmit}>
-              <textarea
-                placeholder="게시글 내용을 입력하세요"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                className="w-full p-2 border rounded mb-4"
-              />
-              <input
-                type="text"
-                placeholder="파일URL(사진 또는 영상)"
-                value={mediaUrl}
-                onChange={(e) => setMediaUrl(e.target.value)}
-                required
-                className="w-full p-2 border rounded mb-4"
-              />
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowPostForm(false)}
-                  className="bg-gray-400 text-white px-4 py-2 rounded"
-                >
-                  취소
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  등록
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-           )}
+        {/* PostForm 컴포넌트 */}
+        {showPostForm && (
+          <PostForm
+            onPostSubmit={handlePostSubmitted}
+            onClose={() => setShowPostForm(false)}
+          />
+        )}
 
         <InfiniteScroll
           dataLength={posts.length}
@@ -244,8 +162,9 @@ const HomePage = ({ onPageChange }) => {
           {posts.map((post) => (
             <StoryPost
               key={post.id}
-              title={post.title || "제목 없음"}
+              title={post.title || "제목 없음 > 회원 이메일 or 닉네임으로 변경"}
               content={post.content || "내용 없음"}
+              mediaUrl={post.mediaUrl || "미디어 없음"}
               createdAt={new Date(post.createdAt).toLocaleDateString()}
             />
           ))}
