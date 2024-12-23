@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PostCard = ({ memberId, content, createdAt, mediaList }) => {
+const PostCard = ({ memberId, memberName, content, createdAt, mediaList }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString('ko-KR', {
@@ -48,7 +48,7 @@ const PostCard = ({ memberId, content, createdAt, mediaList }) => {
       )}
       
       {/* 사용자 정보 */}
-      <p className="text-sm font-medium mb-2">사용자 {memberId}</p>
+      <p className="text-sm font-medium mb-2">{memberName}</p>
       
       {/* 게시물 내용 */}
       <p className="text-sm mb-2">{content}</p>

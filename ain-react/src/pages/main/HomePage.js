@@ -70,10 +70,42 @@ const HomePage = ({ onPageChange }) => {
 
   // 게시글 등록 후 처리
   const handlePostSubmitted = async () => {
-    setPage(0);  // 페이지 초기화
-    setPosts([]);  // 기존 포스트 초기화
-    setHasMore(true);  // hasMore 초기화
-    await fetchPosts();
+    try {
+      setLoading(true);
+      setPosts([]); // 기존 포스트 초기화
+      setPage(0); // 페이지 초기화
+      setHasMore(true); // hasMore 초기화
+      
+      // 직접 첫 페이지 데이터를 가져옴
+      const response = await fetch(
+        `${API_BASE_URL}/api/posts/page?page=0&size=10`, 
+        {
+          method: "GET",
+          headers: {
+            ...authService.getAuthHeader(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("게시물을 가져오는데 실패했습니다.");
+
+      const data = await response.json();
+      
+      if (data.content && data.content.length > 0) {
+        setPosts(data.content);
+        setHasMore(!data.last);
+        setPage(1); // 다음 페이지를 위해 1로 설정
+      } else {
+        setHasMore(false);
+      }
+      
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    } finally {
+      setLoading(false);
+      setShowPostForm(false); // 폼 닫기
+    }
   };
 
   useEffect(() => {
@@ -197,6 +229,7 @@ const HomePage = ({ onPageChange }) => {
             <PostCard
               key={post.id}
               memberId={post.memberId}
+              memberName={post.memberName}
               content={post.content}
               mediaList={post.mediaList}
               createdAt={post.createdAt}
