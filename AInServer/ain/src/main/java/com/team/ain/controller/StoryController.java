@@ -4,42 +4,66 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.team.ain.config.jwt.JwtTokenProvider;
 import com.team.ain.dto.story.StoryDTO;
 import com.team.ain.dto.story.StoryRequest;
+import com.team.ain.service.S3Service;
 import com.team.ain.service.StoryService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/stories")
 @RequiredArgsConstructor
 public class StoryController {
     private final StoryService storyService;
+    private final S3Service s3Service;
     private final JwtTokenProvider jwtTokenProvider;
 
-    // 스토리 작성
     @PostMapping
     public ResponseEntity<?> createStory(
-            @RequestBody StoryRequest content, HttpServletRequest request) {
-            
+            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            HttpServletRequest request) {
+        try {
             Long memberId = jwtTokenProvider.getMemberIdFromRequest(request);
             StoryDTO storyDTO = new StoryDTO();
             storyDTO.setMemberId(memberId);
-            storyDTO.setContent(content.getContent());
+            storyDTO.setContent(content);
+
+            // 미디어 파일이 있는 경우 S3에 업로드
+            if (file != null && !file.isEmpty()) {
+                try {
+                    // FileController의 /api/files/upload 로직과 동일한 S3Service 사용
+                    String mediaUrl = s3Service.uploadFile(file, "stories");
+                    String mediaType = s3Service.getMediaType(file.getContentType());
+                    
+                    storyDTO.setMediaUrl(mediaUrl);
+                    storyDTO.setMediaType(mediaType);
+                    
+                    log.info("스토리 미디어 업로드 성공 - URL: {}", mediaUrl);
+                } catch (IllegalArgumentException e) {
+                    log.error("스토리 미디어 업로드 실패 - 잘못된 요청: {}", e.getMessage());
+                    return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+                }
+            }
             
             storyService.createStory(storyDTO);
+            log.info("스토리 작성 성공 - 회원 ID: {}", memberId);
             return ResponseEntity.ok().body("스토리가 성공적으로 작성되었습니다.");
             
+        } catch (Exception e) {
+            log.error("스토리 작성 실패: ", e);
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "스토리 작성에 실패했습니다: " + e.getMessage()));
+        }
     }
 
     // 활성화된 스토리 조회
