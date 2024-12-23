@@ -10,7 +10,12 @@ const MyPage = () => {
   const { logout } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [memberInfo, setMemberInfo] = useState(null);
+  const [memberInfo, setMemberInfo] = useState({
+    member: null,
+    pets: [],
+    follows: { follower: 0, following: 0 }  // follows 추가
+  });
+  
   const [activeTab, setActiveTab] = useState("pets");
 
   // 1212: 모드 상태 추가 (등록/수정 모드 구분)
@@ -38,7 +43,8 @@ const MyPage = () => {
         if (data.member) {
           setMemberInfo({
             member: data.member,
-            pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []), // 배열 형태로 처리
+            pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []),
+            follows: data.follows || { follower: 0, following: 0 }  // follows 데이터 저장
           });
         } else {
           setError("회원 정보가 없습니다.");
@@ -68,8 +74,8 @@ const MyPage = () => {
 
   const stats = [
     { label: "반려동물", value: memberInfo?.pets?.[0]?.length || 0 },
-    { label: "팔로워", value: 0 },
-    { label: "팔로잉", value: 0 },
+    { label: "팔로워", value: memberInfo?.follows?.follower || 0 },
+    { label: "팔로잉", value: memberInfo?.follows?.following || 0 }
   ];
   
   
@@ -178,15 +184,22 @@ const MyPage = () => {
         {/* 프로필 정보 카드 */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-            <div className="shrink-0">
-              <div className="w-20 h-20 sm:w-36 sm:h-36 rounded-full overflow-hidden border">
+          <div className="shrink-0">
+            <div className="h-20 w-20 sm:w-36 sm:h-36 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+              {memberInfo?.member?.profilePictureUrl ? (
                 <img
-                  className="w-full h-full object-cover"
-                  src={memberInfo?.member?.profilePictureUrl || "/api/placeholder/150/150"}
+                  src={memberInfo?.member?.profilePictureUrl}
                   alt={memberInfo?.member?.name || "사용자"}
+                  className="h-full w-full object-cover"
                 />
-              </div>
+              ) : (
+                <div className="text-gray-400 text-center">
+                  {/* 아이콘을 텍스트로 대신 표시 */}
+                  <span className="text-4xl">👤</span>
+                </div>
+              )}
             </div>
+          </div>
             <div className="flex-1 text-center sm:text-left">
               <h2 className="text-xl sm:text-2xl font-light mb-4 text-center">
                 {memberInfo?.member?.name || "사용자"} 님
@@ -239,11 +252,17 @@ const MyPage = () => {
               memberInfo.pets[0].map((pet, index) => (  // pets[0]에 대해 map 수행
                 <div key={pet.id} className="relative pb-[100%]">
                   <div className="absolute inset-0">
-                    <img
-                      src={pet.photoUrl || "/api/placeholder/300/300"}
-                      alt={pet.name}
-                      className="w-full h-full object-cover rounded"
-                    />
+                    {pet.photoUrl ? (
+                      <img
+                        src={pet.photoUrl}
+                        alt={pet.name}
+                        className="w-full h-full object-cover rounded"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded">
+                        <span className="text-gray-400">No Photo</span>
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity duration-200 rounded">
                       <div className="absolute bottom-0 left-0 right-0 p-3 text-white bg-gradient-to-t from-black/60 to-transparent">
                         <p className="text-sm font-medium">{pet.name}</p>

@@ -1,6 +1,10 @@
 package com.team.ain.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
+
+import com.team.ain.dto.MemberResponse;
 
 @Mapper
 public interface FollowersMapper {
@@ -10,4 +14,9 @@ public interface FollowersMapper {
     long getFollowerIds(Long memberId);
     int getFollowersCount(Long memberId);
     int getFollowingCount(Long memberId);
+
+    
+    List<MemberResponse> getFollowers(Long memberId);
+    
+    List<MemberResponse> getFollowing(Long memberId);
 }
