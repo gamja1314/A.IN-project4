@@ -1,13 +1,12 @@
 import { User } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // useNavigate 훅을 임포트
 import { memberService } from '../../services/MemberService';
 import { CustomButton } from './custom-button.tsx';
 import { MemberList } from "./member-list";
 import { PetCarousel } from './pet-carousel.tsx';
 
-const SomeoneInfo = ({ pageData }) => {
-    const navigate = useNavigate(); // useNavigate 훅을 사용하여 navigate 함수 얻기
+// props에 onPageChange 추가
+const SomeoneInfo = ({ pageData, onPageChange }) => {
     
     const [data, setData] = useState({
         member: null,
@@ -20,21 +19,33 @@ const SomeoneInfo = ({ pageData }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [activeTab, setActiveTab] = useState("pets");
     const [members, setMembers] = useState([]); // 팔로워/팔로잉 목록 저장
+    // 상태 분리
+    const [followers, setFollowers] = useState([]);
+    const [following, setFollowing] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
             if (!pageData?.memberId) return;
 
             try {
+                // 기본 정보 가져오기
                 const response = await memberService.getSomeoneInfo(pageData.memberId);
-                console.log('Fetched data:', response);
-
                 setData({
                     member: response.member,
                     pets: Array.isArray(response.pet) ? response.pet : (response.pet ? [response.pet] : []),
                     follows: response.follows || { follower: 0, following: 0 },
                     isFollowing: response.isFollowing || false
                 });
+                
+                // followers와 following 데이터 모두 가져오기
+                const [followersData, followingData] = await Promise.all([
+                    memberService.getFollowers(pageData.memberId),
+                    memberService.getFollowing(pageData.memberId)
+                ]);
+                
+                setFollowers(followersData);
+                setFollowing(followingData);
+                
             } catch (err) {
                 console.error('Error fetching data:', err);
                 setError(err.message);
@@ -71,21 +82,18 @@ const SomeoneInfo = ({ pageData }) => {
         }
     };
 
-    const fetchMembers = async (type) => {
-        try {
-            const response =
-                type === "followers"
-                    ? await memberService.getFollowers(pageData.memberId)
-                    : await memberService.getFollowing(pageData.memberId);
-            setMembers(response);
-            setActiveTab("members"); // 'members' 탭을 활성화
-        } catch (err) {
-            console.error("Error fetching members:", err);
-        }
-    };
+    // fetchMembers 함수 수정
+    // const fetchMembers = async (type) => {
+    //     // type에 따라 이미 불러온 데이터 사용
+    //     setMembers(type === "followers" ? followers : following);
+    //     setActiveTab("members");
+    // };
 
-    const handleMemberClick = (memberId) => {
-        navigate(`/profile/${memberId}`); // useNavigate 훅을 사용하여 페이지 이동
+    const handleMemberClick = (memberId, memberName) => {
+        onPageChange('someoneInfo', {
+            memberId: memberId,
+            name: memberName
+        });
     };
 
     if (isLoading) return <div>Loading...</div>;
@@ -94,23 +102,32 @@ const SomeoneInfo = ({ pageData }) => {
     const stats = [
         {
             label: "반려동물",
-            value: data.pets?.length || 0
+            value: data.pets?.length || 0,
+            onClick: () => setActiveTab("pets")
         },
         {
             label: "팔로워",
             value: data.follows?.follower || 0,
-            onClick: () => fetchMembers("followers")
+            onClick: () => setActiveTab("followers")
         },
         {
             label: "팔로잉",
             value: data.follows?.following || 0,
-            onClick: () => fetchMembers("following")
+            onClick: () => setActiveTab("following")
         },
     ];
 
-    const tabs = [
+    const navigationTabs = [
+        { id: "pets", label: "반려동물" },
+        { id: "posts", label: "게시물" }
+    ];
+    
+    // 실제 content에서 사용할 모든 탭 (navigation + followers/following)
+    const contentTabs = [
         { id: "pets", label: "반려동물" },
         { id: "posts", label: "게시물" },
+        { id: "followers", label: "팔로워" },
+        { id: "following", label: "팔로잉" }
     ];
 
     return (
@@ -163,7 +180,7 @@ const SomeoneInfo = ({ pageData }) => {
                 {/* Tab navigation */}
                 <div className="border-t">
                     <div className="grid grid-cols-2 w-full">
-                        {tabs.map((tab) => (
+                        {navigationTabs.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
@@ -197,8 +214,17 @@ const SomeoneInfo = ({ pageData }) => {
                             아직 게시물이 없습니다.
                         </div>
                     )}
-                    {activeTab === "members" && (
-                        <MemberList members={members} onMemberClick={handleMemberClick} />
+                    {activeTab === "followers" && (
+                        <MemberList 
+                            members={followers} 
+                            onMemberClick={(memberId, memberName) => handleMemberClick(memberId, memberName)} 
+                        />
+                    )}
+                    {activeTab === "following" && (
+                        <MemberList 
+                            members={following} 
+                            onMemberClick={(memberId, memberName) => handleMemberClick(memberId, memberName)} 
+                        />
                     )}
                 </div>
             </div>
