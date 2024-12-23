@@ -1,10 +1,14 @@
 import { User } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // useNavigate 훅을 임포트
 import { memberService } from '../../services/MemberService';
 import { CustomButton } from './custom-button.tsx';
+import { MemberList } from "./member-list";
 import { PetCarousel } from './pet-carousel.tsx';
 
 const SomeoneInfo = ({ pageData }) => {
+    const navigate = useNavigate(); // useNavigate 훅을 사용하여 navigate 함수 얻기
+    
     const [data, setData] = useState({
         member: null,
         pets: [],
@@ -15,15 +19,16 @@ const SomeoneInfo = ({ pageData }) => {
     const [error, setError] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [activeTab, setActiveTab] = useState("pets");
+    const [members, setMembers] = useState([]); // 팔로워/팔로잉 목록 저장
 
     useEffect(() => {
         const fetchData = async () => {
             if (!pageData?.memberId) return;
-            
+
             try {
                 const response = await memberService.getSomeoneInfo(pageData.memberId);
                 console.log('Fetched data:', response);
-                
+
                 setData({
                     member: response.member,
                     pets: Array.isArray(response.pet) ? response.pet : (response.pet ? [response.pet] : []),
@@ -53,7 +58,7 @@ const SomeoneInfo = ({ pageData }) => {
                 await memberService.followMember(data.member.id);
                 setData(prev => ({ ...prev, isFollowing: true }));
             }
-            
+
             const updatedData = await memberService.getSomeoneInfo(pageData.memberId);
             setData(prev => ({
                 ...prev,
@@ -66,13 +71,41 @@ const SomeoneInfo = ({ pageData }) => {
         }
     };
 
+    const fetchMembers = async (type) => {
+        try {
+            const response =
+                type === "followers"
+                    ? await memberService.getFollowers(pageData.memberId)
+                    : await memberService.getFollowing(pageData.memberId);
+            setMembers(response);
+            setActiveTab("members"); // 'members' 탭을 활성화
+        } catch (err) {
+            console.error("Error fetching members:", err);
+        }
+    };
+
+    const handleMemberClick = (memberId) => {
+        navigate(`/profile/${memberId}`); // useNavigate 훅을 사용하여 페이지 이동
+    };
+
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
     const stats = [
-        { label: "반려동물", value: data.pets?.length || 0 },
-        { label: "팔로워", value: data.follows?.follower || 0 },
-        { label: "팔로잉", value: data.follows?.following || 0 },
+        {
+            label: "반려동물",
+            value: data.pets?.length || 0
+        },
+        {
+            label: "팔로워",
+            value: data.follows?.follower || 0,
+            onClick: () => fetchMembers("followers")
+        },
+        {
+            label: "팔로잉",
+            value: data.follows?.following || 0,
+            onClick: () => fetchMembers("following")
+        },
     ];
 
     const tabs = [
@@ -88,9 +121,9 @@ const SomeoneInfo = ({ pageData }) => {
                     <div className="shrink-0">
                         <div className="h-20 w-20 sm:w-36 sm:h-36 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                             {data.member?.profilePictureUrl ? (
-                                <img 
-                                    src={data.member.profilePictureUrl} 
-                                    alt={data.member.name} 
+                                <img
+                                    src={data.member.profilePictureUrl}
+                                    alt={data.member.name}
                                     className="h-full w-full object-cover"
                                 />
                             ) : (
@@ -99,12 +132,18 @@ const SomeoneInfo = ({ pageData }) => {
                         </div>
                     </div>
                     <div className="flex-1 text-center sm:text-left">
-                        <h2 className="text-xl sm:text-2xl font-bold mb-4"></h2>
+                        <h2 className="text-xl sm:text-2xl font-bold mb-4">{data.member?.name}</h2>
                         <div className="grid grid-cols-3 gap-4 mb-4 w-full max-w-[400px] mx-auto sm:mx-0">
                             {stats.map((stat, index) => (
-                                <div key={index} className="text-center">
+                                <div
+                                    key={index}
+                                    className="text-center cursor-pointer"
+                                    onClick={stat.onClick}
+                                >
                                     <span className="font-semibold block">{stat.value}</span>
-                                    <span className="text-sm text-gray-600 block whitespace-nowrap">{stat.label}</span>
+                                    <span className="text-sm text-gray-600 block whitespace-nowrap">
+                                        {stat.label}
+                                    </span>
                                 </div>
                             ))}
                         </div>
@@ -115,12 +154,12 @@ const SomeoneInfo = ({ pageData }) => {
                                 variant={data.isFollowing ? "outline" : "default"}
                                 className="w-[200px]"
                             >
-                                {data.isFollowing ? '언팔로우' : '팔로우'}
+                                {data.isFollowing ? "언팔로우" : "팔로우"}
                             </CustomButton>
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Tab navigation */}
                 <div className="border-t">
                     <div className="grid grid-cols-2 w-full">
@@ -158,6 +197,9 @@ const SomeoneInfo = ({ pageData }) => {
                             아직 게시물이 없습니다.
                         </div>
                     )}
+                    {activeTab === "members" && (
+                        <MemberList members={members} onMemberClick={handleMemberClick} />
+                    )}
                 </div>
             </div>
         </div>
@@ -165,4 +207,3 @@ const SomeoneInfo = ({ pageData }) => {
 };
 
 export default SomeoneInfo;
-

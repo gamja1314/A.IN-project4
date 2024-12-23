@@ -60,4 +60,24 @@
         WHERE follower_id = #{memberId}
     </select>
 
+    <select id="getFollowers" resultType="com.team.ain.dto.MemberResponse">
+        SELECT 
+            m.id,
+            m.name,
+            m.profile_picture_url as profilePictureUrl
+        FROM member m
+        INNER JOIN followers f ON m.id = f.follower_id
+        WHERE f.following_id = #{memberId}
+    </select>
+
+    <select id="getFollowing" resultType="com.team.ain.dto.MemberResponse">
+        SELECT 
+            m.id,
+            m.name,
+            m.profile_picture_url as profilePictureUrl
+        FROM member m
+        INNER JOIN followers f ON m.id = f.following_id
+        WHERE f.follower_id = #{memberId}
+    </select>
+
 </mapper>

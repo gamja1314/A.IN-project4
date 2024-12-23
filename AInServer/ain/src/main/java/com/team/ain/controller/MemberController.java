@@ -1,6 +1,7 @@
 package com.team.ain.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.config.jwt.JwtTokenProvider;
+import com.team.ain.dto.MemberResponse;
 import com.team.ain.dto.auth.Member;
 import com.team.ain.dto.auth.MemberJoin;
 import com.team.ain.dto.auth.MemberUpdateDTO;
@@ -81,6 +83,16 @@ public class MemberController {
         String email = userDetails.getUsername();
         memberService.updateMemberProfile(email, updateDTO);
         return ResponseEntity.ok("프로필이 성공적으로 업데이트되었습니다.");
+    }
+
+    @GetMapping("/{memberId}/followers")
+    public List<MemberResponse> getFollowers(@PathVariable Long memberId) {
+        return followerService.getFollowers(memberId);
+    }
+
+    @GetMapping("/{memberId}/following")
+    public List<MemberResponse> getFollowing(@PathVariable Long memberId) {
+        return followerService.getFollowing(memberId);
     }
         
 }

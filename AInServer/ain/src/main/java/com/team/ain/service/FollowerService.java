@@ -1,10 +1,12 @@
 package com.team.ain.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.team.ain.dto.MemberResponse;
 import com.team.ain.mapper.FollowersMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -39,5 +41,15 @@ public class FollowerService {
     // 팔로우 체크
     public boolean isFollowing(Long followerId, Long followingId) {
         return followersMapper.isFollowing(followerId, followingId);
+    }
+
+    // 팔로워 목록 조회
+    public List<MemberResponse> getFollowers(Long memberId) {
+        return followersMapper.getFollowers(memberId);
+    }
+
+    // 팔로잉 목록 조회
+    public List<MemberResponse> getFollowing(Long memberId) {
+        return followersMapper.getFollowing(memberId);
     }
 }
