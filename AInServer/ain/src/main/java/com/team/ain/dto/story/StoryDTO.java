@@ -2,9 +2,11 @@ package com.team.ain.dto.story;
 
 import java.time.LocalDateTime;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class StoryDTO {
     private Long id;
     private Long memberId;
