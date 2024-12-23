@@ -11,7 +11,7 @@ export const MemberList = ({ members, onMemberClick }) => {
                 <li
                     key={member.id}
                     className="cursor-pointer text-blue-500 hover:underline"
-                    onClick={() => onMemberClick(member.id)}
+                    onClick={() => onMemberClick(member.id, member.name)}
                 >
                     {member.name}
                 </li>

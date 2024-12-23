@@ -127,7 +127,7 @@ const HomePage = ({ onPageChange }) => {
         <div className="flex overflow-x-auto space-x-4 py-2">
           <StoryProfile
             isMyStory={true}
-            profileImage={memberInfo?.member?.profile_picture_url}
+            profileImage={memberInfo?.member?.profilePictureUrl}
             username="내 스토리"
             onPageChange={onPageChange}
           />
@@ -199,7 +199,7 @@ const HomePage = ({ onPageChange }) => {
               title={post.title || "제목 없음 > 회원 이메일 or 닉네임으로 변경"}
               content={post.content || "내용 없음"}
               mediaUrl={post.mediaUrl || "미디어 없음"}
-              createdAt={new Date(post.createdAt).toLocaleDateString()}
+              createdAt={new Date(post.createdAt)}
             />
           ))}
         </InfiniteScroll>

@@ -101,7 +101,7 @@ const ChatRoom = ({ roomId, currentUser, onPageChange, onMessageSent, onExit }) 
         memberId: senderId,
         name: senderName
     });
-};
+  };
   
   useEffect(() => {
     ChatService.connect(

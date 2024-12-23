@@ -55,7 +55,7 @@ export const renderPage = (currentPage, pageData = {}, onPageChange, refreshMess
       case 'home': return <HomePage onPageChange={onPageChange} />;
       case 'search': return <SearchPage />;
       case 'mypage': return <MyPage />;
-      case 'someoneInfo': return <SomeoneInfo pageData={pageData} />;
+      case 'someoneInfo': return <SomeoneInfo pageData={pageData} onPageChange={onPageChange} />;
       case 'createStory': return <CreateStory onPageChange={onPageChange} />;
       case 'myStories': return <MyStories onPageChange={onPageChange} />;
       default: return <HomePage />;
