@@ -196,10 +196,10 @@ const HomePage = ({ onPageChange }) => {
           {posts.map((post) => (
             <PostCard
               key={post.id}
-              title={post.title || "제목 없음 > 회원 이메일 or 닉네임으로 변경"}
-              content={post.content || "내용 없음"}
-              mediaUrl={post.mediaUrl || "미디어 없음"}
-              createdAt={new Date(post.createdAt)}
+              memberId={post.memberId}
+              content={post.content}
+              mediaList={post.mediaList}
+              createdAt={post.createdAt}
             />
           ))}
         </InfiniteScroll>
