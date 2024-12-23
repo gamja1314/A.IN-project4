@@ -5,10 +5,11 @@ import { authService } from "../../services/authService";
 import StoryProfile from '../story/StoryProfile';
 import StoryPost from "../story/StoryPost";
 import PostForm from "../../components/posts/PostForm"
+import PostCard from "../../components/posts/PostCard";
 
 const HomePage = ({ onPageChange }) => {
   const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);  // 0부터 시작하도록 수정
   const [hasMore, setHasMore] = useState(true);
   const [stories, setStories] = useState([]);
   const [memberInfo, setMemberInfo] = useState(null);
@@ -16,41 +17,62 @@ const HomePage = ({ onPageChange }) => {
   const [showPostForm, setShowPostForm] = useState(false);
 
   const fetchPosts = useCallback(async () => {
-    if (loading) return;
-
+    if (loading) return; // 이미 로딩 중이면 중단
+  
     try {
       setLoading(true);
       const size = 10;
-      const response = await fetch(`${API_BASE_URL}/api/posts/page?page=${page}&size=${size}`, {
-        method: "GET",
-        headers: {
-          ...authService.getAuthHeader(),
-          "Content-Type": "application/json",
-        },
-      });
-
+      const response = await fetch(
+        `${API_BASE_URL}/api/posts/page?page=${page}&size=${size}`, 
+        {
+          method: "GET",
+          headers: {
+            ...authService.getAuthHeader(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
       if (!response.ok) throw new Error("게시물 데이터를 가져오는데 실패했습니다.");
-
-      const newPosts = await response.json();
-      const uniquePosts = [...new Set([...posts, ...newPosts].map(JSON.stringify))].map(JSON.parse);
-
-      if (newPosts.length < size) {
+  
+      const data = await response.json();
+      
+      if (data.content && data.content.length > 0) {
+        setPosts(prevPosts => {
+          const newPosts = [...prevPosts];
+          data.content.forEach(post => {
+            if (!newPosts.find(p => p.id === post.id)) {
+              newPosts.push(post);
+            }
+          });
+          return newPosts;
+        });
+        
+        setHasMore(!data.last);
+        setPage(prev => prev + 1);
+      } else {
         setHasMore(false);
       }
-
-      setPosts(uniquePosts);
-      setPage((prevPage) => prevPage + 1);
+  
     } catch (error) {
       console.error("Error fetching posts:", error);
     } finally {
       setLoading(false);
     }
-  }, [loading, page]);
+  }, [page]); // loading 제거, page만 의존성으로 유지
+  
+  // 초기 데이터 로딩을 위한 useEffect
+  useEffect(() => {
+    if (page === 0) { // 초기 로딩일 때만 실행
+      fetchPosts();
+    }
+  }, [fetchPosts]);
 
   // 게시글 등록 후 처리
   const handlePostSubmitted = async () => {
-    setPage(1);
-    setPosts([]);
+    setPage(0);  // 페이지 초기화
+    setPosts([]);  // 기존 포스트 초기화
+    setHasMore(true);  // hasMore 초기화
     await fetchPosts();
   };
 
@@ -153,14 +175,26 @@ const HomePage = ({ onPageChange }) => {
 
         <InfiniteScroll
           dataLength={posts.length}
-          next={fetchPosts}
+          next={() => {
+            if (!loading) {
+              setTimeout(fetchPosts, 500); // 500ms 지연 추가
+            }
+          }}
           hasMore={hasMore}
-          loader={<h4>Loading...</h4>}
-          endMessage={<p style={{ textAlign: "center" }}>새 게시글이 없습니다.</p>}
+          loader={
+            <div className="flex justify-center p-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          }
+          endMessage={
+            <p className="text-center text-gray-500 p-4">
+              새 게시글이 없습니다.
+            </p>
+          }
           scrollThreshold={0.8}
         >
           {posts.map((post) => (
-            <StoryPost
+            <PostCard
               key={post.id}
               title={post.title || "제목 없음 > 회원 이메일 or 닉네임으로 변경"}
               content={post.content || "내용 없음"}

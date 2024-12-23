@@ -2,6 +2,7 @@ package com.team.ain.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.config.jwt.JwtTokenProvider;
+import com.team.ain.dto.post.PageResponseDTO;
 import com.team.ain.dto.post.Post;
 import com.team.ain.service.PostService;
 
@@ -55,11 +57,11 @@ public class PostController {
 
     // 페이징된 게시물 조회
     @GetMapping("/page")
-    public ResponseEntity<List<Post>> getPostsByPage(
-        @RequestParam(name = "page", defaultValue = "1") int page,
-        @RequestParam(name = "size", defaultValue = "10") int size) {
-        List<Post> posts = postService.getPostsByPage(page, size);
-        return ResponseEntity.ok(posts);
+    public ResponseEntity<PageResponseDTO<Post>> getPostsByPage(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+        Page<Post> postPage = postService.getPostsByPage(page, size);
+        return ResponseEntity.ok(PageResponseDTO.of(postPage));
     }
 
     // 게시물 수정
