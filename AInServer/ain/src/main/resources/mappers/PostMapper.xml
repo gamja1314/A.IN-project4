@@ -10,6 +10,7 @@
         <result property="content" column="content"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+        <result property="memberName" column="member_name"/>
         <collection property="mediaList" ofType="com.team.ain.dto.post.PostMedia">
             <id property="id" column="media_id"/>
             <result property="postId" column="post_id"/>
@@ -42,9 +43,11 @@
                 pm.media_url,
                 pm.media_type,
                 pm.display_order,
-                pm.created_at as media_created_at
+                pm.created_at as media_created_at,
+                m.name as member_name
         FROM posts p
         LEFT JOIN post_media pm ON p.id = pm.post_id
+        LEFT JOIN member m ON p.member_id = m.id
         WHERE p.id = #{id}
         ORDER BY pm.display_order
     </select>
@@ -56,9 +59,11 @@
                 pm.media_url,
                 pm.media_type,
                 pm.display_order,
-                pm.created_at as media_created_at
+                pm.created_at as media_created_at,
+                m.name as member_name
         FROM posts p
         LEFT JOIN post_media pm ON p.id = pm.post_id
+        LEFT JOIN member m ON p.member_id = m.id
         ORDER BY p.created_at DESC
         LIMIT #{size} OFFSET #{page} * #{size}
     </select>
