@@ -21,7 +21,7 @@ const CreateStory = ({ onPageChange }) => {
     'video/quicktime': true, // MOV 파일
   };
 
-  const handleFileSelect = async (e) => {
+  const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -44,61 +44,45 @@ const CreateStory = ({ onPageChange }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!content.trim() && !mediaFile) return;
-    
+      
     if (!isAuthenticated) {
       setError('로그인이 필요합니다.');
       onPageChange('login');
       return;
     }
   
+    // 내용과 미디어 파일이 모두 없는 경우
+    if (!content.trim() && !mediaFile) {
+      setError('스토리 내용이나 미디어 파일을 입력해주세요.');
+      return;
+    }
+    
     setLoading(true);
     setError('');
-  
+    
     try {
-      let mediaUrl = null;
-      
-      // 미디어 파일이 있는 경우 먼저 업로드
+      // FormData 생성 및 데이터 추가
+      const formData = new FormData();
+      formData.append('content', content.trim());
       if (mediaFile) {
-        const fileFormData = new FormData();
-        fileFormData.append('file', mediaFile);
-        fileFormData.append('directory', 'stories');
-
-        const uploadResponse = await fetch(`${API_BASE_URL}/api/files/upload`, {
-          method: 'POST',
-          headers: {
-            ...authService.getAuthHeader(),
-          },
-          body: fileFormData,
-        });
-
-        if (!uploadResponse.ok) {
-          const error = await uploadResponse.json();
-          throw new Error(error.error || '파일 업로드에 실패했습니다.');
-        }
-
-        const uploadData = await uploadResponse.json();
-        mediaUrl = uploadData.url;
+        formData.append('mediaFile', mediaFile);
       }
   
-      // 스토리 생성 요청
+      // 스토리 생성 요청 (한 번의 요청으로 처리)
       const response = await fetch(`${API_BASE_URL}/api/stories`, {
         method: 'POST',
         headers: {
           ...authService.getAuthHeader(),
-          'Content-Type': 'application/json',
+          // Content-Type은 설정하지 않음 (브라우저가 자동으로 설정)
         },
-        body: JSON.stringify({ 
-          content,
-          ...(mediaUrl && { mediaUrl }) // mediaUrl이 있을 때만 포함
-        }),
+        body: formData,
       });
   
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || '스토리 작성에 실패했습니다.');
       }
-      
+        
       onPageChange('myStories');
     } catch (err) {
       setError(err.message);
