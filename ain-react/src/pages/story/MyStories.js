@@ -150,10 +150,32 @@ const MyStories = ({ onPageChange }) => {
         </div>
 
         {/* 스토리 내용 */}
-        <div className="flex items-center justify-center min-h-screen p-4">
-          <p className="text-white text-center">
-            {currentStory.content}
-          </p>
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+          {currentStory.mediaUrl && (
+            <div className="w-full mb-4">
+              {currentStory.mediaType === 'VIDEO' ? (
+                <video 
+                  src={currentStory.mediaUrl}
+                  className="w-full rounded-lg object-contain max-h-[60vh]"
+                  controls
+                  autoPlay
+                  playsInline
+                  muted
+                />
+              ) : (
+                <img
+                  src={currentStory.mediaUrl}
+                  alt="Story content"
+                  className="w-full rounded-lg object-contain max-h-[60vh]"
+                />
+              )}
+            </div>
+          )}
+          {currentStory.content && (
+            <p className="text-white text-center mt-4">
+              {currentStory.content}
+            </p>
+          )}
         </div>
 
         {/* 네비게이션 버튼 */}

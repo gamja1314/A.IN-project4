@@ -7,11 +7,15 @@
         INSERT INTO story (
             member_id,
             content,
+            media_url,
+            media_type,
             created_at,
             status
         ) VALUES (
             #{memberId},
             #{content},
+            #{mediaUrl},
+            #{mediaType},
             CURRENT_TIMESTAMP,
             'ACTIVE'
         )

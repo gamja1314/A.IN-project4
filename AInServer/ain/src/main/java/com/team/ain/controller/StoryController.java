@@ -34,21 +34,19 @@ public class StoryController {
 
     @PostMapping
     public ResponseEntity<?> createStory(
-            @RequestParam(value = "content", required = false) String content,
-            @RequestParam(value = "file", required = false) MultipartFile file,
+            @ModelAttribute StoryRequest storyRequest, 
             HttpServletRequest request) {
         try {
             Long memberId = jwtTokenProvider.getMemberIdFromRequest(request);
             StoryDTO storyDTO = new StoryDTO();
             storyDTO.setMemberId(memberId);
-            storyDTO.setContent(content);
+            storyDTO.setContent(storyRequest.getContent());
 
             // 미디어 파일이 있는 경우 S3에 업로드
-            if (file != null && !file.isEmpty()) {
+            if (storyRequest.getMediaFile() != null && !storyRequest.getMediaFile().isEmpty()) {
                 try {
-                    // FileController의 /api/files/upload 로직과 동일한 S3Service 사용
-                    String mediaUrl = s3Service.uploadFile(file, "stories");
-                    String mediaType = s3Service.getMediaType(file.getContentType());
+                    String mediaUrl = s3Service.uploadFile(storyRequest.getMediaFile(), "stories");
+                    String mediaType = s3Service.getMediaType(storyRequest.getMediaFile().getContentType());
                     
                     storyDTO.setMediaUrl(mediaUrl);
                     storyDTO.setMediaType(mediaType);
