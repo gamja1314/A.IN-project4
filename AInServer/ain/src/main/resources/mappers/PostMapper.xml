@@ -51,9 +51,16 @@
         LIMIT #{limit} OFFSET #{offset};
     </select> -->
     <select id="getPostsByPage" resultType="com.team.ain.dto.post.Post">
-        SELECT * FROM posts
+        SELECT *
+        FROM posts
         ORDER BY created_at DESC
-        LIMIT #{limit} OFFSET #{offset};
+        LIMIT #{size}
+        OFFSET #{page} * #{size}
+    </select>
+
+    <select id="getTotalPostCount" resultType="int">
+        SELECT COUNT(*)
+        FROM posts
     </select>
 
 </mapper>

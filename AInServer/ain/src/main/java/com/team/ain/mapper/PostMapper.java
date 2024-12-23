@@ -25,5 +25,6 @@ public interface PostMapper {
     void deletePostById(int id);
 
     // 페이징
-    List<Post> getPostsByPage(@Param("limit") int limit, @Param("offset") int offset);
+    List<Post> getPostsByPage(@Param("page") int page, @Param("size") int size);
+    int getTotalPostCount();
 }
