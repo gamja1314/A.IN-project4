@@ -3,12 +3,12 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { API_BASE_URL } from "../../config/apiConfig";
 import { authService } from "../../services/authService";
 import StoryProfile from '../story/StoryProfile';
-import StoryPost from "../story/StoryPost";
-import PostForm from "../../components/posts/PostForm"
+import PostForm from "../../components/posts/PostForm";
 import PostCard from "../../components/posts/PostCard";
 
 const HomePage = ({ onPageChange }) => {
   const [posts, setPosts] = useState([]);
+  const [error, setError] = useState('');
   const [page, setPage] = useState(0);  // 0부터 시작하도록 수정
   const [hasMore, setHasMore] = useState(true);
   const [stories, setStories] = useState([]);
@@ -56,6 +56,7 @@ const HomePage = ({ onPageChange }) => {
   
     } catch (error) {
       console.error("Error fetching posts:", error);
+      setError("게시물을 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -114,11 +115,12 @@ const HomePage = ({ onPageChange }) => {
         const response = await fetch(`${API_BASE_URL}/api/member/my`, {
           headers: authService.getAuthHeader(),
         });
-        if (!response.ok) throw new Error('Failed to fetch member info');
+        if (!response.ok) throw new Error('회원 정보를 가져오는데 실패했습니다.');
         const data = await response.json();
         setMemberInfo(data);
       } catch (error) {
         console.error('Error fetching member info:', error);
+        setError('회원 정보를 불러오는데 실패했습니다.');
       }
     };
 
