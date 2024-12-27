@@ -9,7 +9,7 @@ const StoryProfile = ({ isMyStory, profileImage, username, onPageChange }) => {
   };
 
   const handlePlusClick = (e) => {
-    e.stopPropagation(); // 이벤트 버블링 방지
+    e.stopPropagation();
     onPageChange('createStory');
   };
 
@@ -18,13 +18,27 @@ const StoryProfile = ({ isMyStory, profileImage, username, onPageChange }) => {
       <div className="relative mb-1">
         <div 
           onClick={handleClick}
-          className={`w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 ${isMyStory ? 'cursor-pointer' : ''}`}
+          className={`w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100 ${isMyStory ? 'cursor-pointer' : ''}`}
         >
-          <img 
-            src={profileImage || '/api/placeholder/64/64'} 
-            alt={username} 
-            className="w-full h-full object-cover"
-          />
+          {profileImage ? (
+            <img 
+              src={profileImage} 
+              alt={username} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null; // 추가 에러 방지
+                e.target.src = '/default-profile.svg'; // 위에서 만든 SVG 경로
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <img 
+                src="/default-profile.svg"
+                alt={username}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
         </div>
         {isMyStory && (
           <button
