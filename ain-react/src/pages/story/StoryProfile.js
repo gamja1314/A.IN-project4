@@ -5,6 +5,9 @@ const StoryProfile = ({ isMyStory, profileImage, username, onPageChange }) => {
   const handleClick = () => {
     if (isMyStory) {
       onPageChange('myStories');
+    } else if (onPageChange) {
+      // 팔로우한 유저의 스토리 클릭 시에도 onPageChange 실행
+      onPageChange();
     }
   };
 
@@ -18,7 +21,7 @@ const StoryProfile = ({ isMyStory, profileImage, username, onPageChange }) => {
       <div className="relative mb-1">
         <div 
           onClick={handleClick}
-          className={`w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100 ${isMyStory ? 'cursor-pointer' : ''}`}
+          className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100 cursor-pointer hover:border-blue-500 transition-colors duration-200"
         >
           {profileImage ? (
             <img 

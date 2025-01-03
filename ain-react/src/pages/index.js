@@ -13,3 +13,4 @@ export { default as StoryPost } from './story/StoryPost';
 export { default as StoryProfile } from './story/StoryProfile';
 export { default as CreateStory } from './story/CreateStory';
 export { default as MyStories } from './story/MyStories';
+export { default as ViewStory } from './story/ViewStory';
