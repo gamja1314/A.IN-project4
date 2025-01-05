@@ -82,6 +82,30 @@ public class ChatService {
         return chatMessageMapper.findMessagesByRoomId(roomId);
     }
 
+    // public ChatMessagePageResponse getRoomMessages(Long roomId, Long userId, ChatMessageCursor cursor) {
+    //     // 읽음 처리
+    //     chatRoomMapper.readChatRoom(roomId, userId);
+        
+    //     // 메시지 조회
+    //     List<ChatMessageDTO> messages = chatMessageMapper.findMessagesWithCursor(
+    //         roomId, 
+    //         cursor
+    //     );
+        
+    //     // 다음 페이지 존재 여부 확인
+    //     boolean hasMore = messages.size() >= cursor.getPageSize();
+        
+    //     // 마지막 메시지 시간 (다음 페이지 요청시 커서로 사용)
+    //     LocalDateTime lastMessageTime = messages.isEmpty() ? null 
+    //         : messages.get(messages.size() - 1).getCreatedAt();
+        
+    //     return ChatMessagePageResponse.builder()
+    //         .messages(messages)
+    //         .hasMore(hasMore)
+    //         .lastMessageTime(lastMessageTime)
+    //         .build();
+    // }
+
     public ChatRoomDTO getRoomById(Long roomId) {
         return chatRoomMapper.findRoomById(roomId);
     }
