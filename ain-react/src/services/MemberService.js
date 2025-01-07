@@ -122,6 +122,25 @@ class MemberServiceClass {
             throw error;
         }
     }
+
+    async checkFollowStatus(memberId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/member/${memberId}/follow-status`, {
+                method: 'GET',
+                headers: {
+                    ...authService.getAuthHeader(),
+                    'Content-Type': 'application/json',
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to check follow status');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error checking follow status:', error);
+            throw error;
+        }
+    }
 }
 
 export const memberService = new MemberServiceClass();

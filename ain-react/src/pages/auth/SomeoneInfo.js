@@ -1,26 +1,27 @@
 import { User } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // useNavigate 훅을 임포트
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { memberService } from '../../services/MemberService';
 import { CustomButton } from './custom-button.tsx';
 import { MemberList } from "./member-list";
 import { PetCarousel } from './pet-carousel.tsx';
 
 const SomeoneInfo = ({ pageData }) => {
-    const navigate = useNavigate(); // useNavigate 훅을 사용하여 navigate 함수 얻기
-    
+    const navigate = useNavigate();
+
     const [data, setData] = useState({
         member: null,
         pets: [],
         follows: { follower: 0, following: 0 },
-        isFollowing: false
+        isFollowing: false,
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [activeTab, setActiveTab] = useState("pets");
-    const [members, setMembers] = useState([]); // 팔로워/팔로잉 목록 저장
+    const [members, setMembers] = useState([]);
 
+    // 초기 데이터 로드
     useEffect(() => {
         const fetchData = async () => {
             if (!pageData?.memberId) return;
@@ -33,7 +34,7 @@ const SomeoneInfo = ({ pageData }) => {
                     member: response.member,
                     pets: Array.isArray(response.pet) ? response.pet : (response.pet ? [response.pet] : []),
                     follows: response.follows || { follower: 0, following: 0 },
-                    isFollowing: response.isFollowing || false
+                    isFollowing: response.isFollowing || false,
                 });
             } catch (err) {
                 console.error('Error fetching data:', err);
@@ -46,46 +47,120 @@ const SomeoneInfo = ({ pageData }) => {
         fetchData();
     }, [pageData?.memberId]);
 
-    const handleFollowClick = async () => {
-        if (!data?.member?.id || isProcessing) return;
-
-        setIsProcessing(true);
-        try {
-            if (data.isFollowing) {
-                await memberService.unfollowMember(data.member.id);
-                setData(prev => ({ ...prev, isFollowing: false }));
-            } else {
-                await memberService.followMember(data.member.id);
-                setData(prev => ({ ...prev, isFollowing: true }));
-            }
-
-            const updatedData = await memberService.getSomeoneInfo(pageData.memberId);
-            setData(prev => ({
-                ...prev,
-                follows: updatedData.follows || { follower: 0, following: 0 }
-            }));
-        } catch (err) {
-            console.error('Error handling follow:', err);
-        } finally {
-            setIsProcessing(false);
-        }
-    };
-
-    const fetchMembers = async (type) => {
+    // 멤버 데이터 로드 함수
+    const fetchMembers = useCallback(async (type) => {
         try {
             const response =
                 type === "followers"
                     ? await memberService.getFollowers(pageData.memberId)
                     : await memberService.getFollowing(pageData.memberId);
-            setMembers(response);
-            setActiveTab("members"); // 'members' 탭을 활성화
+    
+            console.log("Fetched members:", response);
+    
+            // 각 멤버의 팔로우 상태를 개별적으로 확인
+            const membersWithStatus = await Promise.all(
+                response.map(async (member) => {
+                    try {
+                        // 각 멤버에 대해 getSomeoneInfo를 호출하여 팔로우 상태 확인
+                        const memberInfo = await memberService.getSomeoneInfo(member.id);
+                        return {
+                            ...member,
+                            isFollowing: memberInfo.isFollowing || false
+                        };
+                    } catch (err) {
+                        console.error(`Error fetching status for member ${member.id}:`, err);
+                        return {
+                            ...member,
+                            isFollowing: false
+                        };
+                    }
+                })
+            );
+    
+            setMembers(membersWithStatus);
+            setActiveTab("members");
         } catch (err) {
             console.error("Error fetching members:", err);
+        }
+    }, [pageData?.memberId]);
+
+    // 탭 전환 시 멤버 데이터 로드
+    useEffect(() => {
+        if (activeTab === "members") {
+            fetchMembers("followers");
+        }
+    }, [activeTab, pageData?.memberId, fetchMembers]);
+
+    // 개인 프로필 팔로우/언팔로우
+    const handleFollowClick = async () => {
+        if (!data?.member?.id || isProcessing) return;
+
+        setIsProcessing(true);
+        
+        try {
+            // 로컬 상태 즉시 업데이트
+            setData((prev) => ({
+                ...prev,
+                isFollowing: !prev.isFollowing,
+            }));
+
+            // 서버 요청
+            if (data.isFollowing) {
+                await memberService.unfollowMember(data.member.id);
+            } else {
+                await memberService.followMember(data.member.id);
+            }
+        } catch (err) {
+            console.error("Error handling follow:", err);
+
+            // 서버 요청 실패 시 로컬 상태 복구
+            setData((prev) => ({
+                ...prev,
+                isFollowing: !prev.isFollowing,
+            }));
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    // 팔로우 토글
+    const handleFollowToggle = async (memberId) => {
+        console.log("Follow toggle called for memberId:", memberId);
+        setIsProcessing(true);
+
+        // 로컬 상태 즉시 업데이트
+        setMembers((prev) =>
+            prev.map((m) =>
+                m.id === memberId ? { ...m, isFollowing: !m.isFollowing } : m
+            )
+        );
+
+        try {
+            // 서버 요청
+            const memberToUpdate = members.find((m) => m.id === memberId);
+            if (!memberToUpdate) return;
+
+            if (memberToUpdate.isFollowing) {
+                await memberService.unfollowMember(memberId);
+            } else {
+                await memberService.followMember(memberId);
+            }
+        } catch (err) {
+            console.error("Error toggling follow status:", err);
+
+            // 서버 요청 실패 시 로컬 상태 복구
+            setMembers((prev) =>
+                prev.map((m) =>
+                    m.id === memberId ? { ...m, isFollowing: !m.isFollowing } : m
+                )
+            );
+        } finally {
+            setIsProcessing(false);
         }
     };
 
     const handleMemberClick = (memberId) => {
-        navigate(`/profile/${memberId}`); // useNavigate 훅을 사용하여 페이지 이동
+        navigate(`/profile/${memberId}`);
     };
 
     if (isLoading) return <div>Loading...</div>;
@@ -94,17 +169,17 @@ const SomeoneInfo = ({ pageData }) => {
     const stats = [
         {
             label: "반려동물",
-            value: data.pets?.length || 0
+            value: data.pets?.length || 0,
         },
         {
             label: "팔로워",
             value: data.follows?.follower || 0,
-            onClick: () => fetchMembers("followers")
+            onClick: () => fetchMembers("followers"),
         },
         {
             label: "팔로잉",
             value: data.follows?.following || 0,
-            onClick: () => fetchMembers("following")
+            onClick: () => fetchMembers("following"),
         },
     ];
 
@@ -116,7 +191,6 @@ const SomeoneInfo = ({ pageData }) => {
     return (
         <div className="max-w-2xl mx-auto p-4">
             <div className="bg-white rounded-lg shadow-lg">
-                {/* Profile section */}
                 <div className="p-6 flex flex-col sm:flex-row items-center sm:items-start gap-8">
                     <div className="shrink-0">
                         <div className="h-20 w-20 sm:w-36 sm:h-36 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
@@ -154,13 +228,12 @@ const SomeoneInfo = ({ pageData }) => {
                                 variant={data.isFollowing ? "outline" : "default"}
                                 className="w-[200px]"
                             >
-                                {data.isFollowing ? "언팔로우" : "팔로우"}
+                                {data.isFollowing ? "팔로잉" : "팔로우"}
                             </CustomButton>
                         </div>
                     </div>
                 </div>
 
-                {/* Tab navigation */}
                 <div className="border-t">
                     <div className="grid grid-cols-2 w-full">
                         {tabs.map((tab) => (
@@ -179,7 +252,6 @@ const SomeoneInfo = ({ pageData }) => {
                     </div>
                 </div>
 
-                {/* Tab content */}
                 <div className="p-6">
                     {activeTab === "pets" && (
                         <div>
@@ -198,7 +270,12 @@ const SomeoneInfo = ({ pageData }) => {
                         </div>
                     )}
                     {activeTab === "members" && (
-                        <MemberList members={members} onMemberClick={handleMemberClick} />
+                        <MemberList
+                            members={members}
+                            onMemberClick={handleMemberClick}
+                            onFollowToggle={handleFollowToggle}
+                            
+                        />
                     )}
                 </div>
             </div>
