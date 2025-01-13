@@ -1,28 +1,25 @@
 import { User } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { memberService } from '../../services/MemberService';
 import { CustomButton } from './custom-button.tsx';
 import { MemberList } from "./member-list";
 import { PetCarousel } from './pet-carousel.tsx';
 
-// props에 onPageChange 추가
 const SomeoneInfo = ({ pageData, onPageChange }) => {
-    
     const [data, setData] = useState({
         member: null,
         pets: [],
         follows: { follower: 0, following: 0 },
-        isFollowing: false
+        isFollowing: false,
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [activeTab, setActiveTab] = useState("pets");
-    const [members, setMembers] = useState([]); // 팔로워/팔로잉 목록 저장
-    // 상태 분리
     const [followers, setFollowers] = useState([]);
     const [following, setFollowing] = useState([]);
 
+    // 초기 데이터 로드
     useEffect(() => {
         const fetchData = async () => {
             if (!pageData?.memberId) return;
@@ -34,17 +31,40 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {
                     member: response.member,
                     pets: Array.isArray(response.pet) ? response.pet : (response.pet ? [response.pet] : []),
                     follows: response.follows || { follower: 0, following: 0 },
-                    isFollowing: response.isFollowing || false
+                    isFollowing: response.isFollowing || false,
                 });
                 
-                // followers와 following 데이터 모두 가져오기
+                // followers와 following 데이터 가져오기 및 팔로우 상태 확인
                 const [followersData, followingData] = await Promise.all([
                     memberService.getFollowers(pageData.memberId),
                     memberService.getFollowing(pageData.memberId)
                 ]);
+
+                // 팔로우 상태 확인 및 설정
+                const followersWithStatus = await Promise.all(
+                    followersData.map(async (member) => {
+                        try {
+                            const memberInfo = await memberService.getSomeoneInfo(member.id);
+                            return { ...member, isFollowing: memberInfo.isFollowing || false };
+                        } catch (err) {
+                            return { ...member, isFollowing: false };
+                        }
+                    })
+                );
+
+                const followingWithStatus = await Promise.all(
+                    followingData.map(async (member) => {
+                        try {
+                            const memberInfo = await memberService.getSomeoneInfo(member.id);
+                            return { ...member, isFollowing: memberInfo.isFollowing || false };
+                        } catch (err) {
+                            return { ...member, isFollowing: false };
+                        }
+                    })
+                );
                 
-                setFollowers(followersData);
-                setFollowing(followingData);
+                setFollowers(followersWithStatus);
+                setFollowing(followingWithStatus);
                 
             } catch (err) {
                 console.error('Error fetching data:', err);
@@ -57,37 +77,64 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {
         fetchData();
     }, [pageData?.memberId]);
 
-    const handleFollowClick = async () => {
-        if (!data?.member?.id || isProcessing) return;
-
+    // 팔로우/언팔로우 처리
+    const handleFollowToggle = async (memberId) => {
         setIsProcessing(true);
-        try {
-            if (data.isFollowing) {
-                await memberService.unfollowMember(data.member.id);
-                setData(prev => ({ ...prev, isFollowing: false }));
-            } else {
-                await memberService.followMember(data.member.id);
-                setData(prev => ({ ...prev, isFollowing: true }));
-            }
 
-            const updatedData = await memberService.getSomeoneInfo(pageData.memberId);
-            setData(prev => ({
-                ...prev,
-                follows: updatedData.follows || { follower: 0, following: 0 }
-            }));
+        const updateFollowStatus = (list) =>
+            list.map((m) =>
+                m.id === memberId ? { ...m, isFollowing: !m.isFollowing } : m
+            );
+
+        // 로컬 상태 즉시 업데이트
+        setFollowers(updateFollowStatus);
+        setFollowing(updateFollowStatus);
+
+        try {
+            const memberToUpdate = [...followers, ...following].find((m) => m.id === memberId);
+            if (!memberToUpdate) return;
+
+            if (memberToUpdate.isFollowing) {
+                await memberService.unfollowMember(memberId);
+            } else {
+                await memberService.followMember(memberId);
+            }
         } catch (err) {
-            console.error('Error handling follow:', err);
+            console.error("Error toggling follow status:", err);
+            // 실패 시 상태 복구
+            setFollowers(updateFollowStatus);
+            setFollowing(updateFollowStatus);
         } finally {
             setIsProcessing(false);
         }
     };
 
-    // fetchMembers 함수 수정
-    // const fetchMembers = async (type) => {
-    //     // type에 따라 이미 불러온 데이터 사용
-    //     setMembers(type === "followers" ? followers : following);
-    //     setActiveTab("members");
-    // };
+    // 프로필 팔로우/언팔로우
+    const handleFollowClick = async () => {
+        if (!data?.member?.id || isProcessing) return;
+
+        setIsProcessing(true);
+        try {
+            setData((prev) => ({
+                ...prev,
+                isFollowing: !prev.isFollowing,
+            }));
+
+            if (data.isFollowing) {
+                await memberService.unfollowMember(data.member.id);
+            } else {
+                await memberService.followMember(data.member.id);
+            }
+        } catch (err) {
+            console.error("Error handling follow:", err);
+            setData((prev) => ({
+                ...prev,
+                isFollowing: !prev.isFollowing,
+            }));
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     const handleMemberClick = (memberId, memberName) => {
         onPageChange('someoneInfo', {
@@ -120,14 +167,6 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {
     const navigationTabs = [
         { id: "pets", label: "반려동물" },
         { id: "posts", label: "게시물" }
-    ];
-    
-    // 실제 content에서 사용할 모든 탭 (navigation + followers/following)
-    const contentTabs = [
-        { id: "pets", label: "반려동물" },
-        { id: "posts", label: "게시물" },
-        { id: "followers", label: "팔로워" },
-        { id: "following", label: "팔로잉" }
     ];
 
     return (
@@ -171,13 +210,13 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {
                                 variant={data.isFollowing ? "outline" : "default"}
                                 className="w-[200px]"
                             >
-                                {data.isFollowing ? "언팔로우" : "팔로우"}
+                                {data.isFollowing ? "팔로잉" : "팔로우"}
                             </CustomButton>
                         </div>
                     </div>
                 </div>
 
-                {/* Tab navigation */}
+                {/* Navigation tabs */}
                 <div className="border-t">
                     <div className="grid grid-cols-2 w-full">
                         {navigationTabs.map((tab) => (
@@ -196,7 +235,7 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {
                     </div>
                 </div>
 
-                {/* Tab content */}
+                {/* Content section */}
                 <div className="p-6">
                     {activeTab === "pets" && (
                         <div>
@@ -216,14 +255,16 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {
                     )}
                     {activeTab === "followers" && (
                         <MemberList 
-                            members={followers} 
-                            onMemberClick={(memberId, memberName) => handleMemberClick(memberId, memberName)} 
+                            members={followers}
+                            onMemberClick={handleMemberClick}
+                            onFollowToggle={handleFollowToggle}
                         />
                     )}
                     {activeTab === "following" && (
                         <MemberList 
-                            members={following} 
-                            onMemberClick={(memberId, memberName) => handleMemberClick(memberId, memberName)} 
+                            members={following}
+                            onMemberClick={handleMemberClick}
+                            onFollowToggle={handleFollowToggle}
                         />
                     )}
                 </div>
