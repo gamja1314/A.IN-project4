@@ -270,23 +270,45 @@ class ChatServiceClass {
     });
   }
 
-  // 이전 메시지 로드
-  async loadPreviousMessages(roomId, page = 0, size = 50) {
+  async loadRecentMessages(roomId, size = 30) {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/chat/rooms/${roomId}/messages?page=${page}&size=${size}`,
-        {
-          headers: {
-            ...authService.getAuthHeader()
-          }
+      const url = `${API_BASE_URL}/api/chat/rooms/${roomId}/messages/recent?size=${size}`;
+      const response = await fetch(url, {
+        headers: {
+          ...authService.getAuthHeader()
         }
-      );
+      });
       
       if (!response.ok) {
         throw new Error('Failed to load messages');
       }
       
       return await response.json();
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+      throw error;
+    }
+  }
+  
+  // 이전 메시지 로드
+  async loadPreviousMessages(roomId, lastMessageTime, size) {
+    try {
+      let url = `${API_BASE_URL}/api/chat/rooms/${roomId}/messages?size=${size}`;
+      if (lastMessageTime) {
+        url += `&lastMessageTime=${lastMessageTime}`;
+      }
+      
+      const response = await fetch(url, {
+        headers: {
+          ...authService.getAuthHeader()
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to load messages');
+      }
+      
+      return await response.json(); // { messages: [], hasMore: boolean, lastMessageTime: string }
     } catch (error) {
       console.error('Failed to load messages:', error);
       throw error;

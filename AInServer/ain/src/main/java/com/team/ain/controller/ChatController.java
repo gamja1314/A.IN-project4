@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team.ain.config.jwt.JwtTokenProvider;
+import com.team.ain.dto.chat.ChatMessageCursor;
 import com.team.ain.dto.chat.ChatMessageDTO;
+import com.team.ain.dto.chat.ChatMessagePageResponse;
 import com.team.ain.dto.chat.ChatRoomDTO;
 import com.team.ain.dto.chat.MessageReadDTO;
 import com.team.ain.service.ChatService;
@@ -134,38 +136,56 @@ public class ChatController {
         }
     }
 
-    @GetMapping("/rooms/{roomId}/messages")
-    public ResponseEntity<List<ChatMessageDTO>> getRoomMessages(
-            @PathVariable Long roomId, HttpServletRequest request) {
-        Long userId = jwtTokenProvider.getMemberIdFromRequest(request);
-        List<ChatMessageDTO> messages = chatService.getRoomMessages(roomId, userId);
-        notificationService.readRoomMessage(roomId, userId);
-        return ResponseEntity.ok(messages);
-    }
-
     // @GetMapping("/rooms/{roomId}/messages")
-    // public ResponseEntity<ChatMessagePageResponse> getRoomMessages(
-    //         @PathVariable Long roomId,
-    //         @RequestParam(required = false) LocalDateTime lastMessageTime,
-    //         @RequestParam(defaultValue = "50") int size,
-    //         HttpServletRequest request) {
-        
+    // public ResponseEntity<List<ChatMessageDTO>> getRoomMessages(
+    //         @PathVariable Long roomId, HttpServletRequest request) {
     //     Long userId = jwtTokenProvider.getMemberIdFromRequest(request);
-        
-    //     ChatMessagePageResponse response = chatService.getRoomMessages(
-    //         roomId, 
-    //         userId,
-    //         ChatMessageCursor.builder()
-    //             .lastMessageTime(lastMessageTime)
-    //             .pageSize(size)
-    //             .build()
-    //     );
-        
-    //     // 메시지 읽음 처리
+    //     List<ChatMessageDTO> messages = chatService.getRoomMessages(roomId, userId);
     //     notificationService.readRoomMessage(roomId, userId);
-        
-    //     return ResponseEntity.ok(response);
+    //     return ResponseEntity.ok(messages);
     // }
+
+    @GetMapping("/rooms/{roomId}/messages/recent")
+    public ResponseEntity<ChatMessagePageResponse> getRecentMessage(
+            @PathVariable Long roomId,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+        Long userId = jwtTokenProvider.getMemberIdFromRequest(request);
+        ChatMessagePageResponse response = chatService.getRoomMessages(
+            roomId, 
+            userId,
+            ChatMessageCursor.builder()
+                .pageSize(size)
+                .build()
+        );
+        notificationService.readRoomMessage(roomId, userId);
+        System.out.println("GetRecentMessage > lastMessageTime : " + response.getLastMessageTime());
+        return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/rooms/{roomId}/messages")
+    public ResponseEntity<ChatMessagePageResponse> getRoomMessages(
+            @PathVariable Long roomId,
+            @RequestParam(required = false) LocalDateTime lastMessageTime,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+        
+        Long userId = jwtTokenProvider.getMemberIdFromRequest(request);
+        
+        ChatMessagePageResponse response = chatService.getRoomMessages(
+            roomId, 
+            userId,
+            ChatMessageCursor.builder()
+                .lastMessageTime(lastMessageTime)
+                .pageSize(size)
+                .build()
+        );
+        
+        // 메시지 읽음 처리
+        notificationService.readRoomMessage(roomId, userId);
+        System.out.println("getRoomMessages > lastMessageTime : " + response.getLastMessageTime());
+        return ResponseEntity.ok(response);
+    }
     
     
     // 채팅방의 이전 메시지 조회 (선택적 기능)
