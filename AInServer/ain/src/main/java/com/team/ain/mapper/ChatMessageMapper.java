@@ -14,4 +14,5 @@ public interface ChatMessageMapper {
     Integer getMessageCounts(Long userId);
     int countUnreadMessages(Long memberId);
     List<ChatMessageDTO> findMessagesWithCursor(Long roomId, ChatMessageCursor cursor);
+    List<ChatMessageDTO> findRecentMessages(Long roomId, int size);
 }

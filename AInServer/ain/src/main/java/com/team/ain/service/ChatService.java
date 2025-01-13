@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.team.ain.dto.chat.ChatMember;
+import com.team.ain.dto.chat.ChatMessageCursor;
 import com.team.ain.dto.chat.ChatMessageDTO;
+import com.team.ain.dto.chat.ChatMessagePageResponse;
 import com.team.ain.dto.chat.ChatRoomDTO;
 import com.team.ain.mapper.ChatMessageMapper;
 import com.team.ain.mapper.ChatRoomMapper;
@@ -77,34 +79,56 @@ public class ChatService {
     }
 
     // 채팅방 메시지 가져오기
-    public List<ChatMessageDTO> getRoomMessages(Long roomId, Long userId) {
+    // public List<ChatMessageDTO> getRoomMessages(Long roomId, Long userId) {
+    //     chatRoomMapper.readChatRoom(roomId, userId);
+    //     return chatMessageMapper.findMessagesByRoomId(roomId);
+    // }
+
+    public ChatMessagePageResponse getRoomMessages(Long roomId, Long userId, ChatMessageCursor cursor) {
+        // 읽음 처리
         chatRoomMapper.readChatRoom(roomId, userId);
-        return chatMessageMapper.findMessagesByRoomId(roomId);
+        
+        // 메시지 조회
+        List<ChatMessageDTO> messages = chatMessageMapper.findMessagesWithCursor(
+            roomId, 
+            cursor
+        );
+        
+        // 다음 페이지 존재 여부 확인
+        boolean hasMore = messages.size() >= cursor.getPageSize();
+        
+        // 마지막 메시지 시간 (다음 페이지 요청시 커서로 사용)
+        LocalDateTime lastMessageTime = messages.isEmpty() ? null 
+            : messages.get(messages.size() - 1).getCreatedAt();
+        
+        return ChatMessagePageResponse.builder()
+            .messages(messages)
+            .hasMore(hasMore)
+            .lastMessageTime(lastMessageTime)
+            .build();
     }
 
-    // public ChatMessagePageResponse getRoomMessages(Long roomId, Long userId, ChatMessageCursor cursor) {
-    //     // 읽음 처리
-    //     chatRoomMapper.readChatRoom(roomId, userId);
+    // ChatService에 최근 메시지 조회 메소드 추가
+    public ChatMessagePageResponse getRecentRoomMessages(Long roomId, Long userId, int size) {
+        // 읽음 처리
+        chatRoomMapper.readChatRoom(roomId, userId);
         
-    //     // 메시지 조회
-    //     List<ChatMessageDTO> messages = chatMessageMapper.findMessagesWithCursor(
-    //         roomId, 
-    //         cursor
-    //     );
+        // 최근 메시지 조회
+        List<ChatMessageDTO> messages = chatMessageMapper.findRecentMessages(roomId, size);
         
-    //     // 다음 페이지 존재 여부 확인
-    //     boolean hasMore = messages.size() >= cursor.getPageSize();
+        // 다음 페이지 존재 여부 확인
+        boolean hasMore = messages.size() >= size;
         
-    //     // 마지막 메시지 시간 (다음 페이지 요청시 커서로 사용)
-    //     LocalDateTime lastMessageTime = messages.isEmpty() ? null 
-    //         : messages.get(messages.size() - 1).getCreatedAt();
+        // 첫 번째 메시지의 시간을 lastMessageTime으로 설정 (이전 메시지 로드 시 사용)
+        LocalDateTime lastMessageTime = messages.isEmpty() ? null 
+            : messages.get(0).getCreatedAt();
         
-    //     return ChatMessagePageResponse.builder()
-    //         .messages(messages)
-    //         .hasMore(hasMore)
-    //         .lastMessageTime(lastMessageTime)
-    //         .build();
-    // }
+        return ChatMessagePageResponse.builder()
+            .messages(messages)
+            .hasMore(hasMore)
+            .lastMessageTime(lastMessageTime)
+            .build();
+    }
 
     public ChatRoomDTO getRoomById(Long roomId) {
         return chatRoomMapper.findRoomById(roomId);
