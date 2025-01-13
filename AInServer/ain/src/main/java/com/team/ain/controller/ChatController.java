@@ -186,15 +186,15 @@ public class ChatController {
         System.out.println("getRoomMessages > lastMessageTime : " + response.getLastMessageTime());
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/rooms/{roomId}/leave")
+    public ResponseEntity<?> leaveRoom(@PathVariable Long roomId, HttpServletRequest request) {
+        Long userId = jwtTokenProvider.getMemberIdFromRequest(request);
+        chatService.leaveRoom(roomId, userId);
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "채팅방을 나갔습니다.");
+        return ResponseEntity.ok(response);
+    }
     
-    
-    // 채팅방의 이전 메시지 조회 (선택적 기능)
-    // @GetMapping("/rooms/{roomId}/messages")
-    // public ResponseEntity<List<ChatMessageDTO>> getRoomMessages(
-    //         @PathVariable Long roomId,
-    //         HttpServletRequest request) {
-    //     Long memberId = jwtTokenProvider.getMemberIdFromRequest(request);
-    //     // 메시지 조회 로직 구현 필요
-    //     return ResponseEntity.ok().build();
-    // }
 }
