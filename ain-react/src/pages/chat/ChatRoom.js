@@ -11,11 +11,32 @@ const ChatRoom = ({ roomId, currentUser, onPageChange, onMessageSent, onExit }) 
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const chatContainerRef = useRef(null);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
+
+  const scrollToBottom = useCallback(() => {
+    if (shouldScrollToBottom && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [shouldScrollToBottom]);
+
+  // 스크롤 이벤트 핸들러
+  const handleScroll = useCallback(() => {
+    if (!chatContainerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+    const isNearBottom = scrollHeight - (scrollTop + clientHeight) < 100;
+    setShouldScrollToBottom(isNearBottom);
+  }, []);
 
   const handleMessage = useCallback((message) => {
     const receivedMessage = JSON.parse(message.body);
     setMessages(prev => [...prev, receivedMessage]);
-}, []);
+    // 새 메시지가 현재 사용자의 것이거나 스크롤이 하단에 있을 때만 자동 스크롤
+    if (receivedMessage.senderId === currentUser.id || shouldScrollToBottom) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [currentUser.id, scrollToBottom, shouldScrollToBottom]);
 
   const handleTyping = useCallback((message) => {
     const { userId, isTyping } = JSON.parse(message.body);
@@ -40,12 +61,13 @@ const ChatRoom = ({ roomId, currentUser, onPageChange, onMessageSent, onExit }) 
     try {
       const data = await ChatService.loadPreviousMessages(roomId);
       setMessages(data);
-      // 이전 메시지를 성공적으로 불러온 후 메시지 카운트 새로고침
+      // 초기 메시지 로드 후 스크롤을 맨 아래로
+      setTimeout(scrollToBottom, 100);
       onMessageSent?.();
     } catch (error) {
       setError('Failed to load messages');
     }
-  }, [roomId, onMessageSent]);
+  }, [roomId, onMessageSent, scrollToBottom]);
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -66,9 +88,10 @@ const ChatRoom = ({ roomId, currentUser, onPageChange, onMessageSent, onExit }) 
       ChatService.sendMessage(chatMessage);
       setInputMessage('');
       ChatService.sendTypingStatus(roomId, currentUser.id, false);
+      setShouldScrollToBottom(true);
     } catch (err) {
       setError('Failed to send message');
-      console.log(err)
+      console.log(err);
     }
   };
 
@@ -101,8 +124,15 @@ const ChatRoom = ({ roomId, currentUser, onPageChange, onMessageSent, onExit }) 
         memberId: senderId,
         name: senderName
     });
-};
+  };
   
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.addEventListener('scroll', handleScroll);
+      return () => chatContainerRef.current?.removeEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll]);
+
   useEffect(() => {
     ChatService.connect(
       roomId,
@@ -111,7 +141,7 @@ const ChatRoom = ({ roomId, currentUser, onPageChange, onMessageSent, onExit }) 
       () => {
         setIsConnected(true);
         setError(null);
-        loadPreviousMessages();  // 여기서 loadPreviousMessages가 호출되고, 그 안에서 메시지 카운트가 새로고침됨
+        loadPreviousMessages();
       },
       setError
     );

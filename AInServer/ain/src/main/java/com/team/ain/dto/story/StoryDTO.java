@@ -2,13 +2,17 @@ package com.team.ain.dto.story;
 
 import java.time.LocalDateTime;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class StoryDTO {
     private Long id;
     private Long memberId;
     private String content;
+    private String mediaUrl;
+    private String mediaType;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
     private String status;

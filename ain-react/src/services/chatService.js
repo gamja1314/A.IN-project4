@@ -5,6 +5,7 @@ import { socketService } from "./SocketService";
 class ChatServiceClass {
   constructor() {
     this.client = null;
+    this.subscriptions = new Map(); // 구독 정보를 저장할 Map
   }
 
   // 채팅방 생성
@@ -217,30 +218,51 @@ class ChatServiceClass {
 
   // WebSocket 관련 메서드들
   connect(roomId, onMessageCallback, onTypingCallback, onConnectedCallback, onErrorCallback) {
+    // 기존 구독이 있다면 모두 해제
+    this.disconnect();
+    
     // 채팅 메시지 구독
-    socketService.subscribe(
+    const messageSubscription = socketService.subscribe(
       `/topic/chat/${roomId}`,
       onMessageCallback
     );
-    
+
     // 타이핑 알림 구독
-    socketService.subscribe(
+    const typingSubscription = socketService.subscribe(
       `/topic/typing/${roomId}`,
       onTypingCallback
     );
+
+    // 구독 정보 저장
+    this.subscriptions.set('message', messageSubscription);
+    this.subscriptions.set('typing', typingSubscription);
 
     // Socket 연결
     socketService.connect(onConnectedCallback, onErrorCallback);
   }
 
+  // 연결 해제
   disconnect() {
+    // 모든 구독 해제
+    for (let subscription of this.subscriptions.values()) {
+      if (subscription) {
+        socketService.unsubscribe(subscription);
+      }
+    }
+    
+    // 구독 정보 초기화
+    this.subscriptions.clear();
+    
+    // Socket 연결 해제
     socketService.disconnect();
   }
 
+  // 메시지 전송
   sendMessage(message) {
     socketService.publish('/app/chat/message', message);
   }
 
+  // 타이핑 상태 전송
   sendTypingStatus(roomId, userId, isTyping) {
     socketService.publish(`/app/typing/${roomId}`, {
       userId,
@@ -248,16 +270,22 @@ class ChatServiceClass {
     });
   }
 
-  async loadPreviousMessages(roomId) {
+  // 이전 메시지 로드
+  async loadPreviousMessages(roomId, page = 0, size = 50) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/chat/rooms/${roomId}/messages`, {
-        headers: {
-          ...authService.getAuthHeader()
+      const response = await fetch(
+        `${API_BASE_URL}/api/chat/rooms/${roomId}/messages?page=${page}&size=${size}`,
+        {
+          headers: {
+            ...authService.getAuthHeader()
+          }
         }
-      });
+      );
+      
       if (!response.ok) {
         throw new Error('Failed to load messages');
       }
+      
       return await response.json();
     } catch (error) {
       console.error('Failed to load messages:', error);

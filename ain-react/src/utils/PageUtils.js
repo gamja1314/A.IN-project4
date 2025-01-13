@@ -1,4 +1,4 @@
-import { HomePage, PlacePage, CommunityPage, SearchPage, MyPage, LoginPage, SomeoneInfo, CreateStory, MyStories } from '../pages';
+import { HomePage, PlacePage, CommunityPage, SearchPage, MyPage, LoginPage, SomeoneInfo, CreateStory, MyStories, ViewStory } from '../pages';
 import { ProtectedRoute } from './ProtectedRoute';
 import ChatRoom from '../pages/chat/ChatRoom';
 
@@ -12,7 +12,8 @@ const PROTECTED_PAGES = {
   'chatRoom': true,
   'someoneInfo': false,
   'createStory': true,
-  'MyStories': true
+  'MyStories': true,
+  'viewStory': true
 };
 
 export const getPageTitle = (currentPage, pageData = {}) => {
@@ -26,6 +27,7 @@ export const getPageTitle = (currentPage, pageData = {}) => {
     case 'someoneInfo': return `${pageData?.name}`;
     case 'createStory': return '스토리 만들기';
     case 'myStories': return '내 스토리';
+    case 'viewStory': return `${pageData?.memberName}의 스토리`;
     default: return '애니멀 인사이드';
   }
 };
@@ -50,12 +52,18 @@ export const renderPage = (currentPage, pageData = {}, onPageChange, refreshMess
             onPageChange(page, data);
           }} 
         />;
+      case 'viewStory':
+        return <ViewStory 
+          memberId={pageData?.memberId}
+          memberName={pageData?.memberName}
+          onPageChange={onPageChange}
+        />;
       case 'login': return <LoginPage />;
       case 'place': return <PlacePage />;
       case 'home': return <HomePage onPageChange={onPageChange} />;
       case 'search': return <SearchPage />;
       case 'mypage': return <MyPage />;
-      case 'someoneInfo': return <SomeoneInfo pageData={pageData} />;
+      case 'someoneInfo': return <SomeoneInfo pageData={pageData} onPageChange={onPageChange} />;
       case 'createStory': return <CreateStory onPageChange={onPageChange} />;
       case 'myStories': return <MyStories onPageChange={onPageChange} />;
       default: return <HomePage />;

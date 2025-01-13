@@ -14,7 +14,10 @@ export const MemberList = ({ members, onMemberClick, onFollowToggle }) => {
                     key={member.id}
                     className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg"
                 >
-                    <div className="flex items-center space-x-3 cursor-pointer" onClick={() => onMemberClick(member.id)}>
+                    <div 
+                        className="flex items-center space-x-3 cursor-pointer hover:text-blue-500" 
+                        onClick={() => onMemberClick(member.id, member.name)}
+                    >
                         <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                             {member.profilePictureUrl ? (
                                 <img
@@ -28,16 +31,22 @@ export const MemberList = ({ members, onMemberClick, onFollowToggle }) => {
                         </div>
                         <span className="font-medium">{member.name}</span>
                     </div>
-                    <CustomButton
-                        variant={member.isFollowing ? "outline" : "default"}
-                        size="sm"
-                        onClick={() => onFollowToggle(member.id)}
-                    >
-                        {member.isFollowing ? "팔로잉" : "팔로우"}
-                    </CustomButton>
+                    {onFollowToggle && (
+                        <CustomButton
+                            variant={member.isFollowing ? "outline" : "default"}
+                            size="sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onFollowToggle(member.id);
+                            }}
+                        >
+                            {member.isFollowing ? "팔로잉" : "팔로우"}
+                        </CustomButton>
+                    )}
                 </li>
             ))}
         </ul>
     );
 };
 
+export default MemberList;

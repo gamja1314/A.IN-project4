@@ -17,9 +17,10 @@ public class StoryService {
 
     // 스토리 생성
     public void createStory(StoryDTO storyDTO) {
-        // content 유효성 검사 추가
-        if (storyDTO.getContent() == null || storyDTO.getContent().trim().isEmpty()) {
-            throw new IllegalArgumentException("스토리 내용을 입력해주세요.");
+        // content와 mediaUrl 둘 다 없는 경우에만 에러
+        if ((storyDTO.getContent() == null || storyDTO.getContent().trim().isEmpty()) 
+            && (storyDTO.getMediaUrl() == null || storyDTO.getMediaUrl().trim().isEmpty())) {
+            throw new IllegalArgumentException("스토리 내용이나 미디어 파일을 입력해주세요.");
         }
 
         // 멤버 존재 여부 확인
