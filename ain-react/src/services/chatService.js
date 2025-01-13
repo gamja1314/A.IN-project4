@@ -291,7 +291,7 @@ class ChatServiceClass {
   }
   
   // 이전 메시지 로드
-  async loadPreviousMessages(roomId, lastMessageTime, size) {
+  async loadPreviousMessages(roomId, lastMessageTime, size = 30) {
     try {
       let url = `${API_BASE_URL}/api/chat/rooms/${roomId}/messages?size=${size}`;
       if (lastMessageTime) {

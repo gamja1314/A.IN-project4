@@ -156,4 +156,12 @@ public class ChatService {
         
         return new PageImpl<>(rooms, pageable, total);
     }
+
+    public void leaveRoom(Long roomId, Long userId) {
+        ChatMember chatMember = ChatMember.builder()
+            .roomId(roomId)
+            .memberId(userId)
+            .build();
+        chatRoomMapper.leaveChatRoom(chatMember);
+    }
 }
