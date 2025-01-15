@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Image, X } from 'lucide-react';
 import { API_BASE_URL } from "../../config/apiConfig";
 import { authService } from '../../services/authService';
@@ -11,6 +11,7 @@ const CreateStory = ({ onPageChange }) => {
   const [previewUrl, setPreviewUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const textareaRef = useRef(null);
 
   const ALLOWED_FILE_TYPES = {
     'image/jpeg': true,
@@ -20,6 +21,18 @@ const CreateStory = ({ onPageChange }) => {
     'video/mp4': true,
     'video/quicktime': true, // MOV 파일
   };
+
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [content]);
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -50,7 +63,7 @@ const CreateStory = ({ onPageChange }) => {
       onPageChange('login');
       return;
     }
-  
+    
     // 내용과 미디어 파일이 모두 없는 경우
     if (!content.trim() && !mediaFile) {
       setError('스토리 내용이나 미디어 파일을 입력해주세요.');
@@ -67,7 +80,7 @@ const CreateStory = ({ onPageChange }) => {
       if (mediaFile) {
         formData.append('mediaFile', mediaFile);
       }
-  
+      
       // 스토리 생성 요청 (한 번의 요청으로 처리)
       const response = await fetch(`${API_BASE_URL}/api/stories`, {
         method: 'POST',
@@ -100,47 +113,65 @@ const CreateStory = ({ onPageChange }) => {
   const isVideo = mediaFile?.type.startsWith('video/');
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="fixed top-0 left-0 right-0 bg-white border-b z-[1000] max-w-md mx-auto">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button onClick={() => onPageChange('home')} className="text-gray-800">
-            <ArrowLeft size={24} />
-          </button>
-          <h1 className="text-lg font-semibold">스토리 만들기</h1>
-          <button
-            onClick={handleSubmit}
-            disabled={loading || (!content.trim() && !mediaFile)}
-            className={`px-4 py-1 rounded-full ${
-              loading || (!content.trim() && !mediaFile)
-                ? 'bg-blue-200 text-white'
-                : 'bg-blue-500 text-white'
-            }`}
-          >
-            {loading ? '게시 중...' : '게시'}
-          </button>
-        </div>
+    <div className="min-h-screen bg-white flex flex-col">
+      <div className="bg-white border-b px-4 py-3 flex items-center justify-between">
+        <button onClick={() => onPageChange('home')} className="text-gray-800">
+          <ArrowLeft size={24} />
+        </button>
+        <h1 className="text-lg font-semibold">스토리 만들기</h1>
+        <button
+          onClick={handleSubmit}
+          disabled={loading || (!content.trim() && !mediaFile)}
+          className={`px-4 py-1 rounded-full ${
+            loading || (!content.trim() && !mediaFile)
+              ? 'bg-blue-200 text-white'
+              : 'bg-blue-500 text-white'
+          }`}
+        >
+          {loading ? '게시 중...' : '게시'}
+        </button>
       </div>
 
-      <div className="pt-16 px-4">
+      <div className="flex-1 px-3 py-2 bg-white">
         {error && (
           <div className="mb-4 p-3 bg-red-50 text-red-500 rounded-lg">
             {error}
           </div>
         )}
 
+        <div className="mb-4">
+          <label className="block">
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png,.gif,.mp4,.mov"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <div className="flex items-center justify-center p-2 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+              <div className="flex flex-col items-center">
+                <Image size={24} className="text-gray-400 mb-2" />
+                <span className="text-gray-600">사진/동영상 추가</span>
+                <span className="text-gray-400 text-sm mt-1">
+                  (JPG, PNG, MP4, MOV, GIF)
+                </span>
+              </div>
+            </div>
+          </label>
+        </div>
+
         {previewUrl && (
           <div className="relative mb-4">
             {isVideo ? (
               <video 
                 src={previewUrl} 
-                className="w-full rounded-lg" 
+                className="w-full rounded-lg max-h-64 object-contain" 
                 controls
               />
             ) : (
               <img 
                 src={previewUrl} 
                 alt="Preview" 
-                className="w-full rounded-lg"
+                className="w-full rounded-lg max-h-64 object-contain"
               />
             )}
             <button
@@ -153,35 +184,18 @@ const CreateStory = ({ onPageChange }) => {
         )}
 
         <textarea
-          className="w-full h-[calc(100vh-8rem)] p-4 border-none resize-none focus:ring-0 focus:outline-none"
+          ref={textareaRef}
+          className="w-full p-4 border-none focus:ring-0 focus:outline-none bg-white"
           placeholder="스토리를 작성해보세요..."
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => {
+            setContent(e.target.value);
+          }}
           disabled={loading}
           autoFocus
+          rows={1}
+          style={{ overflow: 'hidden' }}
         />
-
-        <div className="mt-4">
-          <label className="block">
-            <input
-              type="file"
-              accept=".jpg,.jpeg,.png,.gif,.mp4,.mov"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-            <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
-              <div className="flex flex-col items-center">
-                <div className="flex items-center mb-2">
-                  <Image size={24} className="text-gray-400" />
-                </div>
-                <span className="text-gray-600">사진/동영상 추가</span>
-                <span className="text-gray-400 text-sm mt-1">
-                  (JPG, PNG, MP4, MOV, GIF)
-                </span>
-              </div>
-            </div>
-          </label>
-        </div>
       </div>
     </div>
   );

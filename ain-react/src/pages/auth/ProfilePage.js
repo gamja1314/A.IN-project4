@@ -8,7 +8,7 @@ import { API_BASE_URL } from "../../config/apiConfig";
 import { useAuth } from "../../hooks/useAuth";
 import { authService } from "../../services/authService";
 import './MyPage.css';
-import ProfileEditModal from './ProfileEditModal';
+import ProfileEditModal from './ProfileEditModal.js';
 
 const ProfilePage = ({ pageData, onPageChange }) => {
   const { logout } = useAuth();
