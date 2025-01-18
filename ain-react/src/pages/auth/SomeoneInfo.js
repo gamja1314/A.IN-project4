@@ -6,7 +6,7 @@ import { CustomButton } from './custom-button.tsx';
 import { MemberList } from "./member-list";
 import { PetCarousel } from './pet-carousel.tsx';
 
-const SomeoneInfo = ({ pageData }) => {
+const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추가
     const navigate = useNavigate();
 
     const [data, setData] = useState({
@@ -174,12 +174,20 @@ const SomeoneInfo = ({ pageData }) => {
         {
             label: "팔로워",
             value: data.follows?.follower || 0,
-            onClick: () => fetchMembers("followers"),
+            onClick: () => onPageChange('followerList', { 
+                memberId: pageData.memberId,
+                listType: 'followers',
+                name: data.member?.name
+            }),
         },
         {
             label: "팔로잉",
             value: data.follows?.following || 0,
-            onClick: () => fetchMembers("following"),
+            onClick: () => onPageChange('followerList', { 
+                memberId: pageData.memberId,
+                listType: 'following',
+                name: data.member?.name
+            }),
         },
     ];
 
