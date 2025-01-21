@@ -1,13 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { API_BASE_URL } from "../../config/apiConfig";
 import { authService } from '../../services/authService';
+import StoryComment from './StoryComment';
+
+// 특정 회원의 스토리 조회
+
+// StoryCommentButton 컴포넌트 추가
+const StoryCommentButton = ({ onClick }) => {
+  return (
+    <div className="fixed bottom-24 left-0 right-0 flex justify-center z-50">
+      <button
+        onClick={onClick}
+        className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"
+      >
+        <MessageCircle size={20} />
+        <span>댓글</span>
+      </button>
+    </div>
+  );
+};
 
 const MyStories = ({ onPageChange }) => {
   const [stories, setStories] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showComments, setShowComments] = useState(false);
 
   useEffect(() => {
     const fetchMyStories = async () => {
@@ -35,12 +54,14 @@ const MyStories = ({ onPageChange }) => {
   const handleNext = () => {
     if (currentIndex < stories.length - 1) {
       setCurrentIndex(prev => prev + 1);
+      setShowComments(false); // 다음 스토리로 넘어갈 때 댓글창 닫기
     }
   };
 
   const handlePrev = () => {
     if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
+      setShowComments(false); // 이전 스토리로 넘어갈 때 댓글창 닫기
     }
   };
 
@@ -61,21 +82,17 @@ const MyStories = ({ onPageChange }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex justify-center items-center">
-        <div className="max-w-md w-full bg-black">
-          <p className="text-white text-center">로딩 중...</p>
-        </div>
+      <div className="min-h-screen bg-black flex justify-center items-center">
+        <p className="text-white text-center">로딩 중...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex justify-center items-center">
-        <div className="max-w-md w-full bg-black">
-          <div className="text-white bg-red-500/50 p-4 rounded-lg text-center">
-            {error}
-          </div>
+      <div className="min-h-screen bg-black flex justify-center items-center">
+        <div className="text-white bg-red-500/50 p-4 rounded-lg text-center">
+          {error}
         </div>
       </div>
     );
@@ -83,8 +100,8 @@ const MyStories = ({ onPageChange }) => {
 
   if (stories.length === 0) {
     return (
-      <div className="min-h-screen bg-white flex justify-center items-center">
-        <div className="max-w-md w-full bg-black flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-black flex justify-center items-center">
+        <div className="max-w-md w-full flex flex-col items-center justify-center p-4">
           <p className="text-white mb-4">작성한 스토리가 없습니다.</p>
           <button
             onClick={() => onPageChange('createStory')}
@@ -100,8 +117,8 @@ const MyStories = ({ onPageChange }) => {
   const currentStory = stories[currentIndex];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-md mx-auto bg-black relative min-h-screen">
+    <div className="min-h-screen bg-black">
+      <div className="max-w-md mx-auto relative min-h-screen">
         {/* 헤더 */}
         <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 bg-black/50">
           <div className="flex items-center justify-between px-4 py-3">
@@ -150,33 +167,32 @@ const MyStories = ({ onPageChange }) => {
         </div>
 
         {/* 스토리 내용 */}
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          {currentStory.mediaUrl && (
-            <div className="w-full mb-4">
-              {currentStory.mediaType === 'VIDEO' ? (
-                <video 
-                  src={currentStory.mediaUrl}
-                  className="w-full rounded-lg object-contain max-h-[60vh]"
-                  controls
-                  autoPlay
-                  playsInline
-                  muted
-                />
-              ) : (
-                <img
-                  src={currentStory.mediaUrl}
-                  alt="Story content"
-                  className="w-full rounded-lg object-contain max-h-[60vh]"
-                />
-              )}
-            </div>
-          )}
-          {currentStory.content && (
-            <p className="text-white text-center mt-4">
+        <div className="flex items-center justify-center min-h-screen p-4">
+          {currentStory.mediaUrl ? (
+            currentStory.mediaType === 'VIDEO' ? (
+              <video
+                src={currentStory.mediaUrl}
+                className="max-h-[80vh] w-auto"
+                controls
+                autoPlay
+                loop
+              />
+            ) : (
+              <img
+                src={currentStory.mediaUrl}
+                alt="Story"
+                className="max-h-[80vh] w-auto object-contain"
+              />
+            )
+          ) : (
+            <p className="text-white text-center">
               {currentStory.content}
             </p>
           )}
         </div>
+
+        {/* 댓글 버튼 */}
+        <StoryCommentButton onClick={() => setShowComments(true)} />
 
         {/* 네비게이션 버튼 */}
         {currentIndex > 0 && (
@@ -198,6 +214,16 @@ const MyStories = ({ onPageChange }) => {
               <ChevronRight size={40} />
             </button>
           </div>
+        )}
+
+        {/* 댓글 컴포넌트 */}
+        {showComments && (
+          <StoryComment
+            storyId={currentStory.id}
+            storyMemberId={currentStory.memberId}
+            onClose={() => setShowComments(false)}
+            onPageChange={onPageChange}
+          />
         )}
       </div>
     </div>

@@ -11,7 +11,6 @@ const StoryComment = ({ storyId, storyMemberId, onClose, onPageChange }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 댓글 목록 가져오기
   const fetchComments = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/stories/${storyId}/comments`, {
@@ -38,7 +37,6 @@ const StoryComment = ({ storyId, storyMemberId, onClose, onPageChange }) => {
     });
   };
 
-  // 대댓글 가져오기
   const fetchReplies = async (commentId) => {
     try {
       const response = await fetch(
@@ -64,7 +62,6 @@ const StoryComment = ({ storyId, storyMemberId, onClose, onPageChange }) => {
     }
   };
 
-  // 댓글 작성 처리
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -96,7 +93,6 @@ const StoryComment = ({ storyId, storyMemberId, onClose, onPageChange }) => {
     }
   };
 
-  // 대댓글 토글
   const toggleReplies = async (commentId) => {
     if (!expandedComments[commentId]) {
       await fetchReplies(commentId);
@@ -128,7 +124,6 @@ const StoryComment = ({ storyId, storyMemberId, onClose, onPageChange }) => {
   return (
     <div className="fixed inset-0 z-[1001] bg-black bg-opacity-50">
       <div className="fixed bottom-0 left-0 right-0 max-h-[80vh] bg-white rounded-t-lg overflow-hidden">
-        {/* 헤더 */}
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="text-lg font-semibold">댓글</h3>
           <button onClick={onClose}>
@@ -136,20 +131,17 @@ const StoryComment = ({ storyId, storyMemberId, onClose, onPageChange }) => {
           </button>
         </div>
 
-        {/* 에러 메시지 */}
         {error && (
           <div className="p-4 bg-red-50 text-red-500">
             {error}
           </div>
         )}
 
-        {/* 댓글 목록 */}
         <div className="overflow-y-auto max-h-[calc(80vh-8rem)] p-4">
           {comments.map(comment => (
             <div key={comment.id} className="mb-4">
-              {/* 댓글 */}
               <div className="flex items-start space-x-2">
-              <div 
+                <div 
                   className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={() => handleProfileClick(comment.memberId, comment.memberName)}
                 >
@@ -174,10 +166,10 @@ const StoryComment = ({ storyId, storyMemberId, onClose, onPageChange }) => {
                 <div className="flex-1">
                   <div className="bg-gray-100 rounded-lg p-2">
                     <div className="flex items-center gap-2">
-                    <p className="font-semibold text-sm">{comment.memberName}</p>
-                    {comment.memberId === storyMemberId && (
-                      <span className="text-xs text-red-500">작성자</span>
-                    )}
+                      <p className="font-semibold text-sm">{comment.memberName}</p>
+                      {comment.memberId === storyMemberId && (
+                        <span className="text-xs text-red-500">작성자</span>
+                      )}
                     </div>
                     <p className="text-sm">{comment.content}</p>
                   </div>
@@ -206,7 +198,6 @@ const StoryComment = ({ storyId, storyMemberId, onClose, onPageChange }) => {
                 </div>
               </div>
 
-              {/* 대댓글 */}
               {expandedComments[comment.id] && comment.replies && (
                 <div className="ml-10 mt-2 space-y-2">
                   {comment.replies.map(reply => (
@@ -255,7 +246,6 @@ const StoryComment = ({ storyId, storyMemberId, onClose, onPageChange }) => {
           ))}
         </div>
 
-        {/* 댓글 입력 폼 */}
         <div className="p-4 border-t">
           {replyTo && (
             <div className="flex items-center justify-between mb-2 p-2 bg-gray-100 rounded">
