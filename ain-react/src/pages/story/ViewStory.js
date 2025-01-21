@@ -1,13 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { API_BASE_URL } from "../../config/apiConfig";
 import { authService } from '../../services/authService';
+import StoryComment from './StoryComment';
+
+// HomePage에 사용자 스토리 조회
+
+// StoryCommentButton 컴포넌트
+const StoryCommentButton = ({ onClick }) => {
+  return (
+    <div className="fixed bottom-24 left-0 right-0 flex justify-center z-50">
+      <button
+        onClick={onClick}
+        className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"
+      >
+        <MessageCircle size={20} />
+        <span>댓글</span>
+      </button>
+    </div>
+  );
+};
 
 const ViewStory = ({ onPageChange, memberId, memberName }) => {
   const [stories, setStories] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showComments, setShowComments] = useState(false);
 
   useEffect(() => {
     const fetchUserStories = async () => {
@@ -45,12 +64,14 @@ const ViewStory = ({ onPageChange, memberId, memberName }) => {
   const handleNext = () => {
     if (currentIndex < stories.length - 1) {
       setCurrentIndex(prev => prev + 1);
+      setShowComments(false); // 다음 스토리로 넘어갈 때 댓글창 닫기
     }
   };
 
   const handlePrev = () => {
     if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
+      setShowComments(false); // 이전 스토리로 넘어갈 때 댓글창 닫기
     }
   };
 
@@ -180,6 +201,9 @@ const ViewStory = ({ onPageChange, memberId, memberName }) => {
           )}
         </div>
 
+        {/* 댓글 버튼 */}
+        <StoryCommentButton onClick={() => setShowComments(true)} />
+
         {/* 네비게이션 버튼 */}
         {currentIndex > 0 && (
           <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -200,6 +224,16 @@ const ViewStory = ({ onPageChange, memberId, memberName }) => {
               <ChevronRight size={40} />
             </button>
           </div>
+        )}
+
+        {/* 댓글 컴포넌트 */}
+        {showComments && (
+          <StoryComment
+            storyId={currentStory.id}
+            storyMemberId={currentStory.memberId}
+            onClose={() => setShowComments(false)}
+            onPageChange={onPageChange}
+          />
         )}
       </div>
     </div>
