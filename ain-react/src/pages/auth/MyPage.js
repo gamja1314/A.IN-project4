@@ -5,7 +5,6 @@ import { authService } from "../../services/authService";
 import './MyPage.css';
 import ProfileEditModal from './ProfileEditModal';
 
-
 const MyPage = () => {
   const { logout } = useAuth();
   const [error, setError] = useState("");
@@ -77,8 +76,6 @@ const MyPage = () => {
     { label: "팔로워", value: memberInfo?.follows?.follower || 0 },
     { label: "팔로잉", value: memberInfo?.follows?.following || 0 }
   ];
-  
-  
 
   const tabs = [
     { id: "pets", label: "반려동물" },
@@ -128,10 +125,8 @@ const MyPage = () => {
 
   console.log("Current memberInfo:", memberInfo);
 
-
   //1215 프로필 업뎃
   const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
-
   const handleProfileUpdateSuccess = async () => {
     // 프로필 업데이트 후 회원 정보 다시 가져오기
     try {
@@ -278,7 +273,6 @@ const MyPage = () => {
           </div>
         )}
 
-
             {activeTab === "posts" && (
               <div className="py-10 text-center text-sm text-gray-500">아직 게시물이 없습니다.</div>
             )}
@@ -338,8 +332,6 @@ const MyPage = () => {
               </button>
             ))}
         </div>
-
-
 
         {petModalOpen && (
           <div className="modal">
@@ -414,11 +406,9 @@ const MyPage = () => {
             onUpdate={handleProfileUpdateSuccess}
           />
         )}
-
       </main>
     </div>
   );
 };
 
 export default MyPage;
-

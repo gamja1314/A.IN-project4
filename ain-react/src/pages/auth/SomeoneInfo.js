@@ -213,9 +213,11 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추�
                             )}
                         </div>
                     </div>
-                    <div className="flex-1 text-center sm:text-left">
-                        <h2 className="text-xl sm:text-2xl font-bold mb-4">{data.member?.name}</h2>
-                        <div className="grid grid-cols-3 gap-4 mb-4 w-full max-w-[400px] mx-auto sm:mx-0">
+                    <div className="flex flex-col items-center text-center sm:text-center">
+                        <h2 className="text-xl sm:text-2xl font-bold mb-4">
+                            {data.member?.name ? `${data.member.name} 님` : '사용자 님'}
+                        </h2>
+                        <div className="grid grid-cols-3 gap-4 mb-4 w-full max-w-[400px]">
                             {stats.map((stat, index) => (
                                 <div
                                     key={index}
@@ -229,7 +231,7 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추�
                                 </div>
                             ))}
                         </div>
-                        <div className="flex justify-center sm:justify-start mb-4">
+                        <div className="flex justify-center mb-4">
                             <CustomButton
                                 onClick={handleFollowClick}
                                 disabled={isProcessing}
