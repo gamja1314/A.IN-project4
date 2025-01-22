@@ -28,7 +28,7 @@ export const getPageTitle = (currentPage, pageData = {}, onPageChange = null) =>
           <div className="flex items-center">
             {onPageChange && (
               <button 
-                onClick={() => onPageChange('someoneInfo', { 
+                onClick={() => onPageChange(pageData.source ||'someoneInfo', { 
                   memberId: pageData.memberId,
                   name: pageData.name 
                 })}
@@ -80,7 +80,7 @@ export const renderPage = (currentPage, pageData = {}, onPageChange, refreshMess
       case 'place': return <PlacePage />;
       case 'home': return <HomePage onPageChange={onPageChange} />;
       case 'search': return <SearchPage />;
-      case 'mypage': return <MyPage />;
+      case 'mypage': return <MyPage onPageChange={onPageChange} />;
       case 'someoneInfo': return <SomeoneInfo pageData={pageData} onPageChange={onPageChange} />;
       case 'createStory': return <CreateStory onPageChange={onPageChange} />;
       case 'myStories': return <MyStories onPageChange={onPageChange} />;
