@@ -1,22 +1,18 @@
-// pages/auth/LoginPage.js
 import React from 'react';
 import LoginForm from '../../components/auth/LoginForm';
 import OAuthButtons from '../../components/auth/OAuthButtons';
 
-const LoginPage = () => {
+const LoginPage = ({ onPageChange }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900">
-            애니멀 인사이드
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            반려동물과 함께하는 특별한 만남
-          </p>
+          <h2 className="text-3xl font-extrabold text-gray-900">애니멀 인사이드</h2>
+          <p className="mt-2 text-sm text-gray-600">반려동물과 함께하는 특별한 만남</p>
         </div>
 
-        <LoginForm />
+        {/* LoginForm에 onPageChange 전달 */}
+        <LoginForm onPageChange={onPageChange} />
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">

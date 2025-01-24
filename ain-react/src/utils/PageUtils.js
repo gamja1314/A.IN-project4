@@ -1,12 +1,13 @@
 import { ChevronLeft } from 'lucide-react';
 import React from 'react';
-import { CommunityPage, CreateStory, HomePage, LoginPage, MyPage, MyStories, PlacePage, SearchPage, SomeoneInfo } from '../pages';
+import { CommunityPage, CreateStory, HomePage, LoginPage, MyPage, MyStories, PlacePage, SearchPage, SignupPage, SomeoneInfo } from '../pages';
 import { FollowerList } from '../pages/auth/FollowerList';
 import ChatRoom from '../pages/chat/ChatRoom';
 import { ProtectedRoute } from './ProtectedRoute';
 
 // 각 페이지의 보호 여부를 정의하는 객체
 const PROTECTED_PAGES = {
+  'signup': false,
   'place': true,
   'community': true,
   'home': false,
@@ -76,7 +77,7 @@ export const renderPage = (currentPage, pageData = {}, onPageChange, refreshMess
             onPageChange(page, data);
           }} 
         />;
-      case 'login': return <LoginPage />;
+      case 'login': return <LoginPage onPageChange={onPageChange} />;
       case 'place': return <PlacePage />;
       case 'home': return <HomePage onPageChange={onPageChange} />;
       case 'search': return <SearchPage />;
@@ -85,6 +86,8 @@ export const renderPage = (currentPage, pageData = {}, onPageChange, refreshMess
       case 'createStory': return <CreateStory onPageChange={onPageChange} />;
       case 'myStories': return <MyStories onPageChange={onPageChange} />;
       case 'followerList': return <FollowerList pageData={pageData} onPageChange={onPageChange} />;
+      case 'signup': return <SignupPage onPageChange={onPageChange} />;
+
       default: return <HomePage />;
     }
   };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 
-const LoginForm = () => {
+const LoginForm = ({ onPageChange }) => {
   const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -111,11 +111,16 @@ const LoginForm = () => {
       </div>
 
       <div className="text-center text-sm">
-        <span className="text-gray-600">계정이 없으신가요?</span>
-        <a href="/signup" className="ml-1 font-medium text-blue-600 hover:text-blue-500">
-          회원가입
-        </a>
-      </div>
+      <span className="text-gray-600">계정이 없으신가요?</span>
+      {/* onPageChange 함수 추가 */}
+      <button 
+        type="button"
+        onClick={() => onPageChange('signup')}  
+        className="ml-1 font-medium text-blue-600 hover:text-blue-500"
+      >
+        회원가입
+      </button>
+    </div>
     </form>
   );
 };

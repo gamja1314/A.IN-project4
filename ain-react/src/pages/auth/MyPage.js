@@ -3,6 +3,7 @@ import { API_BASE_URL } from "../../config/apiConfig";
 import { useAuth } from "../../hooks/useAuth";
 import { authService } from "../../services/authService";
 import './MyPage.css';
+import PetRegistrationModal from './PetRegistrationModal';
 import ProfileEditModal from './ProfileEditModal';
 
 const MyPage = ({ onPageChange }) => {
@@ -16,7 +17,12 @@ const MyPage = ({ onPageChange }) => {
   });
   
   const [activeTab, setActiveTab] = useState("pets");
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
+  
+  // 반려동물 모달 상태 추가
+  const [isPetModalOpen, setIsPetModalOpen] = useState(false);
+  const [selectedPet, setSelectedPet] = useState(null);
+  const [isEditPetMode, setIsEditPetMode] = useState(false);
 
   useEffect(() => {
     const fetchMemberInfo = async () => {
@@ -32,7 +38,7 @@ const MyPage = ({ onPageChange }) => {
           credentials: "include",
         });
 
-        if (!response.ok) throw new Error("회원 정보를 가져오는 것을 실패했습니다.");
+        if (!response.ok) throw new Error("회원 정보를 가져오는 데 실패했습니다.");
 
         const data = await response.json();
         console.log("API 응답 데이터:", data);
@@ -48,7 +54,7 @@ const MyPage = ({ onPageChange }) => {
         }
       } catch (err) {
         console.error("Error:", err);
-        setError("회원 정보를 가져오는 것을 실패했습니다.");
+        setError("회원 정보를 가져오는 데 실패했습니다.");
       }
     };
 
@@ -67,6 +73,68 @@ const MyPage = ({ onPageChange }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleProfileUpdateSuccess = async () => {
+    try {
+      const headers = {
+        ...authService.getAuthHeader(),
+        "Content-Type": "application/json",
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/member/my`, {
+        method: "GET",
+        headers,
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("회원 정보를 가져오는 데 실패했습니다.");
+
+      const data = await response.json();
+      setMemberInfo({
+        member: data.member,
+        pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []),
+      });
+    } catch (err) {
+      console.error("Error:", err);
+    }
+  };
+
+  const openPetRegistrationModal = (pet = null) => {
+    setSelectedPet(pet);
+    setIsEditPetMode(!!pet);
+    setIsPetModalOpen(true);
+  };
+
+  const handlePetSubmitSuccess = () => {
+    // 반려동물 정보 새로고침
+    const fetchMemberInfo = async () => {
+      try {
+        const headers = {
+          ...authService.getAuthHeader(),
+          "Content-Type": "application/json",
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/member/my`, {
+          method: "GET",
+          headers,
+          credentials: "include",
+        });
+
+        const data = await response.json();
+        if (data.member) {
+          setMemberInfo({
+            member: data.member,
+            pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []),
+          });
+        }
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+
+    fetchMemberInfo();
+    setIsPetModalOpen(false);
   };
 
   const stats = [
@@ -103,71 +171,9 @@ const MyPage = ({ onPageChange }) => {
     { id: "tagged", label: "태그됨" },
   ];
 
-  const [petModalOpen, setPetModalOpen] = useState(false);
-  const [petInfo, setPetInfo] = useState({
-    name: '',
-    species: '',
-    breed: '',
-    gender: '',
-    age: 0,
-    photoUrl: ''
-  });
-
-  const handlePetRegistration = async () => {
-    try {
-      const headers = {
-        ...authService.getAuthHeader(),
-        "Content-Type": "application/json",
-      };
-
-      const endpoint = `${API_BASE_URL}/api/pet/my`;
-      const method = isEditMode ? 'PUT' : 'POST';
-
-      const response = await fetch(endpoint, {
-        method: method,
-        headers,
-        credentials: "include",
-        body: JSON.stringify(petInfo)
-      });
-
-      if (!response.ok) throw new Error("반려동물 등록/수정에 실패했습니다.");
-
-      setPetModalOpen(false);
-      setError("");
-      setIsEditMode(false);
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-
-  const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
-  const handleProfileUpdateSuccess = async () => {
-    try {
-      const headers = {
-        ...authService.getAuthHeader(),
-        "Content-Type": "application/json",
-      };
-
-      const response = await fetch(`${API_BASE_URL}/api/member/my`, {
-        method: "GET",
-        headers,
-        credentials: "include",
-      });
-
-      if (!response.ok) throw new Error("회원 정보를 가져오는 것을 실패했습니다.");
-
-      const data = await response.json();
-      setMemberInfo({
-        member: data.member,
-        pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []),
-      });
-    } catch (err) {
-      console.error("Error:", err);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 헤더 */}
       <header className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 h-14 flex justify-between items-center">
           <h1 className="text-xl font-semibold">애니멀 인사이드</h1>
@@ -181,6 +187,7 @@ const MyPage = ({ onPageChange }) => {
         </div>
       </header>
 
+      {/* 메인 컨텐츠 */}
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {error && (
           <div className="p-4 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">
@@ -188,6 +195,7 @@ const MyPage = ({ onPageChange }) => {
           </div>
         )}
 
+        {/* 프로필 섹션 */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
             <div className="shrink-0">
@@ -235,6 +243,7 @@ const MyPage = ({ onPageChange }) => {
           </div>
         </div>
 
+        {/* 탭 섹션 */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="grid grid-cols-4 w-full">
             {tabs.map((tab) => (
@@ -297,6 +306,7 @@ const MyPage = ({ onPageChange }) => {
           </div>
         </div>
 
+        {/* 계정 설정 섹션 */}
         <div className="bg-white rounded-lg shadow-sm border divide-y">
           <button className="w-full py-3.5 px-4 text-left text-sm font-medium hover:bg-gray-50">
             계정 설정
@@ -306,20 +316,10 @@ const MyPage = ({ onPageChange }) => {
           </button>
         </div>
 
+        {/* 반려동물 관리 섹션 */}
         <div className="bg-white rounded-lg shadow-sm border divide-y">
           <button
-            onClick={() => {
-              setPetInfo({
-                name: '',
-                species: '',
-                breed: '',
-                gender: '',
-                age: '',
-                photoUrl: '',
-              });
-              setPetModalOpen(true);
-              setIsEditMode(false);
-            }}
+            onClick={() => openPetRegistrationModal()}
             className="w-full py-3.5 px-4 text-left text-sm font-medium hover:bg-gray-50"
           >
             반려동물 등록
@@ -329,92 +329,32 @@ const MyPage = ({ onPageChange }) => {
             memberInfo.pets[0].map((pet, index) => (
               <button
                 key={index}
-                onClick={() => {
-                  setPetInfo(pet);
-                  setPetModalOpen(true);
-                  setIsEditMode(true);
-                }}
+                onClick={() => openPetRegistrationModal(pet)}
                 className="w-full py-3.5 px-4 text-left text-sm font-medium hover:bg-gray-50"
               >
                 {pet.name} 수정
               </button>
             ))}
         </div>
-
-        {petModalOpen && (
-          <div className="modal">
-            <div className="form-group">
-              <label>이름</label>
-              <input
-                type="text"
-                value={petInfo.name || ''}
-                onChange={(e) => setPetInfo({ ...petInfo, name: e.target.value })}
-                placeholder="이름"
-              />
-            </div>
-            <div className="form-group">
-              <label>종</label>
-              <input
-                type="text"
-                value={petInfo.species || ''}
-                onChange={(e) => setPetInfo({ ...petInfo, species: e.target.value })}
-                placeholder="종"
-              />
-            </div>
-            <div className="form-group">
-              <label>품종</label>
-              <input
-                type="text"
-                value={petInfo.breed || ''}
-                onChange={(e) => setPetInfo({ ...petInfo, breed: e.target.value })}
-                placeholder="품종"
-              />
-            </div>
-            <div className="form-group">
-              <label>성별</label>
-              <select
-                value={petInfo.gender || ''}
-                onChange={(e) => setPetInfo({ ...petInfo, gender: e.target.value })}
-              >
-                <option value="">성별 선택</option>
-                <option value="MALE">수컷</option>
-                <option value="FEMALE">암컷</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>나이</label>
-              <input
-                type="number"
-                value={petInfo.age || ''}
-                onChange={(e) => setPetInfo({ ...petInfo, age: Number(e.target.value) })}
-                placeholder="나이"
-              />
-            </div>
-            <div className="form-group">
-              <label>사진 URL</label>
-              <input
-                type="text"
-                value={petInfo.photoUrl || ''}
-                onChange={(e) => setPetInfo({ ...petInfo, photoUrl: e.target.value })}
-                placeholder="사진 URL"
-              />
-            </div>
-            <button onClick={handlePetRegistration}>
-              {isEditMode ? '수정' : '등록'} {/* 1212: 등록/수정 버튼 텍스트 변경 */}
-            </button>
-          </div>
-        )}
-        {/* 펫 관리 버튼 카드 끝 */}
-
-        {/* 모달은 컴포넌트의 최상위 레벨에 위치 */}
-        {isProfileEditModalOpen && (
-          <ProfileEditModal 
-            memberInfo={memberInfo?.member} 
-            onClose={() => setIsProfileEditModalOpen(false)}
-            onUpdate={handleProfileUpdateSuccess}
-          />
-        )}
       </main>
+
+      {/* 모달 섹션 */}
+      {isProfileEditModalOpen && (
+        <ProfileEditModal 
+          memberInfo={memberInfo?.member} 
+          onClose={() => setIsProfileEditModalOpen(false)}
+          onUpdate={handleProfileUpdateSuccess}
+        />
+      )}
+
+      {isPetModalOpen && (
+        <PetRegistrationModal
+          petInfo={selectedPet}
+          isEditMode={isEditPetMode}
+          onClose={() => setIsPetModalOpen(false)}
+          onSubmit={handlePetSubmitSuccess}
+        />
+      )}
     </div>
   );
 };
