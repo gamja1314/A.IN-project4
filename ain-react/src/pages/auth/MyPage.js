@@ -20,9 +20,8 @@ const MyPage = ({ onPageChange }) => {
   const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
   
   // 반려동물 모달 상태 추가
-  const [isPetModalOpen, setIsPetModalOpen] = useState(false);
+  const [petModalOpen, setPetModalOpen] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
-  const [isEditPetMode, setIsEditPetMode] = useState(false);
 
   useEffect(() => {
     const fetchMemberInfo = async () => {
@@ -100,10 +99,17 @@ const MyPage = ({ onPageChange }) => {
     }
   };
 
-  const openPetRegistrationModal = (pet = null) => {
+  const handlePetRegistration = async () => {
+    // 모달 오픈과 동시에 펫 정보 초기화
+    setSelectedPet(null);
+    setPetModalOpen(true);
+  };
+
+  // 펫 수정 버튼 클릭 시
+  const handlePetEdit = (pet) => {
+    // 선택한 펫 정보로 모달 오픈
     setSelectedPet(pet);
-    setIsEditPetMode(!!pet);
-    setIsPetModalOpen(true);
+    setPetModalOpen(true);
   };
 
   const handlePetSubmitSuccess = () => {
@@ -126,6 +132,7 @@ const MyPage = ({ onPageChange }) => {
           setMemberInfo({
             member: data.member,
             pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []),
+            follows: data.follows,
           });
         }
       } catch (err) {
@@ -134,7 +141,7 @@ const MyPage = ({ onPageChange }) => {
     };
 
     fetchMemberInfo();
-    setIsPetModalOpen(false);
+    setPetModalOpen(false);
   };
 
   const stats = [
@@ -319,22 +326,22 @@ const MyPage = ({ onPageChange }) => {
         {/* 반려동물 관리 섹션 */}
         <div className="bg-white rounded-lg shadow-sm border divide-y">
           <button
-            onClick={() => openPetRegistrationModal()}
+        onClick={handlePetRegistration}
+        className="w-full py-3.5 px-4 text-left text-sm font-medium hover:bg-gray-50"
+      >
+        반려동물 등록
+      </button>
+
+      {memberInfo?.pets?.[0]?.length > 0 &&
+        memberInfo.pets[0].map((pet, index) => (
+          <button
+            key={index}
+            onClick={() => handlePetEdit(pet)}
             className="w-full py-3.5 px-4 text-left text-sm font-medium hover:bg-gray-50"
           >
-            반려동물 등록
+            {pet.name} 수정
           </button>
-
-          {memberInfo?.pets?.[0]?.length > 0 &&
-            memberInfo.pets[0].map((pet, index) => (
-              <button
-                key={index}
-                onClick={() => openPetRegistrationModal(pet)}
-                className="w-full py-3.5 px-4 text-left text-sm font-medium hover:bg-gray-50"
-              >
-                {pet.name} 수정
-              </button>
-            ))}
+        ))}
         </div>
       </main>
 
@@ -347,12 +354,13 @@ const MyPage = ({ onPageChange }) => {
         />
       )}
 
-      {isPetModalOpen && (
+      {/* 모달 컴포넌트에 props 전달 */}
+      {petModalOpen && (
         <PetRegistrationModal
-          petInfo={selectedPet}
-          isEditMode={isEditPetMode}
-          onClose={() => setIsPetModalOpen(false)}
-          onSubmit={handlePetSubmitSuccess}
+          pet={selectedPet}
+          isOpen={petModalOpen}
+          onClose={() => setPetModalOpen(false)}
+          onSuccess={handlePetSubmitSuccess}
         />
       )}
     </div>

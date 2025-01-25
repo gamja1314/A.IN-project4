@@ -3,8 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../../config/apiConfig';
 import { authService } from '../../services/authService';
 
-const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
-  const [petData, setPetData] = useState({
+const PetRegistrationModal = ({ 
+  pet = null, 
+  isOpen, 
+  onClose, 
+  onSuccess 
+}) => {
+  const [petInfo, setPetInfo] = useState({
     name: '',
     species: '',
     breed: '',
@@ -16,18 +21,29 @@ const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    if (petInfo) {
-      setPetData({
-        name: petInfo.name || '',
-        species: petInfo.species || '',
-        breed: petInfo.breed || '',
-        gender: petInfo.gender || '',
-        age: petInfo.age || '',
-        photoUrl: petInfo.photoUrl || ''
+    if (pet) {
+      setPetInfo({
+        name: pet.name || '',
+        species: pet.species || '',
+        breed: pet.breed || '',
+        gender: pet.gender || '',
+        age: pet.age || '',
+        photoUrl: pet.photoUrl || ''
       });
-      setImagePreview(petInfo.photoUrl);
+      setImagePreview(pet.photoUrl);
+    } else {
+      // 새로운 펫 등록 시 초기화
+      setPetInfo({
+        name: '',
+        species: '',
+        breed: '',
+        gender: '',
+        age: '',
+        photoUrl: ''
+      });
+      setImagePreview(null);
     }
-  }, [petInfo]);
+  }, [pet, isOpen]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -71,8 +87,8 @@ const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
       // 미리보기 설정
       setImagePreview(URL.createObjectURL(file));
       
-      // petData 업데이트
-      setPetData(prev => ({
+      // petInfo 업데이트
+      setPetInfo(prev => ({
         ...prev,
         photoUrl: data.url
       }));
@@ -85,14 +101,6 @@ const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setPetData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -102,24 +110,25 @@ const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
         'Content-Type': 'application/json'
       };
 
-      const endpoint = `${API_BASE_URL}/api/pet/my`;
-      const method = isEditMode ? 'PUT' : 'POST';
+      const endpoint = pet ? `${API_BASE_URL}/api/pet/my` : `${API_BASE_URL}/api/pet/my`;
+      const method = pet ? 'PUT' : 'POST';
 
       const response = await fetch(endpoint, {
-        method: method,
+        method,
         headers,
         credentials: 'include',
         body: JSON.stringify({
-          ...petData,
-          age: Number(petData.age)
+          ...petInfo,
+          id: pet?.id,  // 수정 시 ID 포함
+          age: Number(petInfo.age)
         })
       });
 
       if (!response.ok) {
-        throw new Error(isEditMode ? '반려동물 정보 수정 실패' : '반려동물 등록 실패');
+        throw new Error('반려동물 등록/수정 실패');
       }
 
-      onSubmit();
+      onSuccess();
       onClose();
     } catch (error) {
       console.error('Pet registration/update error:', error);
@@ -127,14 +136,16 @@ const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-semibold mb-4">
-          {isEditMode ? '반려동물 정보 수정' : '반려동물 등록'}
+          {pet ? '반려동물 정보 수정' : '반려동물 등록'}
         </h2>
         <form onSubmit={handleSubmit}>
-          {/* 반려동물 이미지 업로드 */}
+          {/* 프로필 이미지 업로드 */}
           <div className="mb-6">
             <label className="block text-sm font-medium mb-2">반려동물 사진</label>
             <div className="flex justify-center">
@@ -178,8 +189,8 @@ const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
             <input
               type="text"
               name="name"
-              value={petData.name}
-              onChange={handleInputChange}
+              value={petInfo.name}
+              onChange={(e) => setPetInfo({...petInfo, name: e.target.value})}
               className="w-full border rounded px-3 py-2"
               required
             />
@@ -189,8 +200,8 @@ const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
             <input
               type="text"
               name="species"
-              value={petData.species}
-              onChange={handleInputChange}
+              value={petInfo.species}
+              onChange={(e) => setPetInfo({...petInfo, species: e.target.value})}
               className="w-full border rounded px-3 py-2"
               required
             />
@@ -200,18 +211,17 @@ const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
             <input
               type="text"
               name="breed"
-              value={petData.breed}
-              onChange={handleInputChange}
+              value={petInfo.breed}
+              onChange={(e) => setPetInfo({...petInfo, breed: e.target.value})}
               className="w-full border rounded px-3 py-2"
-              required
             />
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">성별</label>
             <select
               name="gender"
-              value={petData.gender}
-              onChange={handleInputChange}
+              value={petInfo.gender}
+              onChange={(e) => setPetInfo({...petInfo, gender: e.target.value})}
               className="w-full border rounded px-3 py-2"
               required
             >
@@ -225,12 +235,13 @@ const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
             <input
               type="number"
               name="age"
-              value={petData.age}
-              onChange={handleInputChange}
+              value={petInfo.age}
+              onChange={(e) => setPetInfo({...petInfo, age: e.target.value})}
               className="w-full border rounded px-3 py-2"
               required
             />
           </div>
+
           <div className="flex justify-end space-x-2">
             <button 
               type="button" 
@@ -244,7 +255,7 @@ const PetRegistrationModal = ({ petInfo, isEditMode, onClose, onSubmit }) => {
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
               disabled={uploading}
             >
-              {uploading ? '업로드 중...' : '저장'}
+              {pet ? '수정' : '등록'}
             </button>
           </div>
         </form>
