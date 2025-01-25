@@ -3,17 +3,20 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { API_BASE_URL } from "../../config/apiConfig";
 import { authService } from '../../services/authService';
 
-const MyStories = ({ onPageChange }) => {
+const ViewStory = ({ onPageChange, memberId, memberName }) => {
   const [stories, setStories] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchMyStories = async () => {
+    const fetchUserStories = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/stories/my`, {
-          headers: authService.getAuthHeader(),
+        const response = await fetch(`${API_BASE_URL}/api/stories/user/${memberId}`, {
+          headers: {
+            ...authService.getAuthHeader(),
+            'Content-Type': 'application/json'
+          }
         });
 
         if (!response.ok) {
@@ -21,7 +24,12 @@ const MyStories = ({ onPageChange }) => {
         }
 
         const data = await response.json();
-        setStories(data);
+        // ACTIVE 상태이고 24시간 이내의 스토리만 필터링
+        const activeStories = data.filter(story => 
+          story.status === 'ACTIVE' && 
+          new Date(story.createdAt) >= new Date(Date.now() - 24 * 60 * 60 * 1000)
+        );
+        setStories(activeStories);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -29,8 +37,10 @@ const MyStories = ({ onPageChange }) => {
       }
     };
 
-    fetchMyStories();
-  }, []);
+    if (memberId) {
+      fetchUserStories();
+    }
+  }, [memberId]);
 
   const handleNext = () => {
     if (currentIndex < stories.length - 1) {
@@ -61,21 +71,17 @@ const MyStories = ({ onPageChange }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex justify-center items-center">
-        <div className="max-w-md w-full bg-black">
-          <p className="text-white text-center">로딩 중...</p>
-        </div>
+      <div className="min-h-screen bg-black flex justify-center items-center">
+        <p className="text-white text-center">로딩 중...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex justify-center items-center">
-        <div className="max-w-md w-full bg-black">
-          <div className="text-white bg-red-500/50 p-4 rounded-lg text-center">
-            {error}
-          </div>
+      <div className="min-h-screen bg-black flex justify-center items-center">
+        <div className="text-white bg-red-500/50 p-4 rounded-lg text-center">
+          {error}
         </div>
       </div>
     );
@@ -83,14 +89,14 @@ const MyStories = ({ onPageChange }) => {
 
   if (stories.length === 0) {
     return (
-      <div className="min-h-screen bg-white flex justify-center items-center">
-        <div className="max-w-md w-full bg-black flex flex-col items-center justify-center p-4">
-          <p className="text-white mb-4">작성한 스토리가 없습니다.</p>
+      <div className="min-h-screen bg-black flex justify-center items-center">
+        <div className="max-w-md w-full flex flex-col items-center justify-center p-4">
+          <p className="text-white mb-4">표시할 스토리가 없습니다.</p>
           <button
-            onClick={() => onPageChange('createStory')}
+            onClick={() => onPageChange('home')}
             className="px-4 py-2 bg-blue-500 text-white rounded-full"
           >
-            스토리 작성하기
+            홈으로 돌아가기
           </button>
         </div>
       </div>
@@ -100,8 +106,8 @@ const MyStories = ({ onPageChange }) => {
   const currentStory = stories[currentIndex];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-md mx-auto bg-black relative min-h-screen">
+    <div className="min-h-screen bg-black">
+      <div className="max-w-md mx-auto relative min-h-screen">
         {/* 헤더 */}
         <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 bg-black/50">
           <div className="flex items-center justify-between px-4 py-3">
@@ -150,29 +156,25 @@ const MyStories = ({ onPageChange }) => {
         </div>
 
         {/* 스토리 내용 */}
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          {currentStory.mediaUrl && (
-            <div className="w-full mb-4">
-              {currentStory.mediaType === 'VIDEO' ? (
-                <video 
-                  src={currentStory.mediaUrl}
-                  className="w-full rounded-lg object-contain max-h-[60vh]"
-                  controls
-                  autoPlay
-                  playsInline
-                  muted
-                />
-              ) : (
-                <img
-                  src={currentStory.mediaUrl}
-                  alt="Story content"
-                  className="w-full rounded-lg object-contain max-h-[60vh]"
-                />
-              )}
-            </div>
-          )}
-          {currentStory.content && (
-            <p className="text-white text-center mt-4">
+        <div className="flex items-center justify-center min-h-screen p-4">
+          {currentStory.mediaUrl ? (
+            currentStory.mediaType === 'VIDEO' ? (
+              <video
+                src={currentStory.mediaUrl}
+                className="max-h-[80vh] w-auto"
+                controls
+                autoPlay
+                loop
+              />
+            ) : (
+              <img
+                src={currentStory.mediaUrl}
+                alt="Story"
+                className="max-h-[80vh] w-auto object-contain"
+              />
+            )
+          ) : (
+            <p className="text-white text-center">
               {currentStory.content}
             </p>
           )}
@@ -204,4 +206,4 @@ const MyStories = ({ onPageChange }) => {
   );
 };
 
-export default MyStories;
+export default ViewStory;

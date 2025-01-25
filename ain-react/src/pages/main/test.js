@@ -4,13 +4,14 @@ import { API_BASE_URL } from "../../config/apiConfig";
 import { authService } from "../../services/authService";
 import { memberService } from "../../services/MemberService";
 import StoryProfile from '../story/StoryProfile';
+import StoryPost from "../story/StoryPost";
 import PostForm from "../../components/posts/PostForm";
 import PostCard from "../../components/posts/PostCard";
 import _ from 'lodash';
 
 const HomePage = ({ onPageChange }) => {
   const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(0);  // 0부터 시작하도록 수정
+  const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [stories, setStories] = useState([]);
   const [memberInfo, setMemberInfo] = useState(null);
@@ -19,94 +20,92 @@ const HomePage = ({ onPageChange }) => {
   const [followingUsers, setFollowingUsers] = useState([]);
   const [error, setError] = useState('');
 
-    // 멤버 정보와 팔로잉 유저 정보 가져오기
-    useEffect(() => {
-      const initializePage = async () => {
-        try {
-          // 먼저 멤버 정보를 가져옵니다
-          const memberData = await memberService.getMemberInfo();
-          setMemberInfo(memberData);
+  // 멤버 정보와 팔로잉 유저 정보 가져오기
+  useEffect(() => {
+    const initializePage = async () => {
+      try {
+        const memberData = await memberService.getMemberInfo();
+        setMemberInfo(memberData);
 
-          if (memberData?.member?.id) {
-            // API 경로 확인: /api/member/{memberId}/following
-            const response = await fetch(
-              `${API_BASE_URL}/api/member/${memberData.member.id}/following`, 
-              {
-                headers: {
-                  ...authService.getAuthHeader(),
-                  'Content-Type': 'application/json'
-                }
-              }
-            );
-
-            if (!response.ok) throw new Error('팔로잉 목록을 가져오는데 실패했습니다.');
-
-            const followingData = await response.json();
-            setFollowingUsers(followingData);
-          }
-        } catch (error) {
-          console.error('Error initializing page:', error);
-          setError(error.message);
-        }
-      };
-
-      if (authService.isAuthenticated()) {
-        initializePage();
-      }
-    }, []);
-  
-    // 팔로우한 유저들의 스토리 가져오기
-    useEffect(() => {
-      const fetchStoriesOfFollowingUsers = async () => {
-        if (!authService.isAuthenticated() || !memberInfo?.member?.id) return;
-        
-              try {
-                // 팔로우한 유저들의 ACTIVE 상태인 스토리 가져오기
-                const response = await fetch(
-                  `${API_BASE_URL}/api/stories/followed`,
-                  {
+        if (memberData?.member?.id) {
+          const response = await fetch(
+            `${API_BASE_URL}/api/member/${memberData.member.id}/following`, 
+            {
               headers: {
                 ...authService.getAuthHeader(),
                 'Content-Type': 'application/json'
               }
             }
-                    );
-            
-                    if (!response.ok) throw new Error('스토리를 가져오는데 실패했습니다.');
-            
-                    const allStories = await response.json();
-            
-                    // ACTIVE 상태인 스토리만 필터링하고 멤버별로 그룹화
-                    const activeStories = allStories.filter(story => story.status === 'ACTIVE');
-                    
-                    // 각 멤버별로 가장 최신 스토리만 선택
-                    const groupedStories = _.chain(activeStories)
-                      .groupBy('memberId')
-                      .map((memberStories) => {
-                        // 각 멤버의 스토리들 중 가장 최신 것을 선택
-                        const latestStory = _.maxBy(memberStories, 'createdAt');
-                        return {
-                          ...latestStory,
-                          totalStories: memberStories.length // 해당 멤버의 총 스토리 수
-                        };
-                      })
-                      .value();
-            
-                    console.log('Grouped stories:', groupedStories);
-                    setStories(groupedStories);
+          );
 
-        } catch (error) {
-          console.error('Error fetching stories:', error);
-          setError('스토리를 불러오는데 실패했습니다.');
+          if (!response.ok) throw new Error('팔로잉 목록을 가져오는데 실패했습니다.');
+
+          const followingData = await response.json();
+          setFollowingUsers(followingData);
         }
-      };
+      } catch (error) {
+        console.error('Error initializing page:', error);
+        setError(error.message);
+      }
+    };
 
-      fetchStoriesOfFollowingUsers();
-    }, [memberInfo]); // memberInfo가 변경될 때만 실행
-  
-    // 게시글 가져오기
+    if (authService.isAuthenticated()) {
+      initializePage();
+    }
+  }, []);
+
+  // 팔로우한 유저들의 스토리 가져오기
+  useEffect(() => {
+    const fetchStoriesOfFollowingUsers = async () => {
+      if (!authService.isAuthenticated() || !memberInfo?.member?.id) return;
+
+      try {
+        // 팔로우한 유저들의 ACTIVE 상태인 스토리 가져오기
+        const response = await fetch(
+          `${API_BASE_URL}/api/stories/followed`,
+          {
+            headers: {
+              ...authService.getAuthHeader(),
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (!response.ok) throw new Error('스토리를 가져오는데 실패했습니다.');
+
+        const allStories = await response.json();
+
+        // ACTIVE 상태인 스토리만 필터링하고 멤버별로 그룹화
+        const activeStories = allStories.filter(story => story.status === 'ACTIVE');
+        
+        // 각 멤버별로 가장 최신 스토리만 선택
+        const groupedStories = _.chain(activeStories)
+          .groupBy('memberId')
+          .map((memberStories) => {
+            // 각 멤버의 스토리들 중 가장 최신 것을 선택
+            const latestStory = _.maxBy(memberStories, 'createdAt');
+            return {
+              ...latestStory,
+              totalStories: memberStories.length // 해당 멤버의 총 스토리 수
+            };
+          })
+          .value();
+
+        console.log('Grouped stories:', groupedStories);
+        setStories(groupedStories);
+
+      } catch (error) {
+        console.error('Error fetching stories:', error);
+        setError('스토리를 불러오는데 실패했습니다.');
+      }
+    };
+
+    fetchStoriesOfFollowingUsers();
+  }, [memberInfo]);
+
+  // 게시글 관련 로직...
   const fetchPosts = useCallback(async () => {
-    if (loading) return; // 이미 로딩 중이면 중단
+    if (loading) return;
   
     try {
       setLoading(true);
@@ -148,28 +147,18 @@ const HomePage = ({ onPageChange }) => {
     } finally {
       setLoading(false);
     }
-  }, [page]); // loading 제거, page만 의존성으로 유지
-  
-  // 초기 데이터 로딩을 위한 useEffect
-  useEffect(() => {
-    if (page === 0) { // 초기 로딩일 때만 실행
-      fetchPosts();
-    }
-  }, [fetchPosts]);
+  }, [page, loading]);
 
-  // 게시글 등록 후 처리
   const handlePostSubmitted = async () => {
     try {
       setLoading(true);
-      setPosts([]); // 기존 포스트 초기화
-      setPage(0); // 페이지 초기화
-      setHasMore(true); // hasMore 초기화
+      setPosts([]);
+      setPage(0);
+      setHasMore(true);
       
-      // 직접 첫 페이지 데이터를 가져옴
       const response = await fetch(
         `${API_BASE_URL}/api/posts/page?page=0&size=10`, 
         {
-          method: "GET",
           headers: {
             ...authService.getAuthHeader(),
             "Content-Type": "application/json",
@@ -181,10 +170,10 @@ const HomePage = ({ onPageChange }) => {
 
       const data = await response.json();
       
-      if (data.content && data.content.length > 0) {
+      if (data.content?.length > 0) {
         setPosts(data.content);
         setHasMore(!data.last);
-        setPage(1); // 다음 페이지를 위해 1로 설정
+        setPage(1);
       } else {
         setHasMore(false);
       }
@@ -193,7 +182,7 @@ const HomePage = ({ onPageChange }) => {
       console.error("Error fetching posts:", error);
     } finally {
       setLoading(false);
-      setShowPostForm(false); // 폼 닫기
+      setShowPostForm(false);
     }
   };
 
@@ -207,14 +196,13 @@ const HomePage = ({ onPageChange }) => {
   };
 
   return (
-    
     <div className="p-4">
-      {/* 에러 메시지 */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
+      
       {/* Stories 섹션 */}
       <div className="bg-white rounded-lg shadow p-4 mb-4">
         <h2 className="text-lg font-semibold mb-2">Stories</h2>
@@ -233,11 +221,11 @@ const HomePage = ({ onPageChange }) => {
           ) : stories.length > 0 ? (
             stories.map((story) => (
               <StoryProfile
-              key={story.memberId}
-              isMyStory={false}
-              profileImage={story.profilePictureUrl}
-              username={story.memberName}
-              onPageChange={() => handleStoryClick(story.memberId, story.memberName)}
+                key={story.memberId}
+                isMyStory={false}
+                profileImage={story.profilePictureUrl}
+                username={story.memberName}
+                onClick={() => handleStoryClick(story.memberId, story.memberName)}
               />
             ))
           ) : followingUsers.length > 0 ? (
@@ -246,21 +234,20 @@ const HomePage = ({ onPageChange }) => {
                 팔로우한 사용자의 스토리가 없습니다.
               </p>
             </div>
-            ) : (
-              <div className="flex-1 flex items-center justify-center min-h-[80px]">
-                <p className="text-xs text-gray-500">
-                  팔로우한 사용자가 없습니다.
-                </p>
-              </div>
-            )}
+          ) : (
+            <div className="flex-1 flex items-center justify-center min-h-[80px]">
+              <p className="text-xs text-gray-500">
+                팔로우한 사용자가 없습니다.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 최신 게시글 섹션 */}
+      {/* Posts 섹션 */}
       <div className="bg-white rounded-lg shadow p-4">
         <h2 className="text-lg font-semibold mb-2">최신 게시글</h2>
-
-        {/* 게시글 등록 버튼 */}
+        
         <div className="flex justify-end mb-4">
           <button
             onClick={() => setShowPostForm(true)}
@@ -270,7 +257,6 @@ const HomePage = ({ onPageChange }) => {
           </button>
         </div>
 
-        {/* PostForm 컴포넌트 */}
         {showPostForm && (
           <PostForm
             onPostSubmit={handlePostSubmitted}
@@ -280,11 +266,7 @@ const HomePage = ({ onPageChange }) => {
 
         <InfiniteScroll
           dataLength={posts.length}
-          next={() => {
-            if (!loading) {
-              setTimeout(fetchPosts, 500); // 500ms 지연 추가
-            }
-          }}
+          next={fetchPosts}
           hasMore={hasMore}
           loader={
             <div className="flex justify-center p-4">

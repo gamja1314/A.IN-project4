@@ -1,6 +1,6 @@
 import { ChevronLeft } from 'lucide-react';
 import React from 'react';
-import { CommunityPage, CreateStory, HomePage, LoginPage, MyPage, MyStories, PlacePage, SearchPage, SignupPage, SomeoneInfo } from '../pages';
+import { CommunityPage, CreateStory, HomePage, LoginPage, MyPage, MyStories, PlacePage, SearchPage, SignupPage, SomeoneInfo, ViewStory } from '../pages';
 import { FollowerList } from '../pages/auth/FollowerList';
 import ChatRoom from '../pages/chat/ChatRoom';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -17,8 +17,9 @@ const PROTECTED_PAGES = {
   'chatRoom': true,
   'someoneInfo': false,
   'createStory': true,
-  'MyStories': true,
+  'myStories': true,
   'followerList': false,
+  'viewStory': true
 };
 
 export const getPageTitle = (currentPage, pageData = {}, onPageChange = null) => {
@@ -29,7 +30,7 @@ export const getPageTitle = (currentPage, pageData = {}, onPageChange = null) =>
           <div className="flex items-center">
             {onPageChange && (
               <button 
-                onClick={() => onPageChange(pageData.source ||'someoneInfo', { 
+                onClick={() => onPageChange(pageData.source || 'someoneInfo', { 
                   memberId: pageData.memberId,
                   name: pageData.name 
                 })}
@@ -50,6 +51,7 @@ export const getPageTitle = (currentPage, pageData = {}, onPageChange = null) =>
       case 'someoneInfo': return `${pageData?.name}`;
       case 'createStory': return '스토리 만들기';
       case 'myStories': return '내 스토리';
+      case 'viewStory': return `${pageData?.memberName}의 스토리`;
       default: return '애니멀 인사이드';
     }
   };
@@ -77,6 +79,12 @@ export const renderPage = (currentPage, pageData = {}, onPageChange, refreshMess
             onPageChange(page, data);
           }} 
         />;
+      case 'viewStory':
+        return <ViewStory 
+          memberId={pageData?.memberId}
+          memberName={pageData?.memberName}
+          onPageChange={onPageChange}
+        />;
       case 'login': return <LoginPage onPageChange={onPageChange} />;
       case 'place': return <PlacePage />;
       case 'home': return <HomePage onPageChange={onPageChange} />;
@@ -87,7 +95,6 @@ export const renderPage = (currentPage, pageData = {}, onPageChange, refreshMess
       case 'myStories': return <MyStories onPageChange={onPageChange} />;
       case 'followerList': return <FollowerList pageData={pageData} onPageChange={onPageChange} />;
       case 'signup': return <SignupPage onPageChange={onPageChange} />;
-
       default: return <HomePage />;
     }
   };

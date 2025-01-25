@@ -53,7 +53,7 @@ public class SecurityConfig {
                 // Swagger UI 접근 허용
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // 로그인, 회원가입, 게시글 불러오기 엔드포인트 허용
-                .requestMatchers("/api/auth/**", "/api/member/signup", "/api/post/**", "/api/member/{memberId}").permitAll()
+                .requestMatchers("/api/auth/**", "/api/member/signup", "/api/posts/page/**", "/api/member/{memberId}").permitAll()
                 // 게시글 작성, 수정, 삭제는 로그인상태만 가능
                 .requestMatchers(HttpMethod.POST, "/api/post/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/post/**").authenticated()

@@ -7,11 +7,15 @@
         INSERT INTO story (
             member_id,
             content,
+            media_url,
+            media_type,
             created_at,
             status
         ) VALUES (
             #{memberId},
             #{content},
+            #{mediaUrl},
+            #{mediaType},
             CURRENT_TIMESTAMP,
             'ACTIVE'
         )
@@ -48,10 +52,20 @@
 
     <!-- 팔로우 사용자 스토리 조회 -->
     <select id="findFollowedMemberStories" resultType="com.team.ain.dto.story.StoryDTO">
-        SELECT s.*, m.name as member_name, m.profile_picture_url
+        SELECT 
+            s.id,
+            s.member_id as memberId,
+            s.content,
+            s.media_url as mediaUrl,
+            s.media_type as mediaType,
+            s.created_at as createdAt,
+            s.expires_at as expiresAt,
+            s.status,
+            m.name as memberName,
+            m.profile_picture_url as profilePictureUrl
         FROM story s
         JOIN member m ON s.member_id = m.id
-        JOIN follow f ON s.member_id = f.followed_id
+        JOIN followers f ON s.member_id = f.following_id
         WHERE f.follower_id = #{memberId}
         AND s.status = 'ACTIVE'
         AND s.created_at >= CURRENT_TIMESTAMP - INTERVAL '24 hours'

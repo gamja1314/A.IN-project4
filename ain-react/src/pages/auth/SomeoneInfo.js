@@ -1,14 +1,13 @@
 import { User } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { memberService } from '../../services/MemberService';
 import { CustomButton } from './custom-button.tsx';
 import { MemberList } from "./member-list";
 import { PetCarousel } from './pet-carousel.tsx';
 
-const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추가
+const SomeoneInfo = ({ pageData, onPageChange }) => {  
     const navigate = useNavigate();
-
     const [data, setData] = useState({
         member: null,
         pets: [],
@@ -19,7 +18,8 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추�
     const [error, setError] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [activeTab, setActiveTab] = useState("pets");
-    const [members, setMembers] = useState([]);
+    const [followers, setFollowers] = useState([]);
+    const [following, setFollowing] = useState([]);
 
     // 초기 데이터 로드
     useEffect(() => {
@@ -28,14 +28,20 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추�
 
             try {
                 const response = await memberService.getSomeoneInfo(pageData.memberId);
-                console.log('Fetched data:', response);
-
                 setData({
                     member: response.member,
                     pets: Array.isArray(response.pet) ? response.pet : (response.pet ? [response.pet] : []),
                     follows: response.follows || { follower: 0, following: 0 },
                     isFollowing: response.isFollowing || false,
                 });
+
+                const [followersData, followingData] = await Promise.all([
+                    memberService.getFollowers(pageData.memberId),
+                    memberService.getFollowing(pageData.memberId)
+                ]);
+
+                setFollowers(followersData);
+                setFollowing(followingData);
             } catch (err) {
                 console.error('Error fetching data:', err);
                 setError(err.message);
@@ -47,97 +53,12 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추�
         fetchData();
     }, [pageData?.memberId]);
 
-    // 멤버 데이터 로드 함수
-    const fetchMembers = useCallback(async (type) => {
-        try {
-            const response =
-                type === "followers"
-                    ? await memberService.getFollowers(pageData.memberId)
-                    : await memberService.getFollowing(pageData.memberId);
-    
-            console.log("Fetched members:", response);
-    
-            // 각 멤버의 팔로우 상태를 개별적으로 확인
-            const membersWithStatus = await Promise.all(
-                response.map(async (member) => {
-                    try {
-                        // 각 멤버에 대해 getSomeoneInfo를 호출하여 팔로우 상태 확인
-                        const memberInfo = await memberService.getSomeoneInfo(member.id);
-                        return {
-                            ...member,
-                            isFollowing: memberInfo.isFollowing || false
-                        };
-                    } catch (err) {
-                        console.error(`Error fetching status for member ${member.id}:`, err);
-                        return {
-                            ...member,
-                            isFollowing: false
-                        };
-                    }
-                })
-            );
-    
-            setMembers(membersWithStatus);
-            setActiveTab("members");
-        } catch (err) {
-            console.error("Error fetching members:", err);
-        }
-    }, [pageData?.memberId]);
-
-    // 탭 전환 시 멤버 데이터 로드
-    useEffect(() => {
-        if (activeTab === "members") {
-            fetchMembers("followers");
-        }
-    }, [activeTab, pageData?.memberId, fetchMembers]);
-
-    // 개인 프로필 팔로우/언팔로우
-    const handleFollowClick = async () => {
-        if (!data?.member?.id || isProcessing) return;
-
-        setIsProcessing(true);
-        
-        try {
-            // 로컬 상태 즉시 업데이트
-            setData((prev) => ({
-                ...prev,
-                isFollowing: !prev.isFollowing,
-            }));
-
-            // 서버 요청
-            if (data.isFollowing) {
-                await memberService.unfollowMember(data.member.id);
-            } else {
-                await memberService.followMember(data.member.id);
-            }
-        } catch (err) {
-            console.error("Error handling follow:", err);
-
-            // 서버 요청 실패 시 로컬 상태 복구
-            setData((prev) => ({
-                ...prev,
-                isFollowing: !prev.isFollowing,
-            }));
-        } finally {
-            setIsProcessing(false);
-        }
-    };
-
-    // 팔로우 토글
+    // 팔로우/언팔로우 처리
     const handleFollowToggle = async (memberId) => {
-        console.log("Follow toggle called for memberId:", memberId);
         setIsProcessing(true);
 
-        // 로컬 상태 즉시 업데이트
-        setMembers((prev) =>
-            prev.map((m) =>
-                m.id === memberId ? { ...m, isFollowing: !m.isFollowing } : m
-            )
-        );
-
         try {
-            // 서버 요청
-            const memberToUpdate = members.find((m) => m.id === memberId);
+            const memberToUpdate = [...followers, ...following].find((m) => m.id === memberId);
             if (!memberToUpdate) return;
 
             if (memberToUpdate.isFollowing) {
@@ -145,22 +66,56 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추�
             } else {
                 await memberService.followMember(memberId);
             }
-        } catch (err) {
-            console.error("Error toggling follow status:", err);
 
-            // 서버 요청 실패 시 로컬 상태 복구
-            setMembers((prev) =>
+            setFollowers((prev) =>
                 prev.map((m) =>
                     m.id === memberId ? { ...m, isFollowing: !m.isFollowing } : m
                 )
             );
+            setFollowing((prev) =>
+                prev.map((m) =>
+                    m.id === memberId ? { ...m, isFollowing: !m.isFollowing } : m
+                )
+            );
+        } catch (err) {
+            console.error("Error toggling follow status:", err);
         } finally {
             setIsProcessing(false);
         }
     };
 
-    const handleMemberClick = (memberId) => {
-        navigate(`/profile/${memberId}`);
+    // 프로필 팔로우/언팔로우
+    const handleFollowClick = async () => {
+        if (!data?.member?.id || isProcessing) return;
+
+        setIsProcessing(true);
+        try {
+            setData((prev) => ({
+                ...prev,
+                isFollowing: !prev.isFollowing,
+            }));
+
+            if (data.isFollowing) {
+                await memberService.unfollowMember(data.member.id);
+            } else {
+                await memberService.followMember(data.member.id);
+            }
+        } catch (err) {
+            console.error("Error handling follow:", err);
+            setData((prev) => ({
+                ...prev,
+                isFollowing: !prev.isFollowing,
+            }));
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleMemberClick = (memberId, memberName) => {
+        onPageChange('someoneInfo', {
+            memberId: memberId,
+            name: memberName
+        });
     };
 
     if (isLoading) return <div>Loading...</div>;
@@ -170,35 +125,29 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추�
         {
             label: "반려동물",
             value: data.pets?.length || 0,
+            onClick: () => setActiveTab("pets")
         },
         {
             label: "팔로워",
             value: data.follows?.follower || 0,
-            onClick: () => onPageChange('followerList', { 
-                memberId: pageData.memberId,
-                listType: 'followers',
-                name: data.member?.name
-            }),
+            onClick: () => setActiveTab("followers")
         },
         {
             label: "팔로잉",
             value: data.follows?.following || 0,
-            onClick: () => onPageChange('followerList', { 
-                memberId: pageData.memberId,
-                listType: 'following',
-                name: data.member?.name
-            }),
+            onClick: () => setActiveTab("following")
         },
     ];
 
-    const tabs = [
+    const navigationTabs = [
         { id: "pets", label: "반려동물" },
-        { id: "posts", label: "게시물" },
+        { id: "posts", label: "게시물" }
     ];
 
     return (
         <div className="max-w-2xl mx-auto p-4">
             <div className="bg-white rounded-lg shadow-lg">
+                {/* Profile section */}
                 <div className="p-6 flex flex-col sm:flex-row items-center sm:items-start gap-8">
                     <div className="shrink-0">
                         <div className="h-20 w-20 sm:w-36 sm:h-36 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
@@ -244,9 +193,10 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추�
                     </div>
                 </div>
 
+                {/* Navigation tabs */}
                 <div className="border-t">
                     <div className="grid grid-cols-2 w-full">
-                        {tabs.map((tab) => (
+                        {navigationTabs.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
@@ -262,6 +212,7 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추�
                     </div>
                 </div>
 
+                {/* Content section */}
                 <div className="p-6">
                     {activeTab === "pets" && (
                         <div>
@@ -279,12 +230,18 @@ const SomeoneInfo = ({ pageData, onPageChange }) => {  // onPageChange prop 추�
                             아직 게시물이 없습니다.
                         </div>
                     )}
-                    {activeTab === "members" && (
-                        <MemberList
-                            members={members}
+                    {activeTab === "followers" && (
+                        <MemberList 
+                            members={followers}
                             onMemberClick={handleMemberClick}
                             onFollowToggle={handleFollowToggle}
-                            
+                        />
+                    )}
+                    {activeTab === "following" && (
+                        <MemberList 
+                            members={following}
+                            onMemberClick={handleMemberClick}
+                            onFollowToggle={handleFollowToggle}
                         />
                     )}
                 </div>
