@@ -93,6 +93,7 @@ const MyPage = ({ onPageChange }) => {
       setMemberInfo({
         member: data.member,
         pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []),
+        follows: data.follows,
       });
     } catch (err) {
       console.error("Error:", err);
