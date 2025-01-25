@@ -15,8 +15,8 @@ export const MemberList = ({ members, onMemberClick, onFollowToggle }) => {
                     className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg"
                 >
                     <div 
-                        className="flex items-center space-x-3 cursor-pointer hover:text-blue-500" 
-                        onClick={() => onMemberClick(member.id, member.name)}
+                        className="flex items-center space-x-3 cursor-pointer" 
+                        onClick={() => onMemberClick(member.id)}
                     >
                         <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                             {member.profilePictureUrl ? (
@@ -48,5 +48,3 @@ export const MemberList = ({ members, onMemberClick, onFollowToggle }) => {
         </ul>
     );
 };
-
-export default MemberList;

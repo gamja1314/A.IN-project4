@@ -11,6 +11,7 @@ import { notificationService } from './services/notificationService';
 import { getPageTitle, renderPage } from './utils/PageUtils';
 
 const AppContent = () => {
+  // 상태 관리
   const [currentPage, setCurrentPage] = useState('home');
   const [pageData, setPageData] = useState({});
   const [refreshCounter, setRefreshCounter] = useState(0);
@@ -33,6 +34,12 @@ const AppContent = () => {
     setRefreshCounter(prev => prev + 1);
   }, []);
 
+
+  /**
+   * 페이지 전환 핸들러
+   * 주요 변경사항: Header에 전달되는 title prop에서 handlePageChange를 함께 전달
+   * 이를 통해 헤더의 뒤로가기 버튼이 페이지 전환 기능을 사용할 수 있음
+   */
   const handlePageChange = (newPage, data = {}) => {
     setCurrentPage(newPage);
     setPageData(data);
@@ -43,8 +50,12 @@ const AppContent = () => {
 
   return (
     <MobileLayout>
-      <Header title={getPageTitle(currentPage, pageData)} />
+      {/* Header 컴포넌트에 title prop으로 getPageTitle 호출 시 handlePageChange 함수 전달 */}
+      <Header 
+        title={getPageTitle(currentPage, pageData, handlePageChange)} 
+      />
       <MainContent>
+        {/* 페이지 렌더링 시에도 동일한 handlePageChange 전달 */}
         {renderPage(currentPage, pageData, handlePageChange, refreshMessageCount)}
       </MainContent>
       <BottomNav 

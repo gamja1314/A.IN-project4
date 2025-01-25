@@ -1,8 +1,13 @@
-import { HomePage, PlacePage, CommunityPage, SearchPage, MyPage, LoginPage, SomeoneInfo, CreateStory, MyStories, ViewStory } from '../pages';
-import { ProtectedRoute } from './ProtectedRoute';
+import { ChevronLeft } from 'lucide-react';
+import React from 'react';
+import { CommunityPage, CreateStory, HomePage, LoginPage, MyPage, MyStories, PlacePage, SearchPage, SignupPage, SomeoneInfo, ViewStory } from '../pages';
+import { FollowerList } from '../pages/auth/FollowerList';
 import ChatRoom from '../pages/chat/ChatRoom';
+import { ProtectedRoute } from './ProtectedRoute';
 
+// 각 페이지의 보호 여부를 정의하는 객체
 const PROTECTED_PAGES = {
+  'signup': false,
   'place': true,
   'community': true,
   'home': false,
@@ -12,24 +17,46 @@ const PROTECTED_PAGES = {
   'chatRoom': true,
   'someoneInfo': false,
   'createStory': true,
-  'MyStories': true,
+  'myStories': true,
+  'followerList': false,
   'viewStory': true
 };
 
-export const getPageTitle = (currentPage, pageData = {}) => {
-  switch (currentPage) {
-    case 'chatRoom': return `${pageData?.roomName}`;
-    case 'place': return '장소';
-    case 'community': return '커뮤니티';
-    case 'home': return '애니멀 인사이드';
-    case 'search': return '검색';
-    case 'mypage': return '마이페이지';
-    case 'someoneInfo': return `${pageData?.name}`;
-    case 'createStory': return '스토리 만들기';
-    case 'myStories': return '내 스토리';
-    case 'viewStory': return `${pageData?.memberName}의 스토리`;
-    default: return '애니멀 인사이드';
-  }
+export const getPageTitle = (currentPage, pageData = {}, onPageChange = null) => {
+  const getTitleContent = () => {
+    switch (currentPage) {
+      case 'followerList':
+        return (
+          <div className="flex items-center">
+            {onPageChange && (
+              <button 
+                onClick={() => onPageChange(pageData.source || 'someoneInfo', { 
+                  memberId: pageData.memberId,
+                  name: pageData.name 
+                })}
+                className="p-2 hover:bg-gray-100 rounded-full mr-2"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+            )}
+            <span>{pageData?.listType === 'followers' ? '팔로워' : '팔로잉'}</span>
+          </div>
+        );
+      case 'chatRoom': return `${pageData?.roomName}`;
+      case 'place': return '장소';
+      case 'community': return '커뮤니티';
+      case 'home': return '애니멀 인사이드';
+      case 'search': return '검색';
+      case 'mypage': return '마이페이지';
+      case 'someoneInfo': return `${pageData?.name}`;
+      case 'createStory': return '스토리 만들기';
+      case 'myStories': return '내 스토리';
+      case 'viewStory': return `${pageData?.memberName}의 스토리`;
+      default: return '애니멀 인사이드';
+    }
+  };
+
+  return getTitleContent();
 };
 
 export const renderPage = (currentPage, pageData = {}, onPageChange, refreshMessageCount) => {
@@ -58,14 +85,16 @@ export const renderPage = (currentPage, pageData = {}, onPageChange, refreshMess
           memberName={pageData?.memberName}
           onPageChange={onPageChange}
         />;
-      case 'login': return <LoginPage />;
+      case 'login': return <LoginPage onPageChange={onPageChange} />;
       case 'place': return <PlacePage />;
       case 'home': return <HomePage onPageChange={onPageChange} />;
       case 'search': return <SearchPage />;
-      case 'mypage': return <MyPage />;
+      case 'mypage': return <MyPage onPageChange={onPageChange} />;
       case 'someoneInfo': return <SomeoneInfo pageData={pageData} onPageChange={onPageChange} />;
       case 'createStory': return <CreateStory onPageChange={onPageChange} />;
       case 'myStories': return <MyStories onPageChange={onPageChange} />;
+      case 'followerList': return <FollowerList pageData={pageData} onPageChange={onPageChange} />;
+      case 'signup': return <SignupPage onPageChange={onPageChange} />;
       default: return <HomePage />;
     }
   };
