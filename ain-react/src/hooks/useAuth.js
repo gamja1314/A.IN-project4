@@ -1,6 +1,6 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { authService } from '../services/authService';
 import { jwtDecode } from 'jwt-decode';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
 
@@ -8,6 +8,10 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  // useAuth.js의 AuthProvider에 signup 추가 20250126
+  const signup = async (userData) => {
+    await authService.signup(userData);
+  };
 
   useEffect(() => {
     const token = authService.getToken();
@@ -46,7 +50,8 @@ export const AuthProvider = ({ children }) => {
       currentUser,
       loading, 
       login, 
-      logout 
+      logout,
+      signup 
     }}>
       {children}
     </AuthContext.Provider>

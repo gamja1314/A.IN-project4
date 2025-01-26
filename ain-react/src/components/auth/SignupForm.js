@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
-const SignupForm = ({ onPageChange }) => {
+const SignupForm = () => {
+  const navigate = useNavigate();
   const { signup } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -27,7 +29,6 @@ const SignupForm = ({ onPageChange }) => {
       return false;
     }
     
-    // 추가 유효성 검사 (이메일 형식, 비밀번호 강도 등)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       setError('유효한 이메일 주소를 입력해주세요.');
@@ -58,9 +59,7 @@ const SignupForm = ({ onPageChange }) => {
         phoneNumber: formData.phoneNumber
       });
 
-      // MODIFY: After successful signup, you might want to navigate to a specific page
-      // For example, redirecting to login or home page
-      onPageChange && onPageChange('login');
+      navigate('/login');
     } catch (error) {
       setError(error.message || '회원가입에 실패했습니다.');
     } finally {
@@ -161,10 +160,9 @@ const SignupForm = ({ onPageChange }) => {
 
       <div className="text-center text-sm">
         <span className="text-gray-600">이미 계정이 있으신가요?</span>
-        {/* MODIFY: Use onPageChange to switch to login page */}
         <button 
           type="button" 
-          onClick={() => onPageChange && onPageChange('login')} 
+          onClick={() => navigate('/login')} 
           className="ml-1 font-medium text-blue-600 hover:text-blue-500"
         >
           로그인

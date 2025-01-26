@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
-const LoginForm = ({ onPageChange }) => {
+const LoginForm = () => {
+  const navigate = useNavigate();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -10,7 +12,9 @@ const LoginForm = ({ onPageChange }) => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const handleSignupClick = () => {
+    navigate('/signup');
+  };
   const handleChange = (e) => {
     const { name, value, checked } = e.target;
     setFormData(prev => ({
@@ -114,12 +118,12 @@ const LoginForm = ({ onPageChange }) => {
       <span className="text-gray-600">계정이 없으신가요?</span>
       {/* onPageChange 함수 추가 */}
       <button 
-        type="button"
-        onClick={() => onPageChange('signup')}  
-        className="ml-1 font-medium text-blue-600 hover:text-blue-500"
-      >
-        회원가입
-      </button>
+      type="button"
+      onClick={handleSignupClick}  
+      className="ml-1 font-medium text-blue-600 hover:text-blue-500"
+    >
+      회원가입
+    </button>
     </div>
     </form>
   );

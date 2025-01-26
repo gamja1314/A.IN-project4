@@ -9,7 +9,6 @@ export { default as CommunityPage } from './chat/CommunityPage';
 export { default as HomePage } from './main/HomePage';
 export { default as PlacePage } from './main/PlacePage';
 export { default as SearchPage } from './main/SearchPage';
-
 // 스토리관련
 export { default as CreateStory } from './story/CreateStory';
 export { default as MyStories } from './story/MyStories';

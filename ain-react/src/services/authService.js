@@ -45,6 +45,26 @@ export const authService = {
     return token ? { Authorization: `Bearer ${token}` } : {};
   },
 
+  // 회원가입 20250126 추가
+  signup: async (userData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/member/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      
+      if (!response.ok) throw new Error('Signup failed');
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Signup error:', error);
+      throw error;
+    }
+  },
+
   // 인증 여부 확인
   isAuthenticated: () => {
     return !!authService.getToken();

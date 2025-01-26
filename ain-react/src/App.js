@@ -6,6 +6,8 @@ import { MobileLayout } from './components/layout/MobileLayout';
 import { BottomNav } from './components/navigation/BottomNav';
 import { NotificationProvider, useNotification } from './contexts/NotificationContext';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
 import SomeoneInfo from './pages/auth/SomeoneInfo'; // 정확한 경로로 SomeoneInfo 임포트
 import { notificationService } from './services/notificationService';
 import { getPageTitle, renderPage } from './utils/PageUtils';
@@ -75,6 +77,10 @@ const App = () => {
           <Routes>
             {/* 홈 경로 */}
             <Route path="/" element={<AppContent />} />
+
+            <Route path="/login" element={<LoginPage />} />
+            
+            <Route path="/signup" element={<SignupPage />} />
             
             {/* 특정 유저 프로필 페이지 라우팅 */}
             <Route path="/profile/:memberId" element={<SomeoneInfo />} />
