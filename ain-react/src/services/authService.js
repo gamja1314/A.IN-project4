@@ -58,7 +58,7 @@ export const authService = {
       
       if (!response.ok) throw new Error('Signup failed');
       
-      return await response.json();
+      return await response.json(); // JSON 응답 파싱
     } catch (error) {
       console.error('Signup error:', error);
       throw error;
