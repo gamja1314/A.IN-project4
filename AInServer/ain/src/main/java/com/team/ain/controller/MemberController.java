@@ -29,7 +29,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 
-
 @RestController
 @RequestMapping("/api/member")
 @RequiredArgsConstructor
@@ -42,12 +41,15 @@ public class MemberController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody MemberJoin memberJoin) {
-        
+    public ResponseEntity<Map<String, String>> signup(@RequestBody MemberJoin memberJoin) {
         memberService.signup(memberJoin);
-        
-        return ResponseEntity.ok("회원가입 성공");
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "회원가입 성공");
+
+        return ResponseEntity.ok(response);
     }
+
     
     @GetMapping("/my")
     public Map<String, Object> getMemberInfo(@AuthenticationPrincipal UserDetails userDetails) {
