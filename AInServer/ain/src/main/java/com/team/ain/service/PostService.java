@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.team.ain.dto.post.Post;
+import com.team.ain.dto.post.PostLike;
 import com.team.ain.dto.post.PostMedia;
 import com.team.ain.mapper.PostMapper;
 
@@ -51,8 +52,8 @@ public class PostService {
     }
 
     // 게시물 단일 조회 (미디어 포함)
-    public Post getPostById(Long id) {
-        return postMapper.getPostById(id);
+    public Post getPostById(Long id, Long currentMemberId) {
+        return postMapper.getPostById(id, currentMemberId);
     }
 
     // 게시물 전체 조회
@@ -67,12 +68,12 @@ public class PostService {
     }
 
     // 페이지 계산 (미디어 포함)
-    public Page<Post> getPostsByPage(int page, int size) {
+    public Page<Post> getPostsByPage(int page, int size, Long currentMemberId) {
         if (page < 0) page = 0;
         if (size < 1) size = 10;
 
         int totalPosts = postMapper.getTotalPostCount();
-        List<Post> posts = postMapper.getPostsByPage(page, size);
+        List<Post> posts = postMapper.getPostsByPage(page, size, currentMemberId);
         
         return new PageImpl<>(posts, PageRequest.of(page, size), totalPosts);
     }
@@ -80,5 +81,23 @@ public class PostService {
     // 특정 미디어만 삭제
     public void deletePostMedia(Long mediaId) {
         postMapper.deletePostMediaById(mediaId);
+    }
+
+    // 게시물 좋아요
+    public void likePost(Long postId, Long memberId) {
+        postMapper.insertPostLike(postId, memberId);
+    }
+    // 게시물 좋아요 취소
+    public void unlikePost(Long postId, Long memberId) {
+        postMapper.deletePostLike(postId, memberId);
+    }
+    // 좋아요 수
+    public PostLike getPostLike(Long postId, Long memberId) {
+        return postMapper.getPostLikes(postId, memberId);
+    }
+
+    public boolean hasLike(Long postId, Long memberId) {
+        // 좋아요 존재 여부 확인 쿼리
+        return postMapper.hasLike(postId, memberId);
     }
 }
