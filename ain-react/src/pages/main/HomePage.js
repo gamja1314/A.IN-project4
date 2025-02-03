@@ -6,6 +6,7 @@ import { memberService } from "../../services/MemberService";
 import StorySection from '../story/StorySection';
 import PostForm from "../../components/posts/PostForm";
 import PostCard from "../../components/posts/PostCard";
+import { PostService } from "../../services/PostService";
 
 const HomePage = ({ onPageChange }) => {
   const [posts, setPosts] = useState([]);
@@ -98,6 +99,38 @@ const HomePage = ({ onPageChange }) => {
     }
   }, [page]); // loading 제거
 
+  const handlePostLike = async (postId, isLiked) => {
+    try {
+      if (isLiked) {
+        await PostService.likePost(postId);
+      } else {
+        await PostService.unlikePost(postId);
+      }
+      
+      // posts 상태 업데이트
+      setPosts(prevPosts => prevPosts.map(post => 
+        post.id === postId 
+          ? { 
+              ...post, 
+              likeCount: isLiked ? post.likeCount + 1 : post.likeCount - 1,
+              liked: isLiked
+            } 
+          : post
+      ));
+    } catch (error) {
+      console.error('Failed to handle like:', error);
+    }
+  };
+  
+  const handlePostComment = async (postId, commentText) => {
+    try {
+      const response = await PostService.addComment(postId, commentText);
+      return response; // 새로 생성된 댓글 데이터 반환
+    } catch (error) {
+      console.error('Failed to add comment:', error);
+    }
+  };
+
   // 초기 데이터 로딩
   useEffect(() => {
     const loadInitialPosts = async () => {
@@ -166,9 +199,8 @@ const HomePage = ({ onPageChange }) => {
 
       {/* 최신 게시글 섹션 */}
       <div className="bg-white rounded-lg shadow p-4">
-        <h2 className="text-lg font-semibold mb-2">최신 게시글</h2>
-
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold mb-2">최신 게시글</h2>
           <button
             onClick={() => setShowPostForm(true)}
             className="bg-blue-500 text-white px-4 py-2 rounded mb-0"
@@ -202,12 +234,19 @@ const HomePage = ({ onPageChange }) => {
         >
           {posts.map((post) => (
             <PostCard
-              key={post.id}
+              key={post.id}  // React 리스트의 key prop
+              postId={post.id}
               memberId={post.memberId}
               memberName={post.memberName}
               content={post.content}
-              mediaList={post.mediaList}
               createdAt={post.createdAt}
+              mediaList={post.mediaList}
+              initialLikes={post.likeCount}      // 게시물의 초기 좋아요 수
+              initialComments={post.comments}     // 게시물의 초기 댓글 목록
+              isLiked={post.liked}
+              onLike={handlePostLike}            // 좋아요 처리 함수
+              onComment={handlePostComment}       // 댓글 처리 함수
+              profileUrl={post.profileUrl}  // 게시글 등록자의 프로필 이미지
             />
           ))}
         </InfiniteScroll>
