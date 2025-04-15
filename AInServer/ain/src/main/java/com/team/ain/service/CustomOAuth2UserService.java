@@ -56,7 +56,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             member = userOptional.get();
             // 기존 회원이면 소셜 연동 정보 업데이트
             if (member.getProvider() != null && !member.getProvider().equals(oAuth2UserInfo.getProvider())) {
-                throw new OAuth2AuthenticationException("이미 다른 소셜 계정으로 가입된 이메일입니다.");
+                // 오류 메시지를 더 명확하게 설정
+                throw new OAuth2AuthenticationException("이미 " + member.getProvider() + " 계정으로 가입된 이메일입니다.");
             }
             updateExistingUser(member, oAuth2UserInfo);
         } else {

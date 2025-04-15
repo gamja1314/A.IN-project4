@@ -17,6 +17,7 @@ import org.springframework.web.filter.CorsFilter;
 import com.team.ain.config.jwt.JwtAccessDeniedHandler;
 import com.team.ain.config.jwt.JwtAuthenticationEntryPoint;
 import com.team.ain.config.jwt.JwtAuthenticationFilter;
+import com.team.ain.config.oauth2.OAuth2AuthenticationFailureHandler;
 import com.team.ain.config.oauth2.OAuth2AuthenticationSuccessHandler;
 import com.team.ain.service.CustomOAuth2UserService;
 
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final CorsFilter corsFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -76,6 +78,7 @@ public class SecurityConfig {
                     .userService(customOAuth2UserService)
                 )
                 .successHandler(oAuth2AuthenticationSuccessHandler)
+                .failureHandler(oAuth2AuthenticationFailureHandler)
             )
 
             // 예외 처리
