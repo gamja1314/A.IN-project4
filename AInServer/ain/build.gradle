@@ -72,6 +72,10 @@ dependencies {
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.534'
 	implementation 'io.github.cdimascio:dotenv-java:3.0.0' // Dotenv 사용
 
+	// OAuth2 클라이언트 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+
 }
 
 tasks.named('test') {

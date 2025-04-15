@@ -1,9 +1,13 @@
 package com.team.ain.config.jwt;
 
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -41,7 +45,41 @@ public class JwtTokenProvider {
                 .compact();
     }
     
-    // 이메일 추출 (기존 유지)
+    // OAuth2 소셜 로그인용 추가 클레임을 포함한 JWT 토큰 생성 메소드
+    public String createTokenWithAdditionalClaims(
+            Long userId, 
+            String username, 
+            Collection<? extends GrantedAuthority> authorities,
+            Map<String, Object> additionalClaims) {
+        
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpiration);
+        
+        String roles = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+        
+        String email = additionalClaims.get("email").toString();
+        Claims claims = Jwts.claims()
+                .setSubject(email);
+        
+        // 기본 클레임 설정
+        claims.put("id", userId);
+        claims.put("name", username);
+        claims.put("roles", roles);
+        
+        // 추가 클레임 설정
+        additionalClaims.forEach(claims::put);
+        
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+    }
+    
+    // 이메일 추출
     public String getEmailFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -57,7 +95,7 @@ public class JwtTokenProvider {
         return getMemberIdFromToken(token);
     }
     
-    // memberId 추출 메소드 추가
+    // memberId 추출 메소드
     public Long getMemberIdFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -68,7 +106,7 @@ public class JwtTokenProvider {
         return claims.get("id", Long.class);
     }
     
-    // 토큰 유효성 검증 (기존 유지)
+    // 토큰 유효성 검증 
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
