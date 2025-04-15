@@ -17,11 +17,18 @@ const OAuthCallback = () => {
         // URL에서 쿼리 파라미터 추출
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
+        const error = params.get('error');
         const userId = params.get('userId');
         const encodedName = params.get('name');
         const encodedEmail = params.get('email');
         const encodedProvider = params.get('provider');
-  
+        
+
+        // 오류 메시지가 있으면 예외 발생
+        if (error) {
+          throw new Error(decodeURIComponent(error));
+        }
+
         if (!token) {
           throw new Error('인증 토큰을 받지 못했습니다.');
         }
