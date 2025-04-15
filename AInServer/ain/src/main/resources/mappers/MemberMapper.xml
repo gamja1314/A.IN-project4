@@ -49,4 +49,41 @@
         </if>
     WHERE email = #{email}
     </update>
+
+    <!-- OAuth2 제공자와 ID로 회원 조회 -->
+    <select id="findByProviderAndProviderId" resultType="com.team.ain.dto.auth.Member">
+        SELECT * FROM member 
+        WHERE provider = #{provider} AND provider_id = #{providerId}
+        LIMIT 1
+    </select>
+        
+    <!-- 소셜 회원 저장 -->
+    <insert id="save" parameterType="com.team.ain.dto.auth.Member" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO member (
+            email,
+            name,
+            profile_picture_url,
+            provider,
+            provider_id,
+            created_at
+        ) VALUES (
+            #{email},
+            #{name},
+            #{profilePictureUrl},
+            #{provider},
+            #{providerId},
+            now()
+        )
+    </insert>
+    
+    <!-- 기존 회원 정보 소셜 로그인 연동 업데이트 -->
+    <update id="update" parameterType="com.team.ain.dto.auth.Member">
+        UPDATE member
+        SET 
+            name = #{name},
+            profile_picture_url = #{profilePictureUrl},
+            provider = #{provider},
+            provider_id = #{providerId}
+        WHERE id = #{id}
+    </update>
 </mapper>

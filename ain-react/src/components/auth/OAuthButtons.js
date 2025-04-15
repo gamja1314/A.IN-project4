@@ -3,8 +3,26 @@ import React from 'react';
 
 const OAuthButtons = () => {
   const handleOAuthLogin = (provider) => {
-    // OAuth 로그인 처리 로직
-    console.log(`${provider} 로그인 시도`);
+    // OAuth 로그인 URL로 리다이렉트
+    const baseUrl = "http://localhost:9999"; // 백엔드 서버 URL
+    
+    let authUrl;
+    switch(provider) {
+      case 'kakao':
+        authUrl = `${baseUrl}/oauth2/authorization/kakao`;
+        break;
+      case 'naver':
+        authUrl = `${baseUrl}/oauth2/authorization/naver`;
+        break;
+      case 'google':
+        authUrl = `${baseUrl}/oauth2/authorization/google`;
+        break;
+      default:
+        return;
+    }
+    
+    // 현재 페이지를 OAuth 인증 페이지로 리다이렉트
+    window.location.href = authUrl;
   };
 
   return (

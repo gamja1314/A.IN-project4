@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import SomeoneInfo from './pages/auth/SomeoneInfo'; // 정확한 경로로 SomeoneInfo 임포트
+import OAuthCallback from './pages/auth/OAuthCallback'; // OAuth 콜백 컴포넌트 임포트
 import { notificationService } from './services/notificationService';
 import { getPageTitle, renderPage } from './utils/PageUtils';
 
@@ -84,6 +85,9 @@ const App = () => {
             
             {/* 특정 유저 프로필 페이지 라우팅 */}
             <Route path="/profile/:memberId" element={<SomeoneInfo />} />
+
+            {/* OAuth 콜백 경로 추가 */}
+            <Route path="/oauth2/callback" element={<OAuthCallback />} />
           </Routes>
         </Router>
       </NotificationProvider>

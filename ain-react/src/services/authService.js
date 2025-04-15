@@ -34,6 +34,12 @@ export const authService = {
     localStorage.removeItem(AUTH_TOKEN_KEY);
   },
 
+  // OAuth 토큰 처리 메서드
+  handleOAuthToken: (token) => {
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+    return token;
+  },
+  
   // 토큰 가져오기
   getToken: () => {
     return localStorage.getItem(AUTH_TOKEN_KEY);

@@ -17,6 +17,8 @@ import org.springframework.web.filter.CorsFilter;
 import com.team.ain.config.jwt.JwtAccessDeniedHandler;
 import com.team.ain.config.jwt.JwtAuthenticationEntryPoint;
 import com.team.ain.config.jwt.JwtAuthenticationFilter;
+import com.team.ain.config.oauth2.OAuth2AuthenticationSuccessHandler;
+import com.team.ain.service.CustomOAuth2UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +29,8 @@ public class SecurityConfig {
     
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsFilter corsFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -54,6 +58,8 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // 로그인, 회원가입, 게시글 불러오기 엔드포인트 허용
                 .requestMatchers("/api/auth/**", "/api/member/signup", "/api/posts/page/**", "/api/member/{memberId}").permitAll()
+                // OAuth2 로그인 페이지 접근 허용
+                .requestMatchers("/login/**", "/oauth2/**").permitAll()
                 // 게시글 작성, 수정, 삭제는 로그인상태만 가능
                 .requestMatchers(HttpMethod.POST, "/api/post/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/post/**").authenticated()
@@ -64,6 +70,14 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             
+            // OAuth2 로그인 설정 추가
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .successHandler(oAuth2AuthenticationSuccessHandler)
+            )
+
             // 예외 처리
             .exceptionHandling(exception -> 
                 exception
