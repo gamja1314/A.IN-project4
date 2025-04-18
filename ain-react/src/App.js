@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'; // React Router 임포트
+import { Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom'; // React Router 임포트
 import Header from './components/layout/Header';
 import { MainContent } from './components/layout/MainContent';
 import { MobileLayout } from './components/layout/MobileLayout';
@@ -20,6 +20,16 @@ const AppContent = () => {
   const [refreshCounter, setRefreshCounter] = useState(0);
   const { isAuthenticated } = useAuth();
   const { setNotifications } = useNotification();
+  const location = useLocation(); // 현재 위치 정보 가져오기
+
+  useEffect(() => {
+    // forceRefresh 상태를 확인하도록 수정
+    if (location.pathname === '/' && location.state?.forceRefresh) {
+      setCurrentPage('home');
+      // 상태 초기화
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   useEffect(() => {
     if (isAuthenticated) {

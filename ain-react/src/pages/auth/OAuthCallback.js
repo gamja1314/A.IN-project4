@@ -55,7 +55,7 @@ const OAuthCallback = () => {
         }
   
         // 메인 페이지로 리다이렉트
-        navigate('/', { replace: true });
+        window.location.href = '/';
       } catch (err) {
         console.error('OAuth 처리 중 오류 발생:', err);
         setError(err.message || '소셜 로그인 처리 중 오류가 발생했습니다.');
