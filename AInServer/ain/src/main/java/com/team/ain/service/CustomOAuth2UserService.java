@@ -35,8 +35,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         try {
             return processOAuth2User(userRequest, oAuth2User);
         } catch (Exception ex) {
-            log.error("OAuth2 인증 처리 중 오류 발생", ex);
-            throw new InternalAuthenticationServiceException(ex.getMessage(), ex);
+            String errorMsg = (ex.getMessage() != null) ? ex.getMessage() : "소셜 로그인 중 오류가 발생했습니다";
+            log.error("OAuth2 인증 처리 중 오류 발생: {}", errorMsg, ex);
+            throw new InternalAuthenticationServiceException(errorMsg, ex);
         }
     }
 
