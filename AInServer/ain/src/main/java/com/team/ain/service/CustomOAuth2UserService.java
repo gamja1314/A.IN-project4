@@ -8,6 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -47,7 +48,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 registrationId, oAuth2User.getAttributes());
 
         if (!StringUtils.hasText(oAuth2UserInfo.getEmail())) {
-            throw new OAuth2AuthenticationException("소셜 계정에서 이메일을 찾을 수 없습니다.");
+            OAuth2Error oauth2Error = new OAuth2Error("email_not_found", "소셜 계정에서 이메일을 찾을 수 없습니다.", null);
+            throw new OAuth2AuthenticationException(oauth2Error, "소셜 계정에서 이메일을 찾을 수 없습니다.");
         }
 
         Optional<Member> userOptional = memberMapper.findByEmail(oAuth2UserInfo.getEmail());
@@ -57,8 +59,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             member = userOptional.get();
             // 기존 회원이면 소셜 연동 정보 업데이트
             if (member.getProvider() != null && !member.getProvider().equals(oAuth2UserInfo.getProvider())) {
-                // 오류 메시지를 더 명확하게 설정
-                throw new OAuth2AuthenticationException("이미 " + member.getProvider() + " 계정으로 가입된 이메일입니다.");
+                // OAuth2Error 객체를 생성하고 메시지와 함께 예외를 던짐
+                String errorMessage = "이미 " + member.getProvider() + " 계정으로 가입된 이메일입니다.";
+                OAuth2Error oauth2Error = new OAuth2Error("email_exists", errorMessage, null);
+                throw new OAuth2AuthenticationException(oauth2Error, errorMessage);
             }
             updateExistingUser(member, oAuth2UserInfo);
         } else {
