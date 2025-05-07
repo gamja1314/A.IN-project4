@@ -11,8 +11,12 @@
 - 2024.11.01 ~ 2025.02.03
 
 ## 💻 코드 구성
-
-![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=gamja1314&repo=A.IN-project4&layout=compact&theme=light&title_color=1E90FF&text_color=151515&bg_color=ffffff&border_radius=10)
+| 언어 | 비율 |
+|------|------|
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" width="20" height="20" /> JavaScript | 61.4% |
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" width="20" height="20" /> Java | 36.7% |
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="20" height="20" /> TypeScript | 1.1% |
+| 🔍 Other | 0.8% |
 
 ## 🛠️ 기술 스택
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
